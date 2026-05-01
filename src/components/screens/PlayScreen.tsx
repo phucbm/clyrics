@@ -1,25 +1,23 @@
-import { createPortal } from 'react-dom'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useActiveSong } from '../../store/useSongStore'
-import { useUIStore } from '../../store/useUIStore'
-import { FAB } from '../shell/FAB'
-import { useYouTubePlayer } from '../../hooks/useYouTubePlayer'
-import { extractVideoId } from '../../hooks/useYouTube'
-import { ArrowLeft, Pause, Play } from '@phosphor-icons/react'
+import {createPortal} from 'react-dom'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import {useActiveSong} from '../../store/useSongStore'
+import {useUIStore} from '../../store/useUIStore'
+import {FAB} from '../shell/FAB'
+import {useYouTubePlayer} from '../../hooks/useYouTubePlayer'
+import {extractVideoId} from '../../hooks/useYouTube'
+import {ArrowLeft, Pause, Play} from '@phosphor-icons/react'
 
-// ── Scroll speed ──────────────────────────────────────────────────────────────
-// Slider 0–10 maps linearly to 0–SPEED_MAX_LINES lines/second.
-// AVG_LINE_PX is the estimated pixel height of one lyric group (chinese+pinyin+translation).
-const AVG_LINE_PX = 120          // px per lyric group — adjust if layout changes
-const SPEED_MAX_LINES = 5        // lines/sec at slider = 10
-function toPxPerSec(v: number) { return (v / 10) * SPEED_MAX_LINES * AVG_LINE_PX }
-// at v=2 → 1 line/s = 90px/s │ at v=10 → 5 lines/s = 450px/s
-// ─────────────────────────────────────────────────────────────────────────────
+const AVG_LINE_PX = 80   // estimated px per lyric group
+const SPEED_PRESETS = [0, 0.2, 0.4, 0.6, 0.8, 1, 2, 3]
+
+function toPxPerSec(linesPerSec: number) {
+    return linesPerSec * AVG_LINE_PX
+}
 
 const PIP_LS_KEY = 'clyrics_pip'
 const HINT_LS_KEY = 'clyrics_focus_hint'
 const PIP_MIN_W = 200
-const PIP_DEFAULT = { x: 0, y: 80, w: 320 } // x recalculated on load
+const PIP_DEFAULT = {x: 0, y: 80, w: 320}
 
 function loadPiP() {
   try {
@@ -126,11 +124,12 @@ function DraggablePiP({ containerRef }: PiPProps) {
 
 export function PlayScreen() {
   const song = useActiveSong()
-  const { playConfig, screen, navigateTo, autoplay, setAutoplay } = useUIStore()
+    const {playConfig, setPlayConfig, screen, navigateTo, autoplay, setAutoplay} = useUIStore()
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
+    const contentRef = useRef<HTMLDivElement>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -138,6 +137,14 @@ export function PlayScreen() {
 
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
   const { containerRef, isPlaying, isReady, play, togglePlay } = useYouTubePlayer(videoId)
+
+    // Refs so wheel/touch handlers always see current values without re-registering
+    const speedRef = useRef(0)
+    const isPlayingRef = useRef(false)
+    const videoIdRef = useRef<string | null>(null)
+    const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+    const touchStartYRef = useRef(0)
+    const touchScrollPosRef = useRef(0)
 
   // Auto-hide controls logic
   const scheduleHide = useCallback(() => {
@@ -181,47 +188,122 @@ export function PlayScreen() {
     }
   }, [isPlaying, revealControls])
 
-  // --- Smooth steady auto-scroll ---
-  const rafRef = useRef<number | undefined>(undefined)
-  const lastTickRef = useRef<number | undefined>(undefined)
-  const scrollPosRef = useRef(0)
-  const isManualScrolling = useRef(false)
-  const isAutoScrolling = useRef(false)
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+    // ── Transform-based auto-scroll ───────────────────────────────────────────
 
-  const handleManualScroll = useCallback(() => {
-    if (isAutoScrolling.current) return
-    if (bodyRef.current) scrollPosRef.current = bodyRef.current.scrollTop
-    isManualScrolling.current = true
-    clearTimeout(resumeTimerRef.current)
-    resumeTimerRef.current = setTimeout(() => {
-      isManualScrolling.current = false
-      lastTickRef.current = undefined
-    }, 200)
-  }, [])
-
-  useEffect(() => {
-    const speed = toPxPerSec(playConfig.scrollSpeed)
-    const hasVideo = !!videoId
-    if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
-    if (speed === 0 || (hasVideo && !isPlaying)) return
-
-    function tick(ts: number) {
-      if (lastTickRef.current !== undefined && !isManualScrolling.current && bodyRef.current) {
-        const dt = (ts - lastTickRef.current) / 1000
-        const el = bodyRef.current
-        scrollPosRef.current = Math.min(scrollPosRef.current + speed * dt, el.scrollHeight - el.clientHeight)
-        isAutoScrolling.current = true
-        el.scrollTop = scrollPosRef.current
-        isAutoScrolling.current = false
-      }
-      lastTickRef.current = ts
-      rafRef.current = requestAnimationFrame(tick)
+    function getScrollPos(): number {
+        if (!contentRef.current) return 0
+        const t = getComputedStyle(contentRef.current).transform
+        if (t === 'none') return 0
+        return -new DOMMatrix(t).m42
     }
 
-    rafRef.current = requestAnimationFrame(tick)
-    return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current) }
+    function getMaxScroll(): number {
+        if (!contentRef.current || !bodyRef.current) return 0
+        return Math.max(0, contentRef.current.scrollHeight - bodyRef.current.clientHeight)
+    }
+
+    function setScrollImmediate(px: number) {
+        const el = contentRef.current
+        if (!el) return
+        el.style.transition = 'none'
+        el.style.transform = `translateY(${-px}px)`
+    }
+
+    function startScrollAnimation(fromPx: number) {
+        const el = contentRef.current
+        if (!el) return
+        const speed = speedRef.current
+        if (speed === 0) return
+        const max = getMaxScroll()
+        const clamped = Math.min(fromPx, max)
+        if (clamped >= max) return
+        const duration = (max - clamped) / speed
+
+        el.style.transition = 'none'
+        el.style.transform = `translateY(${-clamped}px)`
+        void el.offsetHeight // force reflow so browser registers the no-transition position
+        el.style.transition = `transform ${duration}s linear`
+        el.style.transform = `translateY(${-max}px)`
+    }
+
+    function pauseAnimation(): number {
+        const pos = getScrollPos()
+        setScrollImmediate(pos)
+        return pos
+    }
+
+    function resumeIfActive() {
+        if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
+            startScrollAnimation(getScrollPos())
+        }
+    }
+
+    // Wheel — intercept on the overflow:hidden container
+    useEffect(() => {
+        const el = bodyRef.current
+        if (!el) return
+
+        function onWheel(e: WheelEvent) {
+            e.preventDefault()
+            const current = pauseAnimation()
+            const max = getMaxScroll()
+            const next = Math.max(0, Math.min(max, current + e.deltaY))
+            setScrollImmediate(next)
+            clearTimeout(resumeTimerRef.current)
+            resumeTimerRef.current = setTimeout(resumeIfActive, 500)
+        }
+
+        el.addEventListener('wheel', onWheel, {passive: false})
+        return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+    // Touch — intercept on the overflow:hidden container
+  useEffect(() => {
+      const el = bodyRef.current
+      if (!el) return
+
+      function onTouchStart(e: TouchEvent) {
+          touchStartYRef.current = e.touches[0].clientY
+          touchScrollPosRef.current = pauseAnimation()
+          clearTimeout(resumeTimerRef.current)
+      }
+
+      function onTouchMove(e: TouchEvent) {
+          e.preventDefault()
+          const dy = touchStartYRef.current - e.touches[0].clientY
+          const max = getMaxScroll()
+          const next = Math.max(0, Math.min(max, touchScrollPosRef.current + dy))
+          setScrollImmediate(next)
+      }
+
+      function onTouchEnd() {
+          resumeTimerRef.current = setTimeout(resumeIfActive, 500)
+      }
+
+      el.addEventListener('touchstart', onTouchStart, {passive: true})
+      el.addEventListener('touchmove', onTouchMove, {passive: false})
+      el.addEventListener('touchend', onTouchEnd, {passive: true})
+      return () => {
+          el.removeEventListener('touchstart', onTouchStart)
+          el.removeEventListener('touchmove', onTouchMove)
+          el.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [])
+
+    // Start/stop animation on play state or speed change
+    useEffect(() => {
+        speedRef.current = toPxPerSec(playConfig.scrollSpeed)
+        isPlayingRef.current = isPlaying
+        videoIdRef.current = videoId
+
+        if (speedRef.current > 0 && (!videoId || isPlaying)) {
+            startScrollAnimation(getScrollPos())
+        } else {
+            pauseAnimation()
+        }
   }, [playConfig.scrollSpeed, videoId, isPlaying])
+
+    // ─────────────────────────────────────────────────────────────────────────
 
   if (!song) {
     return (
@@ -239,38 +321,43 @@ export function PlayScreen() {
 
   return (
     <div className="h-full flex flex-col relative">
-      <div ref={bodyRef} onScroll={handleManualScroll} className="flex-1 overflow-y-auto">
 
+        {/* Mobile video — outside scroll container so sticky isn't needed */}
         {videoId && !isDesktop && (
-          <div className="sticky top-0 z-10 w-full bg-black" style={{ aspectRatio: '16/9' }}>
-            <div ref={containerRef} className="w-full h-full" style={{ pointerEvents: 'none' }} />
-          </div>
+            <div className="w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}}>
+                <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
+            </div>
         )}
 
-        <div style={{ height: videoId && !isDesktop ? '20vh' : '42vh' }} />
+        {/* Scroll area — overflow:hidden, content moves via translateY */}
+        <div ref={bodyRef} className="flex-1 overflow-hidden">
+            <div ref={contentRef} style={{willChange: 'transform'}}>
 
-        <div className="px-6">
-          <h2 className="text-3xl font-bold tracking-tight text-[#0F0F0F] leading-tight">{song.title}</h2>
-          {showArtist && <p className="text-sm text-[#888] mt-1.5">{song.artist}</p>}
-        </div>
+                <div style={{height: videoId && !isDesktop ? '20vh' : '42vh'}}/>
 
-        <div className="h-12" />
+                <div className="px-6">
+                    <h2 className="text-3xl font-bold tracking-tight text-[#0F0F0F] leading-tight">{song.title}</h2>
+                    {showArtist && <p className="text-sm text-[#888] mt-1.5">{song.artist}</p>}
+                </div>
 
-        <div className="px-6 pb-40 space-y-8">
-          {song.lines.map((line) => (
-            <div key={line.id}>
-              {playConfig.pinyin && line.pinyin && (
-                <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
-              )}
-              <p className="text-2xl font-semibold text-[#0F0F0F] leading-tight tracking-tight">{line.chinese}</p>
-              {playConfig.translation && line.translation && (
-                <p className="text-sm italic text-[#555] mt-1.5 leading-relaxed">{line.translation}</p>
-              )}
-              {playConfig.secondLang && line.secondTranslation && (
-                <p className="text-sm text-[#777] mt-1 leading-relaxed">{line.secondTranslation}</p>
-              )}
-            </div>
-          ))}
+                <div className="h-12"/>
+
+                <div className="px-6 pb-40 space-y-8">
+                    {song.lines.map((line) => (
+                        <div key={line.id}>
+                            {playConfig.pinyin && line.pinyin && (
+                                <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
+                            )}
+                            <p className="text-2xl font-semibold text-[#0F0F0F] leading-tight tracking-tight">{line.chinese}</p>
+                            {playConfig.translation && line.translation && (
+                                <p className="text-sm italic text-[#555] mt-1.5 leading-relaxed">{line.translation}</p>
+                            )}
+                            {playConfig.secondLang && line.secondTranslation && (
+                                <p className="text-sm text-[#777] mt-1 leading-relaxed">{line.secondTranslation}</p>
+                            )}
+                        </div>
+                    ))}
+                </div>
         </div>
       </div>
 
@@ -308,12 +395,27 @@ export function PlayScreen() {
         </div>
       )}
 
-      {/* Play/Pause FAB — both modes, auto-hides in focus */}
+        {/* Speed + Play/Pause FABs — both modes, auto-hide in focus */}
       <div
-        className={`absolute bottom-6 right-5 z-20 transition-opacity duration-500 ${
+          className={`absolute bottom-6 right-5 z-20 flex flex-col items-center gap-3 transition-opacity duration-500 ${
           fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
+          <FAB
+              onClick={() => {
+                  const idx = SPEED_PRESETS.indexOf(playConfig.scrollSpeed)
+                  const next = idx >= 0 ? (idx + 1) % SPEED_PRESETS.length : 0
+                  setPlayConfig({scrollSpeed: SPEED_PRESETS[next]})
+              }}
+              variant="secondary"
+              label="Scroll speed"
+          >
+          <span className="text-xs font-bold tabular-nums leading-none">
+            {playConfig.scrollSpeed === 0 ? 'off' : playConfig.scrollSpeed % 1 === 0
+                ? playConfig.scrollSpeed.toString()
+                : playConfig.scrollSpeed.toFixed(1)}
+          </span>
+          </FAB>
         <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
           {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
         </FAB>

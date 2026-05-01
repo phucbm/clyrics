@@ -23,7 +23,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     pinyin: true,
     translation: true,
     secondLang: false,
-    scrollSpeed: 5,
+    scrollSpeed: 1,
   },
   generateConfig: {
     translateLang: 'Vietnamese',

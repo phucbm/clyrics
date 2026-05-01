@@ -2,7 +2,9 @@ import { useActiveSong } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { ToggleRow } from '../ui/Toggle'
-import { Play } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, Play } from '@phosphor-icons/react'
+
+const SPEED_PRESETS = [0, 0.2, 0.5, 0.8, 1, 2, 3]
 
 export function PlayConfigSheet() {
   const { playConfig, setPlayConfig, navigateTo, setAutoplay } = useUIStore()
@@ -17,6 +19,17 @@ export function PlayConfigSheet() {
   }
 
   const speed = playConfig.scrollSpeed
+  const idx = SPEED_PRESETS.indexOf(speed)
+  const safeIdx = idx >= 0 ? idx : 0
+
+  function decrease() {
+    if (safeIdx > 0) setPlayConfig({ scrollSpeed: SPEED_PRESETS[safeIdx - 1] })
+  }
+  function increase() {
+    if (safeIdx < SPEED_PRESETS.length - 1) setPlayConfig({ scrollSpeed: SPEED_PRESETS[safeIdx + 1] })
+  }
+
+  const label = speed === 0 ? 'Off' : speed % 1 === 0 ? speed.toString() : speed.toFixed(1)
 
   return (
     <div className="px-5 pb-8 space-y-1">
@@ -38,30 +51,25 @@ export function PlayConfigSheet() {
         />
       )}
 
-      {/* Scroll speed slider */}
-      <div className="pt-3 pb-1">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-medium text-[#0F0F0F]">Auto scroll</p>
-          <span className="text-xs text-[#888] tabular-nums">
-            {speed === 0 ? 'Off' : (() => {
-              const v = (speed / 10) * 5
-              const label = Number.isInteger(v) ? v.toString() : v.toFixed(1)
-              return `${label} ${v === 1 ? 'line' : 'lines'}/s`
-            })()}
-          </span>
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={10}
-          step={1}
-          value={speed}
-          onChange={(e) => setPlayConfig({ scrollSpeed: Number(e.target.value) })}
-          className="w-full accent-[#0F0F0F]"
-        />
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-[#CCC]">Off</span>
-          <span className="text-[10px] text-[#CCC]">5 lines/s</span>
+      {/* Scroll speed */}
+      <div className="pt-3 pb-1 flex items-center justify-between">
+        <p className="text-sm font-medium text-[#0F0F0F]">Auto scroll</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={decrease}
+            disabled={safeIdx === 0}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#0F0F0F] hover:bg-[#F0F0EC] disabled:opacity-30 transition-colors"
+          >
+            <CaretLeft size={14} weight="bold" />
+          </button>
+          <span className="text-sm tabular-nums w-8 text-center font-medium">{label}</span>
+          <button
+            onClick={increase}
+            disabled={safeIdx === SPEED_PRESETS.length - 1}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#0F0F0F] hover:bg-[#F0F0EC] disabled:opacity-30 transition-colors"
+          >
+            <CaretRight size={14} weight="bold" />
+          </button>
         </div>
       </div>
 
