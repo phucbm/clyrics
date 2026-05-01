@@ -1,11 +1,16 @@
 export type Screen = 'home' | 'edit' | 'play'
 
+export interface Translation {
+  lang: string
+  text: string
+}
+
 export interface LyricLine {
   id: string
+  order: number
   chinese: string
   pinyin: string
-  translation: string
-  secondTranslation?: string
+  translations: Translation[]
 }
 
 export interface Song {
@@ -14,8 +19,7 @@ export interface Song {
   artist: string
   youtubeUrl?: string
   youtubeDuration?: number
-  language: string
-  secondLanguage?: string
+  authors: string[]
   lines: LyricLine[]
   createdAt: number
   source: 'local' | 'repo'
@@ -25,17 +29,13 @@ export interface PlayConfig {
   pinyin: boolean
   translation: boolean
   secondLang: boolean
-  scrollSpeed: number  // lines/sec, 0 = stopped
+  scrollSpeed: number
   loop: boolean
 }
 
 export interface GenerateConfig {
   translateLang: string
   secondLang?: string
+  thirdLang?: string
   overridePinyin: boolean
-}
-
-export interface GitHubSettings {
-  username: string
-  token: string
 }

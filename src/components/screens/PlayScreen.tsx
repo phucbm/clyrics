@@ -130,7 +130,7 @@ function DraggablePiP({ containerRef, progressBarRef }: PiPProps) {
 
 export function PlayScreen() {
   const song = useActiveSong()
-    const {playConfig, setPlayConfig, screen, navigateTo, autoplay, setAutoplay} = useUIStore()
+    const {playConfig, setPlayConfig, screen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
@@ -430,20 +430,26 @@ export function PlayScreen() {
                 <div className="h-12"/>
 
                 <div className="px-6 pb-40 space-y-8">
-                    {song.lines.map((line) => (
-                        <div key={line.id}>
-                            {playConfig.pinyin && line.pinyin && (
-                                <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
-                            )}
-                            <p className="text-2xl font-semibold text-[#0F0F0F] leading-tight tracking-tight">{line.chinese}</p>
-                            {playConfig.translation && line.translation && (
-                                <p className="text-sm italic text-[#555] mt-1.5 leading-relaxed">{line.translation}</p>
-                            )}
-                            {playConfig.secondLang && line.secondTranslation && (
-                                <p className="text-sm text-[#777] mt-1 leading-relaxed">{line.secondTranslation}</p>
-                            )}
-                        </div>
-                    ))}
+                    {song.lines.map((line) => {
+                        const primaryText = line.translations.find((t) => t.lang === primaryLang)?.text
+                        const secondaryText = secondaryLang
+                            ? line.translations.find((t) => t.lang === secondaryLang)?.text
+                            : undefined
+                        return (
+                            <div key={line.id}>
+                                {playConfig.pinyin && line.pinyin && (
+                                    <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
+                                )}
+                                <p className="text-2xl font-semibold text-[#0F0F0F] leading-tight tracking-tight">{line.chinese}</p>
+                                {playConfig.translation && primaryText && (
+                                    <p className="text-sm italic text-[#555] mt-1.5 leading-relaxed">{primaryText}</p>
+                                )}
+                                {playConfig.secondLang && secondaryText && (
+                                    <p className="text-sm text-[#777] mt-1 leading-relaxed">{secondaryText}</p>
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
         </div>
       </div>

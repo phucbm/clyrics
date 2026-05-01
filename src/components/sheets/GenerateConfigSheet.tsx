@@ -21,7 +21,7 @@ const LANGUAGES = [
 export function GenerateConfigSheet() {
   const song = useActiveSong()
   const { updateSong } = useSongStore()
-  const { generateConfig, setGenerateConfig, setPlayConfig } = useUIStore()
+  const { generateConfig, setGenerateConfig, setPlayConfig, setLangs } = useUIStore()
   const { close } = useBottomSheet()
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,12 +41,16 @@ export function GenerateConfigSheet() {
     setError(null)
     try {
       const chinese = song.lines.map((l) => l.chinese).join('\n')
-      const lines = await generateLyrics(chinese, generateConfig.translateLang, generateConfig.secondLang || undefined)
-      updateSong(song.id, {
-        lines,
-        language: generateConfig.translateLang,
-        secondLanguage: generateConfig.secondLang || undefined,
-      })
+      const lines = await generateLyrics(
+        chinese,
+        generateConfig.translateLang,
+        generateConfig.secondLang || undefined,
+        song.lines,
+        generateConfig.overridePinyin,
+        generateConfig.thirdLang || undefined
+      )
+      updateSong(song.id, { lines })
+      setLangs(generateConfig.translateLang, generateConfig.secondLang || undefined)
       setPlayConfig({ translation: true, secondLang: !!generateConfig.secondLang })
       close()
     } catch (e) {
@@ -78,7 +82,7 @@ export function GenerateConfigSheet() {
   return (
     <div className="px-5 pb-8 space-y-4">
       <div>
-        <label className="text-xs font-medium text-[#888]">Translate to</label>
+        <label className="text-xs font-medium text-[#888]">Primary language</label>
         <select
           value={generateConfig.translateLang}
           onChange={(e) => setGenerateConfig({ translateLang: e.target.value })}
@@ -91,10 +95,24 @@ export function GenerateConfigSheet() {
       </div>
 
       <div>
-        <label className="text-xs font-medium text-[#888]">Bilingual 2nd language (optional)</label>
+        <label className="text-xs font-medium text-[#888]">2nd language (optional)</label>
         <select
           value={generateConfig.secondLang ?? ''}
           onChange={(e) => setGenerateConfig({ secondLang: e.target.value || undefined })}
+          className={selectCls}
+        >
+          <option value="">None</option>
+          {LANGUAGES.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-[#888]">3rd language (optional)</label>
+        <select
+          value={generateConfig.thirdLang ?? ''}
+          onChange={(e) => setGenerateConfig({ thirdLang: e.target.value || undefined })}
           className={selectCls}
         >
           <option value="">None</option>

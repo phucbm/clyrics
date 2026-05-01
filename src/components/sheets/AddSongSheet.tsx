@@ -23,14 +23,14 @@ export function AddSongSheet() {
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
-      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translation: '' }))
+      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, order: i, chinese, pinyin: '', translations: [] }))
 
     const song: Song = {
       id: nanoid(),
       title: title.trim() || 'Untitled',
       artist: artist.trim() || '',
       youtubeUrl: youtubeUrl.trim() || undefined,
-      language: 'Vietnamese',
+      authors: [],
       lines,
       createdAt: Date.now(),
       source: 'local',
