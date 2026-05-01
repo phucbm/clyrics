@@ -25,8 +25,15 @@ export function EditSongSheet({ song }: Props) {
   )
   const [resetting, setResetting] = useState(false)
 
+  function stripToChineseOnly(text: string): string {
+    return text
+      .split('\n')
+      .map((line) => line.replace(/[^一-鿿㐀-䶿豈-﫿]/g, ''))
+      .join('\n')
+  }
+
   function parseDraftLines() {
-    return rawLyrics
+    return stripToChineseOnly(rawLyrics)
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
@@ -138,6 +145,10 @@ export function EditSongSheet({ song }: Props) {
           onChange={(e) => setRawLyrics(e.target.value)}
         />
       </div>
+
+      <p className="text-xs text-[#AAA] text-center">
+        Only Chinese characters are saved — all other text is stripped automatically.
+      </p>
 
       <button
         onClick={handleSave}
