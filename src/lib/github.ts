@@ -1,13 +1,47 @@
 import { Octokit } from 'octokit'
+import { SignJWT, importPKCS8 } from 'jose'
 import type { Song } from '../types'
 
 const OWNER = 'phucbm'
 const REPO = 'clyrics'
 const PR_LIST_URL = `https://github.com/${OWNER}/${REPO}/pulls`
 
-function getOctokit() {
-  const token = import.meta.env.VITE_GITHUB_TOKEN as string | undefined
-  if (!token) throw new Error('NO_GITHUB_TOKEN')
+async function getInstallationToken(): Promise<string> {
+  const appId = import.meta.env.VITE_GITHUB_APP_ID as string
+  const installationId = import.meta.env.VITE_GITHUB_APP_INSTALLATION_ID as string
+  const rawKey = import.meta.env.VITE_GITHUB_APP_PRIVATE_KEY as string
+
+  if (!appId || !installationId || !rawKey) throw new Error('NO_GITHUB_APP_CONFIG')
+
+  const pem = rawKey.replace(/\\n/g, '\n')
+  const key = await importPKCS8(pem, 'RS256')
+
+  const jwt = await new SignJWT({})
+    .setProtectedHeader({ alg: 'RS256' })
+    .setIssuedAt()
+    .setIssuer(appId)
+    .setExpirationTime('10m')
+    .sign(key)
+
+  const res = await fetch(
+    `https://api.github.com/app/installations/${installationId}/access_tokens`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    }
+  )
+
+  if (!res.ok) throw new Error(`GitHub App token error: ${res.status}`)
+  const data = await res.json()
+  return data.token
+}
+
+async function getOctokit(): Promise<Octokit> {
+  const token = await getInstallationToken()
   return new Octokit({ auth: token })
 }
 
@@ -36,18 +70,15 @@ export function getPRListUrl() {
 }
 
 export async function contributeSong(song: Song, contributor: string): Promise<string> {
-  const octokit = getOctokit()
-  const username = (import.meta.env.VITE_GITHUB_USERNAME as string | undefined) ?? OWNER
+  const octokit = await getOctokit()
   const filePath = `songs/${song.id}.json`
   const branch = `song/${song.id}-${Date.now()}`
 
-  // Get main SHA
   const { data: ref } = await octokit.rest.git.getRef({
     owner: OWNER, repo: REPO, ref: 'heads/main',
   })
   const mainSha = ref.object.sha
 
-  // For repo songs: fetch existing file to get SHA + merge authors
   let fileSha: string | undefined
   let finalSong = { ...song }
 
@@ -71,14 +102,12 @@ export async function contributeSong(song: Song, contributor: string): Promise<s
 
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalSong, null, 2))))
 
-  // Create branch on upstream
   await octokit.rest.git.createRef({
     owner: OWNER, repo: REPO,
     ref: `refs/heads/${branch}`,
     sha: mainSha,
   })
 
-  // Create/update file on that branch
   await octokit.rest.repos.createOrUpdateFileContents({
     owner: OWNER, repo: REPO,
     path: filePath,
@@ -86,10 +115,8 @@ export async function contributeSong(song: Song, contributor: string): Promise<s
     content,
     branch,
     ...(fileSha ? { sha: fileSha } : {}),
-    committer: { name: username, email: `${username}@users.noreply.github.com` },
   })
 
-  // Open PR
   const { data: pr } = await octokit.rest.pulls.create({
     owner: OWNER, repo: REPO,
     title: prTitle(song),
