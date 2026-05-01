@@ -7,12 +7,17 @@ import { useYouTubePlayer } from '../../hooks/useYouTubePlayer'
 import { extractVideoId } from '../../hooks/useYouTube'
 import { ArrowLeft, Pause, Play } from '@phosphor-icons/react'
 
-// ── Tune this to change scroll speed feel ────────────────────────────────────
-const SCROLL_SPEED_MULT = 0.6 // px/s = v² × SCROLL_SPEED_MULT  (v: 0–10)
+// ── Scroll speed ──────────────────────────────────────────────────────────────
+// Slider 0–10 maps linearly to 0–SPEED_MAX_LINES lines/second.
+// AVG_LINE_PX is the estimated pixel height of one lyric group (chinese+pinyin+translation).
+const AVG_LINE_PX = 90           // px per lyric group — adjust if layout changes
+const SPEED_MAX_LINES = 2        // lines/sec at slider = 10
+function toPxPerSec(v: number) { return (v / 10) * SPEED_MAX_LINES * AVG_LINE_PX }
+// at v=5 → 1 line/s = 90px/s │ at v=10 → 2 lines/s = 180px/s
 // ─────────────────────────────────────────────────────────────────────────────
-function toPxPerSec(v: number) { return v * v * SCROLL_SPEED_MULT }
 
 const PIP_LS_KEY = 'clyrics_pip'
+const HINT_LS_KEY = 'clyrics_focus_hint'
 const PIP_MIN_W = 200
 const PIP_DEFAULT = { x: 0, y: 80, w: 320 } // x recalculated on load
 
@@ -124,9 +129,12 @@ export function PlayScreen() {
   const { playConfig, screen, navigateTo, autoplay, setAutoplay } = useUIStore()
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
+  const [showHint, setShowHint] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const hintShownRef = useRef(localStorage.getItem(HINT_LS_KEY) === '1')
 
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
   const { containerRef, isPlaying, isReady, play, togglePlay } = useYouTubePlayer(videoId)
@@ -150,16 +158,27 @@ export function PlayScreen() {
     }
   }, [autoplay, isReady, play, setAutoplay])
 
-  // Focus mode + auto-hide tied to playing state
+  // Focus mode + auto-hide + first-play hint
   useEffect(() => {
     setFocusMode(isPlaying)
     if (isPlaying) {
       revealControls()
+      if (!hintShownRef.current) {
+        hintShownRef.current = true
+        localStorage.setItem(HINT_LS_KEY, '1')
+        setShowHint(true)
+        hintTimerRef.current = setTimeout(() => setShowHint(false), 4000)
+      }
     } else {
       setControlsVisible(true)
       clearTimeout(hideTimerRef.current)
+      setShowHint(false)
+      clearTimeout(hintTimerRef.current)
     }
-    return () => clearTimeout(hideTimerRef.current)
+    return () => {
+      clearTimeout(hideTimerRef.current)
+      clearTimeout(hintTimerRef.current)
+    }
   }, [isPlaying, revealControls])
 
   // --- Smooth steady auto-scroll ---
@@ -261,7 +280,18 @@ export function PlayScreen() {
         <div
           className="absolute bottom-0 inset-x-0 h-1/4 z-10"
           onPointerDown={revealControls}
-        />
+        >
+          {/* First-play hint */}
+          <div
+            className={`absolute bottom-24 inset-x-0 flex justify-center transition-opacity duration-500 ${
+              showHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            <span className="px-4 py-2 bg-black/60 text-white/90 text-xs rounded-full backdrop-blur-sm">
+              Tap here to show pause button
+            </span>
+          </div>
+        </div>
       )}
 
       {/* Back FAB — idle mode only */}

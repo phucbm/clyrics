@@ -42,8 +42,8 @@ export function PlayConfigSheet() {
       <div className="pt-3 pb-1">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-medium text-[#0F0F0F]">Auto scroll</p>
-          <span className="text-xs text-[#888] tabular-nums w-12 text-right">
-            {speed === 0 ? 'Off' : speed <= 3 ? 'Slow' : speed <= 7 ? 'Normal' : 'Fast'}
+          <span className="text-xs text-[#888] tabular-nums">
+            {speed === 0 ? 'Off' : `${((speed / 10) * 2).toFixed(1)} lines/s`}
           </span>
         </div>
         <input
@@ -57,7 +57,7 @@ export function PlayConfigSheet() {
         />
         <div className="flex justify-between mt-1">
           <span className="text-[10px] text-[#CCC]">Off</span>
-          <span className="text-[10px] text-[#CCC]">Fast</span>
+          <span className="text-[10px] text-[#CCC]">2 lines/s</span>
         </div>
       </div>
 
