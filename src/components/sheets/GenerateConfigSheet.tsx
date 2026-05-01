@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
-import { ToggleRow } from '../ui/Toggle'
 import { generateLyrics, getGroqKey } from '../../lib/groq'
 import { Lightning, Warning, Key } from '@phosphor-icons/react'
 
@@ -27,13 +26,15 @@ export function GenerateConfigSheet() {
   const [error, setError] = useState<string | null>(null)
 
   const hasKey = !!getGroqKey()
-  const hasPinyin = song?.lines.some((l) => l.pinyin) ?? false
   const lineCount = song?.lines.length ?? 0
   const inputTok = Math.round(lineCount * 10 + 60)
   const outputTok = Math.round(lineCount * 30)
 
   const selectCls =
     'w-full mt-1 px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-sm text-[#0F0F0F] focus:border-[#0F0F0F] transition-colors'
+
+  const takenBy2nd = new Set([generateConfig.translateLang, generateConfig.thirdLang].filter(Boolean) as string[])
+  const takenBy3rd = new Set([generateConfig.translateLang, generateConfig.secondLang].filter(Boolean) as string[])
 
   async function handleGenerate() {
     if (!song || !hasKey) return
@@ -46,7 +47,7 @@ export function GenerateConfigSheet() {
         generateConfig.translateLang,
         generateConfig.secondLang || undefined,
         song.lines,
-        generateConfig.overridePinyin,
+        true,
         generateConfig.thirdLang || undefined
       )
       updateSong(song.id, { lines })
@@ -88,9 +89,10 @@ export function GenerateConfigSheet() {
           onChange={(e) => setGenerateConfig({ translateLang: e.target.value })}
           className={selectCls}
         >
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>{lang}</option>
-          ))}
+          {LANGUAGES.map((lang) => {
+            const taken = lang === generateConfig.secondLang || lang === generateConfig.thirdLang
+            return <option key={lang} value={lang} disabled={taken} style={taken ? { color: '#bbb' } : undefined}>{lang}</option>
+          })}
         </select>
       </div>
 
@@ -98,36 +100,33 @@ export function GenerateConfigSheet() {
         <label className="text-xs font-medium text-[#888]">2nd language (optional)</label>
         <select
           value={generateConfig.secondLang ?? ''}
-          onChange={(e) => setGenerateConfig({ secondLang: e.target.value || undefined })}
+          onChange={(e) => setGenerateConfig({ secondLang: e.target.value || undefined, thirdLang: e.target.value ? generateConfig.thirdLang : undefined })}
           className={selectCls}
         >
           <option value="">None</option>
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>{lang}</option>
-          ))}
+          {LANGUAGES.map((lang) => {
+            const taken = takenBy2nd.has(lang)
+            return <option key={lang} value={lang} disabled={taken} style={taken ? { color: '#bbb' } : undefined}>{lang}</option>
+          })}
         </select>
       </div>
 
-      <div>
-        <label className="text-xs font-medium text-[#888]">3rd language (optional)</label>
-        <select
-          value={generateConfig.thirdLang ?? ''}
-          onChange={(e) => setGenerateConfig({ thirdLang: e.target.value || undefined })}
-          className={selectCls}
-        >
-          <option value="">None</option>
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>{lang}</option>
-          ))}
-        </select>
-      </div>
-
-      <ToggleRow
-        label="Override pinyin"
-        sublabel={hasPinyin ? 'Pinyin detected in lyrics' : undefined}
-        checked={generateConfig.overridePinyin}
-        onChange={(v) => setGenerateConfig({ overridePinyin: v })}
-      />
+      {generateConfig.secondLang && (
+        <div>
+          <label className="text-xs font-medium text-[#888]">3rd language (optional)</label>
+          <select
+            value={generateConfig.thirdLang ?? ''}
+            onChange={(e) => setGenerateConfig({ thirdLang: e.target.value || undefined })}
+            className={selectCls}
+          >
+            <option value="">None</option>
+            {LANGUAGES.map((lang) => {
+              const taken = takenBy3rd.has(lang)
+              return <option key={lang} value={lang} disabled={taken} style={taken ? { color: '#bbb' } : undefined}>{lang}</option>
+            })}
+          </select>
+        </div>
+      )}
 
       <div className="border-t border-[#E0E0DC] pt-3">
         <p className="text-xs text-[#999]">
