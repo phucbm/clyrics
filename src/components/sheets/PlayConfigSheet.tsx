@@ -51,6 +51,12 @@ export function PlayConfigSheet() {
         />
       )}
 
+      <ToggleRow
+        label="Loop"
+        checked={playConfig.loop}
+        onChange={(v) => setPlayConfig({ loop: v })}
+      />
+
       {/* Scroll speed */}
       <div className="pt-3 pb-1 flex items-center justify-between">
         <p className="text-sm font-medium text-[#0F0F0F]">Auto scroll</p>

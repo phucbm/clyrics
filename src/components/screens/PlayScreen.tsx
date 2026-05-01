@@ -1,5 +1,5 @@
 import {createPortal} from 'react-dom'
-import {useCallback, useEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useRef, useState, type RefObject} from 'react'
 import {useActiveSong} from '../../store/useSongStore'
 import {useUIStore} from '../../store/useUIStore'
 import {FAB} from '../shell/FAB'
@@ -44,9 +44,10 @@ function useMediaQuery(query: string) {
 
 interface PiPProps {
   containerRef: (el: HTMLDivElement | null) => void
+  progressBarRef: RefObject<HTMLDivElement>
 }
 
-function DraggablePiP({ containerRef }: PiPProps) {
+function DraggablePiP({ containerRef, progressBarRef }: PiPProps) {
   const [pip, setPip] = useState(loadPiP)
   const pipRef = useRef(pip)
 
@@ -108,6 +109,11 @@ function DraggablePiP({ containerRef }: PiPProps) {
     >
       <div ref={containerRef} className="w-full h-full bg-black" style={{ pointerEvents: 'none' }} />
 
+      {/* Progress bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+        <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
+      </div>
+
       {/* Resize grip — bottom-right corner */}
       <div
         className="absolute bottom-0 right-0 w-7 h-7 z-10 cursor-se-resize flex items-end justify-end p-1.5"
@@ -136,7 +142,8 @@ export function PlayScreen() {
   const hintShownRef = useRef(localStorage.getItem(HINT_LS_KEY) === '1')
 
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
-  const { containerRef, isPlaying, isReady, play, togglePlay } = useYouTubePlayer(videoId)
+  const { containerRef, isPlaying, isReady, play, togglePlay, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop)
+  const progressBarRef = useRef<HTMLDivElement>(null)
 
     // Refs so wheel/touch handlers always see current values without re-registering
     const speedRef = useRef(0)
@@ -187,6 +194,31 @@ export function PlayScreen() {
       clearTimeout(hintTimerRef.current)
     }
   }, [isPlaying, revealControls])
+
+    // CSS-transition progress bar — mirrors scroll animation approach
+    function startProgressAnimation() {
+        const el = progressBarRef.current
+        if (!el) return
+        const { currentTime, duration } = getTimeInfo()
+        if (!duration) return
+        const pct = (currentTime / duration) * 100
+        const remaining = duration - currentTime
+        el.style.transition = 'none'
+        el.style.width = `${pct}%`
+        void el.offsetWidth
+        el.style.transition = `width ${remaining}s linear`
+        el.style.width = '100%'
+    }
+
+    function pauseProgressAnimation() {
+        const el = progressBarRef.current
+        if (!el) return
+        const computed = getComputedStyle(el).width
+        const parent = el.parentElement
+        const pct = parent ? (parseFloat(computed) / parent.clientWidth) * 100 : 0
+        el.style.transition = 'none'
+        el.style.width = `${pct}%`
+    }
 
     // ── Transform-based auto-scroll ───────────────────────────────────────────
 
@@ -301,7 +333,27 @@ export function PlayScreen() {
         } else {
             pauseAnimation()
         }
+
+        if (videoId) {
+            if (isPlaying) startProgressAnimation()
+            else pauseProgressAnimation()
+        }
   }, [playConfig.scrollSpeed, videoId, isPlaying])
+
+    function syncToVideo() {
+        const progress = getProgress()
+        const max = getMaxScroll()
+        const targetPx = progress * max
+        pauseAnimation()
+        setScrollImmediate(targetPx)
+        pauseProgressAnimation()
+        setTimeout(() => {
+            if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
+                startScrollAnimation(targetPx)
+            }
+            if (isPlayingRef.current) startProgressAnimation()
+        }, 50)
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -324,8 +376,11 @@ export function PlayScreen() {
 
         {/* Mobile video — outside scroll container so sticky isn't needed */}
         {videoId && !isDesktop && (
-            <div className="w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}}>
+            <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}}>
                 <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                    <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
+                </div>
             </div>
         )}
 
@@ -362,7 +417,7 @@ export function PlayScreen() {
       </div>
 
       {videoId && isDesktop && screen === 'play' && createPortal(
-        <DraggablePiP containerRef={containerRef} />,
+        <DraggablePiP containerRef={containerRef} progressBarRef={progressBarRef} />,
         document.body
       )}
 
@@ -401,6 +456,11 @@ export function PlayScreen() {
           fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
+          {videoId && (
+              <FAB onClick={syncToVideo} variant="secondary" label="Sync to video">
+                  <span className="text-xs font-bold">sync</span>
+              </FAB>
+          )}
           <FAB
               onClick={() => {
                   const idx = SPEED_PRESETS.indexOf(playConfig.scrollSpeed)

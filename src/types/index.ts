@@ -26,6 +26,7 @@ export interface PlayConfig {
   translation: boolean
   secondLang: boolean
   scrollSpeed: number  // lines/sec, 0 = stopped
+  loop: boolean
 }
 
 export interface GenerateConfig {

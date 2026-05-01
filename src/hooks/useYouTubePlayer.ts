@@ -24,7 +24,7 @@ function loadYTApi(onReady: () => void) {
   }
 }
 
-export function useYouTubePlayer(videoId: string | null) {
+export function useYouTubePlayer(videoId: string | null, loop = false) {
   // Callback ref — tracks when the container div mounts/unmounts
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
   const containerRef = useCallback((el: HTMLDivElement | null) => setContainerEl(el), [])
@@ -62,9 +62,29 @@ export function useYouTubePlayer(videoId: string | null) {
     }
   }, [videoId, containerEl])
 
+  useEffect(() => {
+    if (isReady) playerRef.current?.setLoop(loop)
+  }, [loop, isReady])
+
   function play() { playerRef.current?.playVideo() }
   function pause() { playerRef.current?.pauseVideo() }
   function togglePlay() { isPlaying ? pause() : play() }
 
-  return { containerRef, isPlaying, isReady, play, pause, togglePlay }
+  function getProgress(): number {
+    const p = playerRef.current
+    if (!p) return 0
+    try {
+      const duration = p.getDuration()
+      if (!duration) return 0
+      return p.getCurrentTime() / duration
+    } catch { return 0 }
+  }
+
+  function getTimeInfo(): { currentTime: number; duration: number } {
+    const p = playerRef.current
+    if (!p) return { currentTime: 0, duration: 0 }
+    try { return { currentTime: p.getCurrentTime(), duration: p.getDuration() } } catch { return { currentTime: 0, duration: 0 } }
+  }
+
+  return { containerRef, isPlaying, isReady, play, pause, togglePlay, getProgress, getTimeInfo }
 }
