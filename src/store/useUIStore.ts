@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import type { Screen, PlayConfig, GenerateConfig } from '../types'
 
+const SCREEN_ORDER: Screen[] = ['home', 'edit', 'play']
+
 interface UIStore {
   screen: Screen
+  direction: 'forward' | 'back'
   playConfig: PlayConfig
   generateConfig: GenerateConfig
   autoplay: boolean
@@ -12,8 +15,9 @@ interface UIStore {
   setAutoplay: (v: boolean) => void
 }
 
-export const useUIStore = create<UIStore>((set) => ({
+export const useUIStore = create<UIStore>((set, get) => ({
   screen: 'home',
+  direction: 'forward',
   autoplay: false,
   playConfig: {
     pinyin: true,
@@ -26,7 +30,11 @@ export const useUIStore = create<UIStore>((set) => ({
     secondLang: undefined,
     overridePinyin: false,
   },
-  navigateTo: (screen) => set({ screen }),
+  navigateTo: (screen) => {
+    const cur = SCREEN_ORDER.indexOf(get().screen)
+    const next = SCREEN_ORDER.indexOf(screen)
+    set({ screen, direction: next >= cur ? 'forward' : 'back' })
+  },
   setPlayConfig: (config) => set((s) => ({ playConfig: { ...s.playConfig, ...config } })),
   setGenerateConfig: (config) => set((s) => ({ generateConfig: { ...s.generateConfig, ...config } })),
   setAutoplay: (v) => set({ autoplay: v }),
