@@ -27,10 +27,13 @@ function recoverPartialJson(raw: string): string {
 
 export async function generateLyrics(
   chinese: string,
-  language: string
+  language: string,
+  secondLanguage?: string
 ): Promise<LyricLine[]> {
   const key = getGroqKey()
   if (!key) throw new Error('NO_KEY')
+
+  const secondInstr = secondLanguage ? ` Also translate to ${secondLanguage} in the "secondTranslation" field.` : ''
 
   const res = await fetch(GROQ_API, {
     method: 'POST',
@@ -42,7 +45,7 @@ export async function generateLyrics(
       model: MODEL,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT_RAW },
-        { role: 'user', content: `Translate to ${language}.\n\nLyrics:\n${chinese}` },
+        { role: 'user', content: `Translate to ${language}.${secondInstr}\n\nLyrics:\n${chinese}` },
       ],
       temperature: 0.1,
       max_tokens: 6000,
@@ -57,7 +60,7 @@ export async function generateLyrics(
   const data = (await res.json()) as { choices: { message: { content: string } }[] }
   const raw = (data.choices[0]?.message?.content ?? '[]').trim()
 
-  let parsed: Omit<LyricLine, 'id'>[]
+  let parsed: (Omit<LyricLine, 'id'> & { secondTranslation?: string })[]
   try {
     parsed = JSON.parse(raw)
   } catch {
@@ -69,5 +72,6 @@ export async function generateLyrics(
     chinese: l.chinese,
     pinyin: l.pinyin ?? '',
     translation: l.translation ?? '',
+    ...(l.secondTranslation ? { secondTranslation: l.secondTranslation } : {}),
   }))
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useUIStore } from './store/useUIStore'
 import { BottomSheetProvider } from './components/shell/BottomSheet'
@@ -25,12 +26,38 @@ const variants = {
 
 const transition = { duration: 0.32, ease: [0.32, 0.72, 0, 1] as const }
 
+type Align = 'left' | 'center' | 'right'
+const LS_ALIGN = 'clyrics_align'
+const JUSTIFY: Record<Align, string> = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end',
+}
+
+function useAlign() {
+  const [align, setAlignState] = useState<Align>(
+    () => (localStorage.getItem(LS_ALIGN) as Align) || 'center'
+  )
+  function setAlign(a: Align) {
+    setAlignState(a)
+    localStorage.setItem(LS_ALIGN, a)
+  }
+  return { align, setAlign }
+}
+
+const ALIGN_OPTIONS: { value: Align; label: string }[] = [
+  { value: 'left', label: '⊢' },
+  { value: 'center', label: '↔' },
+  { value: 'right', label: '⊣' },
+]
+
 export default function App() {
   const { screen, direction } = useUIStore()
   const Screen = SCREENS[screen]
+  const { align, setAlign } = useAlign()
 
   return (
-    <div className="min-h-dvh flex justify-center bg-[#ECEAE6]">
+    <div className={`min-h-dvh flex ${JUSTIFY[align]} bg-[#ECEAE6]`}>
       <div className="w-full max-w-[600px] h-dvh flex flex-col relative bg-[#F8F7F5] overflow-hidden">
         <BottomSheetProvider>
           <div className="flex-1 relative overflow-hidden">
@@ -52,14 +79,37 @@ export default function App() {
         </BottomSheetProvider>
       </div>
 
-      <a
-        href="https://phucbm.com"
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-3 right-4 text-xs text-[#AAA] hover:text-[#888] transition-colors hidden md:block select-none"
+      {/* Desktop-only controls — sits in sidebar space, switches side with alignment */}
+      <div
+        className={`hidden md:flex fixed bottom-3 items-center gap-3 select-none ${
+          align === 'right' ? 'left-4' : 'right-4'
+        }`}
       >
-        made with ♥ by phucbm
-      </a>
+        <div className="flex items-center gap-0.5 bg-[#E4E2DE] rounded-lg p-0.5">
+          {ALIGN_OPTIONS.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => setAlign(value)}
+              title={`Align ${value}`}
+              className={`w-7 h-7 rounded-md text-sm transition-colors flex items-center justify-center ${
+                align === value
+                  ? 'bg-white text-[#0F0F0F] shadow-sm'
+                  : 'text-[#999] hover:text-[#555]'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <a
+          href="https://phucbm.com"
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-[#AAA] hover:text-[#888] transition-colors"
+        >
+          made with ♥ by phucbm
+        </a>
+      </div>
     </div>
   )
 }

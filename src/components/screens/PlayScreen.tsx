@@ -10,10 +10,10 @@ import { ArrowLeft, Pause, Play } from '@phosphor-icons/react'
 // ── Scroll speed ──────────────────────────────────────────────────────────────
 // Slider 0–10 maps linearly to 0–SPEED_MAX_LINES lines/second.
 // AVG_LINE_PX is the estimated pixel height of one lyric group (chinese+pinyin+translation).
-const AVG_LINE_PX = 90           // px per lyric group — adjust if layout changes
-const SPEED_MAX_LINES = 2        // lines/sec at slider = 10
+const AVG_LINE_PX = 120          // px per lyric group — adjust if layout changes
+const SPEED_MAX_LINES = 5        // lines/sec at slider = 10
 function toPxPerSec(v: number) { return (v / 10) * SPEED_MAX_LINES * AVG_LINE_PX }
-// at v=5 → 1 line/s = 90px/s │ at v=10 → 2 lines/s = 180px/s
+// at v=2 → 1 line/s = 90px/s │ at v=10 → 5 lines/s = 450px/s
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PIP_LS_KEY = 'clyrics_pip'
@@ -186,9 +186,11 @@ export function PlayScreen() {
   const lastTickRef = useRef<number | undefined>(undefined)
   const scrollPosRef = useRef(0)
   const isManualScrolling = useRef(false)
+  const isAutoScrolling = useRef(false)
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const handleManualScroll = useCallback(() => {
+    if (isAutoScrolling.current) return
     if (bodyRef.current) scrollPosRef.current = bodyRef.current.scrollTop
     isManualScrolling.current = true
     clearTimeout(resumeTimerRef.current)
@@ -209,7 +211,9 @@ export function PlayScreen() {
         const dt = (ts - lastTickRef.current) / 1000
         const el = bodyRef.current
         scrollPosRef.current = Math.min(scrollPosRef.current + speed * dt, el.scrollHeight - el.clientHeight)
+        isAutoScrolling.current = true
         el.scrollTop = scrollPosRef.current
+        isAutoScrolling.current = false
       }
       lastTickRef.current = ts
       rafRef.current = requestAnimationFrame(tick)
@@ -275,11 +279,12 @@ export function PlayScreen() {
         document.body
       )}
 
-      {/* Bottom touch zone — focus mode only, reveals controls */}
+      {/* Bottom touch/hover zone — focus mode only, reveals controls */}
       {focusMode && (
         <div
           className="absolute bottom-0 inset-x-0 h-1/4 z-10"
-          onPointerDown={revealControls}
+          onPointerDown={isDesktop ? undefined : revealControls}
+          onMouseEnter={isDesktop ? revealControls : undefined}
         >
           {/* First-play hint */}
           <div
@@ -288,7 +293,7 @@ export function PlayScreen() {
             }`}
           >
             <span className="px-4 py-2 bg-black/60 text-white/90 text-xs rounded-full backdrop-blur-sm">
-              Tap here to show pause button
+              {isDesktop ? 'Hover here to show pause button' : 'Tap here to show pause button'}
             </span>
           </div>
         </div>

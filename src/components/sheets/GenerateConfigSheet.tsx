@@ -21,7 +21,7 @@ const LANGUAGES = [
 export function GenerateConfigSheet() {
   const song = useActiveSong()
   const { updateSong } = useSongStore()
-  const { generateConfig, setGenerateConfig } = useUIStore()
+  const { generateConfig, setGenerateConfig, setPlayConfig } = useUIStore()
   const { close } = useBottomSheet()
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,8 +41,13 @@ export function GenerateConfigSheet() {
     setError(null)
     try {
       const chinese = song.lines.map((l) => l.chinese).join('\n')
-      const lines = await generateLyrics(chinese, generateConfig.translateLang)
-      updateSong(song.id, { lines, language: generateConfig.translateLang })
+      const lines = await generateLyrics(chinese, generateConfig.translateLang, generateConfig.secondLang || undefined)
+      updateSong(song.id, {
+        lines,
+        language: generateConfig.translateLang,
+        secondLanguage: generateConfig.secondLang || undefined,
+      })
+      setPlayConfig({ translation: true, secondLang: !!generateConfig.secondLang })
       close()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Generation failed')
