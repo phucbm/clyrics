@@ -70,6 +70,15 @@ export function useYouTubePlayer(videoId: string | null, loop = false) {
   function pause() { playerRef.current?.pauseVideo() }
   function togglePlay() { isPlaying ? pause() : play() }
 
+  function seekTo(fraction: number) {
+    const p = playerRef.current
+    if (!p) return
+    try {
+      const duration = p.getDuration()
+      if (duration) p.seekTo(fraction * duration, true)
+    } catch {}
+  }
+
   function getProgress(): number {
     const p = playerRef.current
     if (!p) return 0
@@ -86,5 +95,5 @@ export function useYouTubePlayer(videoId: string | null, loop = false) {
     try { return { currentTime: p.getCurrentTime(), duration: p.getDuration() } } catch { return { currentTime: 0, duration: 0 } }
   }
 
-  return { containerRef, isPlaying, isReady, play, pause, togglePlay, getProgress, getTimeInfo }
+  return { containerRef, isPlaying, isReady, play, pause, togglePlay, seekTo, getProgress, getTimeInfo }
 }

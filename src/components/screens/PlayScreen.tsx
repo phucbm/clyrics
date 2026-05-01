@@ -142,8 +142,11 @@ export function PlayScreen() {
   const hintShownRef = useRef(localStorage.getItem(HINT_LS_KEY) === '1')
 
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
-  const { containerRef, isPlaying, isReady, play, togglePlay, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop)
+  const { containerRef, isPlaying, isReady, play, togglePlay, seekTo, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop)
   const progressBarRef = useRef<HTMLDivElement>(null)
+  const [scrubPct, setScrubPct] = useState(0)
+  const [showScrubber, setShowScrubber] = useState(false)
+  const [scrubValue, setScrubValue] = useState(0)
 
     // Refs so wheel/touch handlers always see current values without re-registering
     const speedRef = useRef(0)
@@ -171,6 +174,13 @@ export function PlayScreen() {
       setAutoplay(false)
     }
   }, [autoplay, isReady, play, setAutoplay])
+
+  // Poll video progress for the % button
+  useEffect(() => {
+    if (!videoId) { setScrubPct(0); return }
+    const id = setInterval(() => setScrubPct(Math.round(getProgress() * 100)), 1000)
+    return () => clearInterval(id)
+  }, [videoId])
 
   // Focus mode + auto-hide + first-play hint
   useEffect(() => {
@@ -328,15 +338,13 @@ export function PlayScreen() {
         isPlayingRef.current = isPlaying
         videoIdRef.current = videoId
 
-        if (speedRef.current > 0 && (!videoId || isPlaying)) {
+        if (videoId && isPlaying) {
+            syncToVideo()
+        } else if (speedRef.current > 0 && !videoId) {
             startScrollAnimation(getScrollPos())
         } else {
             pauseAnimation()
-        }
-
-        if (videoId) {
-            if (isPlaying) startProgressAnimation()
-            else pauseProgressAnimation()
+            if (videoId) pauseProgressAnimation()
         }
   }, [playConfig.scrollSpeed, videoId, isPlaying])
 
@@ -457,11 +465,16 @@ export function PlayScreen() {
         }`}
       >
           {videoId && (
+              <FAB onClick={() => { setScrubValue(scrubPct); setShowScrubber(v => !v) }} variant="secondary" label="Video progress">
+                  <span className="text-xs font-bold tabular-nums leading-none">{scrubPct}%</span>
+              </FAB>
+          )}
+          {videoId && (
               <FAB onClick={syncToVideo} variant="secondary" label="Sync to video">
                   <span className="text-xs font-bold">sync</span>
               </FAB>
           )}
-          <FAB
+          {videoId && <FAB
               onClick={() => {
                   const idx = SPEED_PRESETS.indexOf(playConfig.scrollSpeed)
                   const next = idx >= 0 ? (idx + 1) % SPEED_PRESETS.length : 0
@@ -475,11 +488,40 @@ export function PlayScreen() {
                 ? playConfig.scrollSpeed.toString()
                 : playConfig.scrollSpeed.toFixed(1)}
           </span>
-          </FAB>
-        <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
-          {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
-        </FAB>
+          </FAB>}
+          {videoId && (
+            <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
+              {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
+            </FAB>
+          )}
       </div>
+
+      {/* Video scrubber popup */}
+      {showScrubber && videoId && (
+        <div className="absolute bottom-6 right-[4.5rem] z-30 bg-white rounded-2xl shadow-xl border border-black/10 p-4 w-56">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-xs font-semibold text-[#333]">{scrubValue}%</span>
+            <button
+              onClick={() => setShowScrubber(false)}
+              className="text-[#999] hover:text-[#333] text-xs leading-none"
+            >✕</button>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={scrubValue}
+            onChange={e => {
+              const v = Number(e.target.value)
+              setScrubValue(v)
+              seekTo(v / 100)
+            }}
+            onPointerUp={() => setTimeout(syncToVideo, 150)}
+            className="w-full accent-[#0F0F0F]"
+          />
+        </div>
+      )}
     </div>
   )
 }
