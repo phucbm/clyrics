@@ -106,6 +106,7 @@ export function EditScreen() {
 
   function handleDelete() {
     if (!song) return
+    if (!window.confirm(`Delete "${song.title}"? This cannot be undone.`)) return
     deleteSong(song.id)
     setActiveSong(null)
     navigateTo('home')
@@ -154,6 +155,24 @@ export function EditScreen() {
           if (e.target === e.currentTarget) setEditingLineId(null)
         }}
       >
+        {/* Generate banner — shown when lines exist but none have pinyin or translation */}
+        {song.lines.length > 0
+          && !song.lines.some((l) => l.pinyin.trim())
+          && !song.lines.some((l) => l.translation.trim()) && (
+          <div className="flex items-center gap-3 mt-3 mb-1 px-4 py-3 bg-[#F0F0EC] border border-[#E0E0DC] rounded-xl">
+            <p className="flex-1 text-xs text-[#666] leading-snug">
+              No pinyin or translation yet. Generate them automatically.
+            </p>
+            <button
+              onClick={() => open(<GenerateConfigSheet />, 'Generate')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F0F0F] text-white text-xs font-semibold rounded-lg shrink-0 hover:bg-[#2a2a2a] transition-colors"
+            >
+              <Lightning size={11} weight="fill" />
+              Generate
+            </button>
+          </div>
+        )}
+
         {song.lines.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-sm text-[#888] mb-3">No lines yet.</p>
@@ -195,7 +214,7 @@ export function EditScreen() {
       </div>
       <div className="absolute bottom-6 right-5 z-20 flex flex-col-reverse gap-3">
         {/* Primary (bottom): Edit */}
-        <FAB onClick={() => open(<EditSongSheet song={song} />, 'Edit Song')} label="Edit song">
+        <FAB onClick={() => open(<EditSongSheet song={song} />, 'Edit Song')} variant="secondary" label="Edit song">
           <Note size={20} weight="fill" />
         </FAB>
         {/* Generate */}
@@ -203,7 +222,7 @@ export function EditScreen() {
           <Lightning size={20} weight="fill" />
         </FAB>
         {/* Play (top) */}
-        <FAB onClick={() => open(<PlayConfigSheet />, 'Play')} variant="secondary" label="Play">
+        <FAB onClick={() => open(<PlayConfigSheet />, 'Play')} label="Play">
           <Play size={20} weight="fill" />
         </FAB>
       </div>

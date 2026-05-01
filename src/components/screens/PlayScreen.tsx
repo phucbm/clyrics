@@ -7,8 +7,8 @@ import { useYouTubePlayer } from '../../hooks/useYouTubePlayer'
 import { extractVideoId } from '../../hooks/useYouTube'
 import { ArrowLeft, Pause, Play } from '@phosphor-icons/react'
 
-// px/sec = speed² * 0.3  →  0→0, 5→7.5, 10→30
-function toPxPerSec(v: number) { return v * v * 0.3 }
+// Doubled range: v² × 0.6  →  0→0, 5→15, 10→60 px/s
+function toPxPerSec(v: number) { return v * v * 0.6 }
 
 function useMediaQuery(query: string) {
   const [m, setM] = useState(() => window.matchMedia(query).matches)
@@ -57,7 +57,8 @@ function DraggablePiP({ containerRef }: PiPProps) {
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
-      <div ref={containerRef} className="w-full h-full bg-black" />
+      {/* pointer-events: none so iframe is non-interactive; drag wrapper handles it */}
+      <div ref={containerRef} className="w-full h-full bg-black" style={{ pointerEvents: 'none' }} />
     </div>
   )
 }
@@ -80,13 +81,13 @@ export function PlayScreen() {
     }
   }, [autoplay, isReady, play, setAutoplay])
 
-  // Focus mode: enter when playing, exit when paused
+  // Focus mode follows playing state
   useEffect(() => {
-    if (isPlaying) setFocusMode(true)
-    else setFocusMode(false)
+    setFocusMode(isPlaying)
   }, [isPlaying])
 
   // --- Smooth steady auto-scroll ---
+  // Pauses when video is paused (only if a video URL exists)
   const rafRef = useRef<number | undefined>(undefined)
   const lastTickRef = useRef<number | undefined>(undefined)
   const scrollPosRef = useRef(0)
@@ -105,10 +106,12 @@ export function PlayScreen() {
 
   useEffect(() => {
     const speed = toPxPerSec(playConfig.scrollSpeed)
+    const hasVideo = !!videoId
 
     if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
 
-    if (speed === 0) return
+    // No scroll if speed=0, or video exists but is currently paused
+    if (speed === 0 || (hasVideo && !isPlaying)) return
 
     function tick(ts: number) {
       if (lastTickRef.current !== undefined && !isManualScrolling.current && bodyRef.current) {
@@ -126,7 +129,7 @@ export function PlayScreen() {
     return () => {
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
     }
-  }, [playConfig.scrollSpeed])
+  }, [playConfig.scrollSpeed, videoId, isPlaying])
 
   if (!song) {
     return (
@@ -143,13 +146,12 @@ export function PlayScreen() {
 
   return (
     <div className="h-full flex flex-col relative">
-      {/* Body */}
       <div ref={bodyRef} onScroll={handleManualScroll} className="flex-1 overflow-y-auto">
 
-        {/* YouTube inline — mobile only, sticky at top */}
+        {/* YouTube inline — mobile only, sticky, non-interactive */}
         {videoId && !isDesktop && (
           <div className="sticky top-0 z-10 w-full bg-black" style={{ aspectRatio: '16/9' }}>
-            <div ref={containerRef} className="w-full h-full" />
+            <div ref={containerRef} className="w-full h-full" style={{ pointerEvents: 'none' }} />
           </div>
         )}
 
@@ -162,7 +164,6 @@ export function PlayScreen() {
           {showArtist && <p className="text-sm text-[#888] mt-1.5">{song.artist}</p>}
         </div>
 
-        {/* Gap before lyrics */}
         <div className="h-12" />
 
         {/* Lyrics */}
@@ -192,7 +193,7 @@ export function PlayScreen() {
         </div>
       </div>
 
-      {/* Desktop PiP — portaled to body so it escapes the slider's transform */}
+      {/* Desktop PiP — portaled to body, escapes slider transform */}
       {videoId && isDesktop && screen === 'play' && createPortal(
         <DraggablePiP containerRef={containerRef} />,
         document.body
@@ -217,8 +218,8 @@ export function PlayScreen() {
       {/* FABs — focus mode */}
       {focusMode && (
         <div className="absolute bottom-6 right-5 z-20">
-          <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
-            {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
+          <FAB onClick={togglePlay} label="Pause">
+            <Pause size={22} weight="fill" />
           </FAB>
         </div>
       )}
