@@ -6,6 +6,7 @@ import {FAB} from '../shell/FAB'
 import {useYouTubePlayer} from '../../hooks/useYouTubePlayer'
 import {extractVideoId} from '../../hooks/useYouTube'
 import {ArrowLeft, Pause, Play} from '@phosphor-icons/react'
+import {FABGroup} from '../shell/FABGroup'
 
 const AVG_LINE_PX = 80   // estimated px per lyric group
 const SPEED_PRESETS = [0, 0.2, 0.4, 0.6, 0.8, 1, 2, 3]
@@ -45,9 +46,10 @@ function useMediaQuery(query: string) {
 interface PiPProps {
   containerRef: (el: HTMLDivElement | null) => void
   progressBarRef: RefObject<HTMLDivElement | null>
+  onReveal?: () => void
 }
 
-function DraggablePiP({ containerRef, progressBarRef }: PiPProps) {
+function DraggablePiP({ containerRef, progressBarRef, onReveal }: PiPProps) {
   const [pip, setPip] = useState(loadPiP)
   const pipRef = useRef(pip)
 
@@ -106,6 +108,7 @@ function DraggablePiP({ containerRef, progressBarRef }: PiPProps) {
       className="fixed z-[9999] rounded-2xl overflow-hidden shadow-2xl border border-black/20 select-none cursor-grab active:cursor-grabbing"
       style={{ left: pip.x, top: pip.y, width: pip.w, height: h }}
       onPointerDown={startDrag}
+      onClick={onReveal}
     >
       <div ref={containerRef} className="w-full h-full bg-black" style={{ pointerEvents: 'none' }} />
 
@@ -408,7 +411,7 @@ export function PlayScreen() {
 
         {/* Mobile video — outside scroll container so sticky isn't needed */}
         {videoId && !isDesktop && (
-            <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}}>
+            <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={revealControls}>
                 <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
                     <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
@@ -455,7 +458,7 @@ export function PlayScreen() {
       </div>
 
       {videoId && isDesktop && screen === 'play' && createPortal(
-        <DraggablePiP containerRef={containerRef} progressBarRef={progressBarRef} />,
+        <DraggablePiP containerRef={containerRef} progressBarRef={progressBarRef} onReveal={revealControls} />,
         document.body
       )}
 
@@ -479,21 +482,22 @@ export function PlayScreen() {
         </div>
       )}
 
-      {/* Back FAB — idle mode only */}
-      {!focusMode && (
-        <div className="absolute bottom-6 left-5 z-20">
+      {/* Back FAB */}
+      <div className={`absolute bottom-6 left-5 z-20 transition-opacity duration-500 ${fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <FABGroup side="left">
           <FAB onClick={() => navigateTo('edit')} variant="secondary" label="Back to Edit">
             <ArrowLeft size={20} />
           </FAB>
-        </div>
-      )}
+        </FABGroup>
+      </div>
 
         {/* Speed + Play/Pause FABs — both modes, auto-hide in focus */}
       <div
-          className={`absolute bottom-6 right-5 z-20 flex flex-col items-center gap-3 transition-opacity duration-500 ${
+          className={`absolute bottom-6 right-5 z-20 transition-opacity duration-500 ${
           fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
+        <FABGroup side="right" className="flex flex-col items-center gap-3">
           {videoId && (
               <FAB onClick={() => { setScrubValue(scrubPct); setShowScrubber(v => !v) }} variant="secondary" label="Video progress">
                   <span className="text-xs font-bold tabular-nums leading-none">{scrubPct}%</span>
@@ -524,6 +528,7 @@ export function PlayScreen() {
               {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
             </FAB>
           )}
+        </FABGroup>
       </div>
 
       {/* Loop countdown toast */}

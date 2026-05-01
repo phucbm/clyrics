@@ -2,6 +2,7 @@ import { useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { FAB } from '../shell/FAB'
+import { FABGroup } from '../shell/FABGroup'
 import { AddSongSheet } from '../sheets/AddSongSheet'
 import { Plus, ArrowRight } from '@phosphor-icons/react'
 import type { Song } from '../../types'
@@ -72,11 +73,11 @@ export function HomeScreen() {
       </div>
 
       {/* FABs: right zone — [+] primary */}
-      <div className="absolute bottom-6 right-5 z-20">
+      <FABGroup side="right" className="absolute bottom-6 right-5 z-20">
         <FAB onClick={openAddSong} label="Add song">
           <Plus size={22} />
         </FAB>
-      </div>
+      </FABGroup>
     </div>
   )
 }
