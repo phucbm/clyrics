@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useUIStore } from './store/useUIStore'
-import { BottomSheetProvider } from './components/shell/BottomSheet'
-import { HomeScreen } from './components/screens/HomeScreen'
-import { EditScreen } from './components/screens/EditScreen'
-import { PlayScreen } from './components/screens/PlayScreen'
+import {useState} from 'react'
+import {AnimatePresence, motion} from 'framer-motion'
+import {useUIStore} from './store/useUIStore'
+import {BottomSheetProvider} from './components/shell/BottomSheet'
+import {HomeScreen} from './components/screens/HomeScreen'
+import {EditScreen} from './components/screens/EditScreen'
+import {PlayScreen} from './components/screens/PlayScreen'
 
 const SCREENS = {
   home: HomeScreen,
@@ -81,34 +81,40 @@ export default function App() {
 
       {/* Desktop-only controls — sits in sidebar space, switches side with alignment */}
       <div
-        className={`hidden md:flex fixed bottom-3 items-center gap-3 select-none ${
-          align === 'right' ? 'left-4' : 'right-4'
+          className={`hidden md:flex flex-col fixed top-3 gap-3 select-none ${
+          align === 'left' ? 'right-4' : 'left-4'
         }`}
       >
-        <div className="flex items-center gap-0.5 bg-[#E4E2DE] rounded-lg p-0.5">
-          {ALIGN_OPTIONS.map(({ value, label }) => (
-            <button
-              key={value}
-              onClick={() => setAlign(value)}
-              title={`Align ${value}`}
-              className={`w-7 h-7 rounded-md text-sm transition-colors flex items-center justify-center ${
-                align === value
-                  ? 'bg-white text-[#0F0F0F] shadow-sm'
-                  : 'text-[#999] hover:text-[#555]'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <a
-          href="https://phucbm.com"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-[#AAA] hover:text-[#888] transition-colors"
-        >
-          made with ♥ by phucbm
-        </a>
+          <div>
+              <img src="/icon.png" alt="" className="w-8 h-8 rounded-lg" />
+          </div>
+          <div>
+              <div className="inline-flex w-auto items-center gap-0.5 bg-[#E4E2DE] rounded-lg p-0.5">
+                  {ALIGN_OPTIONS.map(({value, label}) => (
+                      <button
+                          key={value}
+                          onClick={() => setAlign(value)}
+                          title={`Align ${value}`}
+                          className={`w-7 h-7 rounded-md text-sm transition-colors flex items-center justify-center ${
+                              align === value
+                                  ? 'bg-white text-[#0F0F0F] shadow-sm'
+                                  : 'text-[#999] hover:text-[#555]'
+                          }`}
+                      >
+                          {label}
+                      </button>
+                  ))}
+              </div>
+          </div>
+          <a
+              href="https://phucbm.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs text-[#AAA] hover:text-[#888] transition-colors"
+          >
+              made with ♥ by phucbm
+          </a>
+
       </div>
     </div>
   )
