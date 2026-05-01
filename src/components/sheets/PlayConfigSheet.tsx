@@ -3,19 +3,12 @@ import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { ToggleRow } from '../ui/Toggle'
 import { Play } from '@phosphor-icons/react'
-import type { ScrollSpeed } from '../../types'
-
-const SPEEDS: { value: ScrollSpeed; label: string }[] = [
-  { value: 'off', label: 'Off' },
-  { value: 'slow', label: 'Slow' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'fast', label: 'Fast' },
-]
 
 export function PlayConfigSheet() {
   const { playConfig, setPlayConfig, navigateTo, setAutoplay } = useUIStore()
   const { close } = useBottomSheet()
   const song = useActiveSong()
+  const hasSecondLang = !!song?.secondLanguage
 
   function handlePlay() {
     setAutoplay(true)
@@ -23,7 +16,7 @@ export function PlayConfigSheet() {
     navigateTo('play')
   }
 
-  const hasSecondLang = !!song?.secondLanguage
+  const speed = playConfig.scrollSpeed
 
   return (
     <div className="px-5 pb-8 space-y-1">
@@ -39,29 +32,32 @@ export function PlayConfigSheet() {
       />
       {hasSecondLang && (
         <ToggleRow
-          label={`2nd language (${song!.secondLanguage!.toUpperCase()})`}
+          label={`2nd language (${song!.secondLanguage})`}
           checked={playConfig.secondLang}
           onChange={(v) => setPlayConfig({ secondLang: v })}
         />
       )}
 
-      {/* Scroll speed */}
-      <div className="pt-2 pb-1">
-        <p className="text-sm font-medium text-[#0F0F0F] mb-2">Auto scroll</p>
-        <div className="flex gap-2">
-          {SPEEDS.map(({ value, label }) => (
-            <button
-              key={value}
-              onClick={() => setPlayConfig({ scrollSpeed: value })}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
-                playConfig.scrollSpeed === value
-                  ? 'bg-[#0F0F0F] text-white border-[#0F0F0F]'
-                  : 'bg-white text-[#888] border-[#E0E0DC] hover:text-[#0F0F0F]'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      {/* Scroll speed slider */}
+      <div className="pt-3 pb-1">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm font-medium text-[#0F0F0F]">Auto scroll</p>
+          <span className="text-xs text-[#888] tabular-nums w-12 text-right">
+            {speed === 0 ? 'Off' : speed <= 3 ? 'Slow' : speed <= 7 ? 'Normal' : 'Fast'}
+          </span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={10}
+          step={1}
+          value={speed}
+          onChange={(e) => setPlayConfig({ scrollSpeed: Number(e.target.value) })}
+          className="w-full accent-[#0F0F0F]"
+        />
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] text-[#CCC]">Off</span>
+          <span className="text-[10px] text-[#CCC]">Fast</span>
         </div>
       </div>
 

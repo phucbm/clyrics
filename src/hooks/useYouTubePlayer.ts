@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 declare global {
   interface Window {
@@ -7,30 +7,43 @@ declare global {
   }
 }
 
+function loadYTApi(onReady: () => void) {
+  if (window.YT?.Player) {
+    onReady()
+    return
+  }
+  const prev = window.onYouTubeIframeAPIReady
+  window.onYouTubeIframeAPIReady = () => {
+    prev?.()
+    onReady()
+  }
+  if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+    const script = document.createElement('script')
+    script.src = 'https://www.youtube.com/iframe_api'
+    document.head.appendChild(script)
+  }
+}
+
 export function useYouTubePlayer(videoId: string | null) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  // Callback ref — tracks when the container div mounts/unmounts
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
+  const containerRef = useCallback((el: HTMLDivElement | null) => setContainerEl(el), [])
+
   const playerRef = useRef<any>(null)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    if (!videoId) return
+    if (!videoId || !containerEl) return
     let destroyed = false
 
     function initPlayer() {
-      if (destroyed || !containerRef.current) return
-      playerRef.current = new window.YT.Player(containerRef.current, {
+      if (destroyed || !containerEl) return
+      playerRef.current = new window.YT.Player(containerEl, {
         videoId,
         playerVars: { rel: 0, modestbranding: 1 },
         events: {
-          onReady: (e: any) => {
-            if (!destroyed) {
-              setDuration(e.target.getDuration())
-              setIsReady(true)
-            }
-          },
+          onReady: () => { if (!destroyed) setIsReady(true) },
           onStateChange: (e: any) => {
             if (!destroyed) setIsPlaying(e.data === window.YT.PlayerState.PLAYING)
           },
@@ -38,46 +51,20 @@ export function useYouTubePlayer(videoId: string | null) {
       })
     }
 
-    if (window.YT?.Player) {
-      initPlayer()
-    } else {
-      const prev = window.onYouTubeIframeAPIReady
-      window.onYouTubeIframeAPIReady = () => {
-        prev?.()
-        initPlayer()
-      }
-      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        const script = document.createElement('script')
-        script.src = 'https://www.youtube.com/iframe_api'
-        document.head.appendChild(script)
-      }
-    }
+    loadYTApi(initPlayer)
 
     return () => {
       destroyed = true
       setIsReady(false)
+      setIsPlaying(false)
       playerRef.current?.destroy()
       playerRef.current = null
     }
-  }, [videoId])
-
-  useEffect(() => {
-    if (!isPlaying) return
-    const interval = setInterval(() => {
-      const t = playerRef.current?.getCurrentTime?.()
-      if (t != null) setCurrentTime(t)
-      const d = playerRef.current?.getDuration?.()
-      if (d != null && d !== duration) setDuration(d)
-    }, 500)
-    return () => clearInterval(interval)
-  }, [isPlaying, duration])
+  }, [videoId, containerEl])
 
   function play() { playerRef.current?.playVideo() }
   function pause() { playerRef.current?.pauseVideo() }
-  function togglePlay() {
-    if (isPlaying) pause()
-    else play()
-  }
+  function togglePlay() { isPlaying ? pause() : play() }
 
-  return { containerRef, currentTime, duration, isPlaying, isReady, play, pause, togglePlay }
+  return { containerRef, isPlaying, isReady, play, pause, togglePlay }
 }

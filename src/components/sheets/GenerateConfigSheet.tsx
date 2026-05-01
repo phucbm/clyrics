@@ -5,9 +5,18 @@ import { useBottomSheet } from '../shell/BottomSheet'
 import { ToggleRow } from '../ui/Toggle'
 import { generateLyrics, getGroqKey } from '../../lib/groq'
 import { Lightning, Warning, Key } from '@phosphor-icons/react'
-import type { Lang } from '../../types'
 
-const LANG_LABELS: Record<Lang, string> = { vi: 'Vietnamese', en: 'English', jp: 'Japanese' }
+const LANGUAGES = [
+  'Vietnamese', 'English', 'Japanese', 'Korean',
+  'Chinese (Simplified)', 'Chinese (Traditional)',
+  'French', 'German', 'Spanish', 'Portuguese', 'Italian',
+  'Russian', 'Ukrainian', 'Polish', 'Czech', 'Romanian', 'Hungarian',
+  'Arabic', 'Hebrew', 'Persian', 'Turkish',
+  'Hindi', 'Bengali', 'Urdu',
+  'Thai', 'Indonesian', 'Malay',
+  'Dutch', 'Swedish', 'Norwegian', 'Danish', 'Finnish', 'Greek',
+  'Swahili', 'Catalan',
+]
 
 export function GenerateConfigSheet() {
   const song = useActiveSong()
@@ -20,7 +29,6 @@ export function GenerateConfigSheet() {
   const hasKey = !!getGroqKey()
   const hasPinyin = song?.lines.some((l) => l.pinyin) ?? false
   const lineCount = song?.lines.length ?? 0
-  // Rough token estimates: ~8 chars/line input, ~30 tokens/line output
   const inputTok = Math.round(lineCount * 10 + 60)
   const outputTok = Math.round(lineCount * 30)
 
@@ -64,38 +72,33 @@ export function GenerateConfigSheet() {
 
   return (
     <div className="px-5 pb-8 space-y-4">
-      {/* Translate language */}
       <div>
         <label className="text-xs font-medium text-[#888]">Translate to</label>
         <select
           value={generateConfig.translateLang}
-          onChange={(e) => setGenerateConfig({ translateLang: e.target.value as Lang })}
+          onChange={(e) => setGenerateConfig({ translateLang: e.target.value })}
           className={selectCls}
         >
-          {(Object.entries(LANG_LABELS) as [Lang, string][]).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {LANGUAGES.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
           ))}
         </select>
       </div>
 
-      {/* 2nd language */}
       <div>
-        <label className="text-xs font-medium text-[#888]">Bilingual 2nd language</label>
+        <label className="text-xs font-medium text-[#888]">Bilingual 2nd language (optional)</label>
         <select
           value={generateConfig.secondLang ?? ''}
-          onChange={(e) =>
-            setGenerateConfig({ secondLang: (e.target.value as Lang) || undefined })
-          }
+          onChange={(e) => setGenerateConfig({ secondLang: e.target.value || undefined })}
           className={selectCls}
         >
           <option value="">None</option>
-          {(Object.entries(LANG_LABELS) as [Lang, string][]).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {LANGUAGES.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
           ))}
         </select>
       </div>
 
-      {/* Override pinyin */}
       <ToggleRow
         label="Override pinyin"
         sublabel={hasPinyin ? 'Pinyin detected in lyrics' : undefined}
@@ -103,14 +106,12 @@ export function GenerateConfigSheet() {
         onChange={(v) => setGenerateConfig({ overridePinyin: v })}
       />
 
-      {/* Token estimate */}
       <div className="border-t border-[#E0E0DC] pt-3">
         <p className="text-xs text-[#999]">
           Est. input ~{inputTok} tok / Est. output ~{outputTok} tok
         </p>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
           <Warning size={12} className="shrink-0" />
@@ -118,7 +119,6 @@ export function GenerateConfigSheet() {
         </div>
       )}
 
-      {/* Generate button */}
       <button
         onClick={handleGenerate}
         disabled={generating || !song}

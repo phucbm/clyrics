@@ -1,4 +1,4 @@
-import type { Lang, LyricLine } from '../types'
+import type { LyricLine } from '../types'
 import SYSTEM_PROMPT_RAW from '../prompts/generate.md?raw'
 
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
@@ -25,16 +25,12 @@ function recoverPartialJson(raw: string): string {
   return raw.slice(0, lastClose + 1) + ']'
 }
 
-const LANG_LABELS: Record<Lang, string> = { vi: 'Vietnamese', en: 'English', jp: 'Japanese' }
-
 export async function generateLyrics(
   chinese: string,
-  language: Lang
+  language: string
 ): Promise<LyricLine[]> {
   const key = getGroqKey()
   if (!key) throw new Error('NO_KEY')
-
-  const langLabel = LANG_LABELS[language]
 
   const res = await fetch(GROQ_API, {
     method: 'POST',
@@ -45,14 +41,8 @@ export async function generateLyrics(
     body: JSON.stringify({
       model: MODEL,
       messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT_RAW,
-        },
-        {
-          role: 'user',
-          content: `Translate to ${langLabel}.\n\nLyrics:\n${chinese}`,
-        },
+        { role: 'system', content: SYSTEM_PROMPT_RAW },
+        { role: 'user', content: `Translate to ${language}.\n\nLyrics:\n${chinese}` },
       ],
       temperature: 0.1,
       max_tokens: 6000,

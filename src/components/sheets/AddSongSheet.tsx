@@ -3,8 +3,7 @@ import { nanoid } from 'nanoid'
 import { useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
-import { generateLyrics, getGroqKey } from '../../lib/groq'
-import { Sparkle, Warning } from '@phosphor-icons/react'
+import { Warning } from '@phosphor-icons/react'
 import type { Song } from '../../types'
 
 export function AddSongSheet() {
@@ -16,60 +15,30 @@ export function AddSongSheet() {
   const [artist, setArtist] = useState('')
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [rawLyrics, setRawLyrics] = useState('')
-  const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const hasKey = !!getGroqKey()
-
-  function buildSong(lines: { id: string; chinese: string; pinyin: string; translation: string }[]): Song {
-    return {
-      id: nanoid(),
-      title: title.trim() || 'Untitled',
-      artist: artist.trim() || '',
-      youtubeUrl: youtubeUrl.trim() || undefined,
-      language: 'vi',
-      lines,
-      createdAt: Date.now(),
-      source: 'local',
-    }
-  }
-
-  function parseDraftLines() {
-    return rawLyrics
+  function handleSave() {
+    if (!rawLyrics.trim()) { setError('Add some lyrics first.'); return }
+    const lines = rawLyrics
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
       .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translation: '' }))
-  }
 
-  function handleSave() {
-    const song = buildSong(parseDraftLines())
+    const song: Song = {
+      id: nanoid(),
+      title: title.trim() || 'Untitled',
+      artist: artist.trim() || '',
+      youtubeUrl: youtubeUrl.trim() || undefined,
+      language: 'Vietnamese',
+      lines,
+      createdAt: Date.now(),
+      source: 'local',
+    }
     addSong(song)
     setActiveSong(song.id)
     close()
     navigateTo('edit')
-  }
-
-  async function handleGenerate() {
-    if (!rawLyrics.trim() || !hasKey) return
-    setGenerating(true)
-    setError(null)
-    try {
-      const lines = await generateLyrics(rawLyrics.trim(), 'vi')
-      const song = buildSong(lines)
-      addSong(song)
-      setActiveSong(song.id)
-      close()
-      navigateTo('edit')
-    } catch (e) {
-      setError(
-        e instanceof Error && e.message === 'NO_KEY'
-          ? 'No Groq API key. Add it in Settings.'
-          : e instanceof Error ? e.message : 'Generation failed'
-      )
-    } finally {
-      setGenerating(false)
-    }
   }
 
   const inputCls =
@@ -110,25 +79,12 @@ export function AddSongSheet() {
         </div>
       )}
 
-      <div className="flex gap-3 pt-1">
-        <button
-          onClick={handleSave}
-          disabled={!rawLyrics.trim()}
-          className="flex-1 py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-30 hover:bg-[#2a2a2a] transition-colors"
-        >
-          Save
-        </button>
-        {hasKey && (
-          <button
-            onClick={handleGenerate}
-            disabled={generating || !rawLyrics.trim()}
-            className="flex-1 py-3.5 border border-[#E0E0DC] rounded-xl text-sm font-semibold text-[#0F0F0F] disabled:opacity-40 hover:bg-[#F0F0EC] transition-colors flex items-center justify-center gap-2"
-          >
-            <Sparkle size={14} weight="fill" />
-            {generating ? 'Generating…' : 'Generate'}
-          </button>
-        )}
-      </div>
+      <button
+        onClick={handleSave}
+        className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+      >
+        Save
+      </button>
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useActiveSong } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
@@ -5,27 +6,26 @@ import { FAB } from '../shell/FAB'
 import { useYouTubePlayer } from '../../hooks/useYouTubePlayer'
 import { extractVideoId } from '../../hooks/useYouTube'
 import { ArrowLeft, Pause, Play } from '@phosphor-icons/react'
-import type { ScrollSpeed } from '../../types'
 
-const SCROLL_PX_PER_SEC: Record<ScrollSpeed, number> = {
-  off: 0,
-  slow: 18,
-  normal: 45,
-  fast: 110,
-}
+// px/sec = speed² * 0.3  →  0→0, 5→7.5, 10→30
+function toPxPerSec(v: number) { return v * v * 0.3 }
 
 function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
+  const [m, setM] = useState(() => window.matchMedia(query).matches)
   useEffect(() => {
     const mq = window.matchMedia(query)
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
+    const h = (e: MediaQueryListEvent) => setM(e.matches)
+    mq.addEventListener('change', h)
+    return () => mq.removeEventListener('change', h)
   }, [query])
-  return matches
+  return m
 }
 
-function DraggablePiP({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+interface PiPProps {
+  containerRef: (el: HTMLDivElement | null) => void
+}
+
+function DraggablePiP({ containerRef }: PiPProps) {
   const [pos, setPos] = useState(() => ({
     x: Math.max(0, window.innerWidth - 340),
     y: 80,
@@ -39,7 +39,6 @@ function DraggablePiP({ containerRef }: { containerRef: React.RefObject<HTMLDivE
     e.currentTarget.setPointerCapture(e.pointerId)
     e.preventDefault()
   }
-
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (!dragging.current) return
     setPos({
@@ -47,12 +46,11 @@ function DraggablePiP({ containerRef }: { containerRef: React.RefObject<HTMLDivE
       y: Math.max(0, Math.min(window.innerHeight - 180, e.clientY - offset.current.y)),
     })
   }
-
   function onPointerUp() { dragging.current = false }
 
   return (
     <div
-      className="fixed z-50 rounded-xl overflow-hidden shadow-2xl border border-white/10 cursor-grab active:cursor-grabbing select-none"
+      className="fixed z-[9999] rounded-2xl overflow-hidden shadow-2xl border border-black/20 cursor-grab active:cursor-grabbing select-none"
       style={{ left: pos.x, top: pos.y, width: 320, height: 180 }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -66,7 +64,7 @@ function DraggablePiP({ containerRef }: { containerRef: React.RefObject<HTMLDivE
 
 export function PlayScreen() {
   const song = useActiveSong()
-  const { playConfig, navigateTo, autoplay, setAutoplay } = useUIStore()
+  const { playConfig, screen, navigateTo, autoplay, setAutoplay } = useUIStore()
   const [focusMode, setFocusMode] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
@@ -74,7 +72,7 @@ export function PlayScreen() {
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
   const { containerRef, isPlaying, isReady, play, togglePlay } = useYouTubePlayer(videoId)
 
-  // Autoplay signal from PlayConfigSheet
+  // Trigger autoplay once player is ready
   useEffect(() => {
     if (autoplay && isReady) {
       play()
@@ -82,18 +80,21 @@ export function PlayScreen() {
     }
   }, [autoplay, isReady, play, setAutoplay])
 
-  // Focus mode follows playing state
+  // Focus mode: enter when playing, exit when paused
   useEffect(() => {
     if (isPlaying) setFocusMode(true)
+    else setFocusMode(false)
   }, [isPlaying])
 
-  // Steady auto-scroll with manual scroll pause/resume
+  // --- Smooth steady auto-scroll ---
   const rafRef = useRef<number | undefined>(undefined)
   const lastTickRef = useRef<number | undefined>(undefined)
+  const scrollPosRef = useRef(0)
   const isManualScrolling = useRef(false)
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const handleManualScroll = useCallback(() => {
+    if (bodyRef.current) scrollPosRef.current = bodyRef.current.scrollTop
     isManualScrolling.current = true
     clearTimeout(resumeTimerRef.current)
     resumeTimerRef.current = setTimeout(() => {
@@ -103,21 +104,19 @@ export function PlayScreen() {
   }, [])
 
   useEffect(() => {
-    const speed = SCROLL_PX_PER_SEC[playConfig.scrollSpeed]
+    const speed = toPxPerSec(playConfig.scrollSpeed)
 
-    if (speed === 0) {
-      if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
-      return
-    }
+    if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
+
+    if (speed === 0) return
 
     function tick(ts: number) {
-      if (!isManualScrolling.current && bodyRef.current) {
-        const dt = lastTickRef.current !== undefined ? (ts - lastTickRef.current) / 1000 : 0
+      if (lastTickRef.current !== undefined && !isManualScrolling.current && bodyRef.current) {
+        const dt = (ts - lastTickRef.current) / 1000
         const el = bodyRef.current
         const maxScroll = el.scrollHeight - el.clientHeight
-        if (el.scrollTop < maxScroll) {
-          el.scrollTop += speed * dt
-        }
+        scrollPosRef.current = Math.min(scrollPosRef.current + speed * dt, maxScroll)
+        el.scrollTop = scrollPosRef.current
       }
       lastTickRef.current = ts
       rafRef.current = requestAnimationFrame(tick)
@@ -133,46 +132,45 @@ export function PlayScreen() {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-3">
         <p className="text-sm text-[#888]">No song selected.</p>
-        <button
-          onClick={() => navigateTo('edit')}
-          className="text-sm font-medium text-[#0F0F0F] underline underline-offset-2"
-        >
+        <button onClick={() => navigateTo('edit')} className="text-sm font-medium text-[#0F0F0F] underline underline-offset-2">
           Back to Edit
         </button>
       </div>
     )
   }
 
+  const showArtist = song.artist && song.artist !== 'Unknown' && song.artist !== ''
+
   return (
     <div className="h-full flex flex-col relative">
-      {/* Header — hidden in focus mode */}
-      {!focusMode && (
-        <header className="shrink-0 px-5 pt-4 pb-3 border-b border-[#E0E0DC] bg-[#F8F7F5]">
-          <h2 className="text-base font-semibold text-[#0F0F0F] truncate">{song.title}</h2>
-          {song.artist && song.artist !== 'Unknown' && (
-            <p className="text-xs text-[#888] mt-0.5">{song.artist}</p>
-          )}
-        </header>
-      )}
-
       {/* Body */}
       <div ref={bodyRef} onScroll={handleManualScroll} className="flex-1 overflow-y-auto">
-        {/* YouTube inline — mobile only, sticky below header */}
+
+        {/* YouTube inline — mobile only, sticky at top */}
         {videoId && !isDesktop && (
           <div className="sticky top-0 z-10 w-full bg-black" style={{ aspectRatio: '16/9' }}>
             <div ref={containerRef} className="w-full h-full" />
           </div>
         )}
 
+        {/* Spacer: push title to approx mid-screen */}
+        <div style={{ height: videoId && !isDesktop ? '20vh' : '42vh' }} />
+
+        {/* Title + Artist */}
+        <div className="px-6">
+          <h2 className="text-3xl font-bold tracking-tight text-[#0F0F0F] leading-tight">{song.title}</h2>
+          {showArtist && <p className="text-sm text-[#888] mt-1.5">{song.artist}</p>}
+        </div>
+
+        {/* Gap before lyrics */}
+        <div className="h-12" />
+
         {/* Lyrics */}
-        <div className="px-5 pt-6 pb-32 space-y-8">
+        <div className="px-6 pb-40 space-y-8">
           {song.lines.map((line) => (
             <div key={line.id}>
               {playConfig.pinyin && line.pinyin && (
-                <p
-                  className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide"
-                  style={{ fontFamily: "ui-monospace, 'SF Mono', monospace" }}
-                >
+                <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">
                   {line.pinyin}
                 </p>
               )}
@@ -194,8 +192,11 @@ export function PlayScreen() {
         </div>
       </div>
 
-      {/* YouTube PiP — desktop only, draggable */}
-      {videoId && isDesktop && <DraggablePiP containerRef={containerRef} />}
+      {/* Desktop PiP — portaled to body so it escapes the slider's transform */}
+      {videoId && isDesktop && screen === 'play' && createPortal(
+        <DraggablePiP containerRef={containerRef} />,
+        document.body
+      )}
 
       {/* FABs — idle */}
       {!focusMode && (

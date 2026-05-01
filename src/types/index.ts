@@ -1,5 +1,4 @@
 export type Screen = 'home' | 'edit' | 'play'
-export type Lang = 'vi' | 'en' | 'jp'
 
 export interface LyricLine {
   id: string
@@ -15,25 +14,23 @@ export interface Song {
   artist: string
   youtubeUrl?: string
   youtubeDuration?: number
-  language: Lang
-  secondLanguage?: Lang
+  language: string
+  secondLanguage?: string
   lines: LyricLine[]
   createdAt: number
   source: 'local' | 'repo'
 }
 
-export type ScrollSpeed = 'off' | 'slow' | 'normal' | 'fast'
-
 export interface PlayConfig {
   pinyin: boolean
   translation: boolean
   secondLang: boolean
-  scrollSpeed: ScrollSpeed
+  scrollSpeed: number  // 0–10, 0 = stopped
 }
 
 export interface GenerateConfig {
-  translateLang: Lang
-  secondLang?: Lang
+  translateLang: string
+  secondLang?: string
   overridePinyin: boolean
 }
 
