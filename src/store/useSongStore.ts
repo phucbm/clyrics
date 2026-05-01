@@ -1,20 +1,16 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Song, GitHubSettings, AppTab } from '../types'
+import type { Song, GitHubSettings } from '../types'
 
 interface SongStore {
   songs: Song[]
   activeSongId: string | null
-  activeTab: AppTab
-  activeLineIndex: number
   githubSettings: GitHubSettings | null
 
   addSong: (song: Song) => void
   updateSong: (id: string, updates: Partial<Song>) => void
   deleteSong: (id: string) => void
   setActiveSong: (id: string | null) => void
-  setActiveTab: (tab: AppTab) => void
-  setActiveLineIndex: (index: number) => void
   setGithubSettings: (settings: GitHubSettings | null) => void
 }
 
@@ -23,8 +19,6 @@ export const useSongStore = create<SongStore>()(
     (set) => ({
       songs: [],
       activeSongId: null,
-      activeTab: 'input',
-      activeLineIndex: 0,
       githubSettings: null,
 
       addSong: (song) => set((s) => ({ songs: [song, ...s.songs] })),
@@ -38,8 +32,6 @@ export const useSongStore = create<SongStore>()(
           activeSongId: s.activeSongId === id ? null : s.activeSongId,
         })),
       setActiveSong: (id) => set({ activeSongId: id }),
-      setActiveTab: (tab) => set({ activeTab: tab }),
-      setActiveLineIndex: (index) => set({ activeLineIndex: index }),
       setGithubSettings: (settings) => set({ githubSettings: settings }),
     }),
     {
