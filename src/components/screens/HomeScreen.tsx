@@ -4,48 +4,23 @@ import { useBottomSheet } from '../shell/BottomSheet'
 import { FAB } from '../shell/FAB'
 import { FABGroup } from '../shell/FABGroup'
 import { AddSongSheet } from '../sheets/AddSongSheet'
-import { Plus, ArrowRight } from '@phosphor-icons/react'
-import type { Song } from '../../types'
-
-function SongCard({ song, onClick }: { song: Song; onClick: () => void }) {
-  const langs = [...new Set(song.lines.flatMap((l) => l.translations.map((t) => t.lang)))]
-
-  return (
-    <button
-      onClick={onClick}
-      className="w-full text-left px-4 py-3.5 bg-white border border-[#E0E0DC] rounded-xl hover:border-[#0F0F0F] transition-all flex items-center gap-3 group shadow-sm active:scale-[0.98]"
-    >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-[#0F0F0F] truncate">{song.title}</p>
-          <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F0EC] text-[#999] font-medium uppercase">
-            {song.source}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          <p className="text-xs text-[#888]">
-            {[song.artist, `${song.lines.length} lines`].filter((v) => v && v !== 'Unknown').join(' · ')}
-          </p>
-          {langs.map((lang) => (
-            <span key={lang} className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#E8F0FE] text-[#4A6FA5] font-medium uppercase">
-              {lang}
-            </span>
-          ))}
-        </div>
-      </div>
-      <ArrowRight size={14} className="text-[#CCC] group-hover:text-[#555] transition-colors shrink-0" />
-    </button>
-  )
-}
+import { SongCard } from '../cards/SongCard'
+import { Plus } from '@phosphor-icons/react'
 
 export function HomeScreen() {
   const { songs, setActiveSong } = useSongStore()
-  const { navigateTo } = useUIStore()
+  const { navigateTo, setAutoplay } = useUIStore()
   const { open } = useBottomSheet()
 
-  function handleSelect(id: string) {
+  function handleEdit(id: string) {
     setActiveSong(id)
     navigateTo('edit')
+  }
+
+  function handlePlay(id: string) {
+    setActiveSong(id)
+    setAutoplay(true)
+    navigateTo('play')
   }
 
   function openAddSong() {
@@ -56,7 +31,10 @@ export function HomeScreen() {
     <div className="h-full flex flex-col relative">
       {/* Header */}
       <header className="shrink-0 px-5 pt-6 pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0F0F0F]">C-Lyrics</h1>
+        <div className="flex items-center gap-2.5">
+            <img src="/icon.png" alt="" className="w-8 h-8 rounded-lg" />
+          <h1 className="text-2xl font-bold tracking-tight text-[#0F0F0F]">C-Lyrics</h1>
+        </div>
         <p className="text-xs text-[#999] mt-0.5">Chinese lyrics with pinyin &amp; translation</p>
       </header>
 
@@ -75,7 +53,7 @@ export function HomeScreen() {
         ) : (
           <div className="space-y-2">
             {songs.map((song) => (
-              <SongCard key={song.id} song={song} onClick={() => handleSelect(song.id)} />
+              <SongCard key={song.id} song={song} onEdit={() => handleEdit(song.id)} onPlay={() => handlePlay(song.id)} />
             ))}
           </div>
         )}

@@ -6,6 +6,7 @@ const SCREEN_ORDER: Screen[] = ['home', 'edit', 'play']
 
 interface UIStore {
   screen: Screen
+  prevScreen: Screen
   direction: 'forward' | 'back'
   playConfig: PlayConfig
   generateConfig: GenerateConfig
@@ -23,6 +24,7 @@ export const useUIStore = create<UIStore>()(
   persist(
     (set, get) => ({
       screen: 'home',
+      prevScreen: 'home',
       direction: 'forward',
       autoplay: false,
       primaryLang: 'Vietnamese',
@@ -42,7 +44,7 @@ export const useUIStore = create<UIStore>()(
       navigateTo: (screen) => {
         const cur = SCREEN_ORDER.indexOf(get().screen)
         const next = SCREEN_ORDER.indexOf(screen)
-        set({ screen, direction: next >= cur ? 'forward' : 'back' })
+        set({ prevScreen: get().screen, screen, direction: next >= cur ? 'forward' : 'back' })
       },
       setPlayConfig: (config) => set((s) => ({ playConfig: { ...s.playConfig, ...config } })),
       setGenerateConfig: (config) => set((s) => ({ generateConfig: { ...s.generateConfig, ...config } })),

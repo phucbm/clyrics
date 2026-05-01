@@ -133,7 +133,7 @@ function DraggablePiP({ containerRef, progressBarRef, onReveal }: PiPProps) {
 
 export function PlayScreen() {
   const song = useActiveSong()
-    const {playConfig, setPlayConfig, screen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
+    const {playConfig, setPlayConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
@@ -396,7 +396,7 @@ export function PlayScreen() {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-3">
         <p className="text-sm text-[#888]">No song selected.</p>
-        <button onClick={() => navigateTo('edit')} className="text-sm font-medium text-[#0F0F0F] underline underline-offset-2">
+        <button onClick={() => navigateTo(prevScreen === 'home' ? 'home' : 'edit')} className="text-sm font-medium text-[#0F0F0F] underline underline-offset-2">
           Back to Edit
         </button>
       </div>
@@ -413,6 +413,7 @@ export function PlayScreen() {
         {videoId && !isDesktop && (
             <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={revealControls}>
                 <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
+                <img src="/icon.png" alt="" className="absolute bottom-3 right-3 w-7 h-7 rounded-md opacity-60 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
                     <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
                 </div>
@@ -489,7 +490,7 @@ export function PlayScreen() {
       {/* Back FAB */}
       <div className={`absolute bottom-6 left-5 z-20 transition-opacity duration-500 ${fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <FABGroup side="left">
-          <FAB onClick={() => navigateTo('edit')} variant="secondary" label="Back to Edit">
+          <FAB onClick={() => navigateTo(prevScreen === 'home' ? 'home' : 'edit')} variant="secondary" label="Back to Edit">
             <ArrowLeft size={20} />
           </FAB>
         </FABGroup>

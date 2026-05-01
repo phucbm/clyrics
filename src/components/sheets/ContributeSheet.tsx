@@ -66,6 +66,10 @@ export function ContributeSheet({ song }: Props) {
 
   return (
     <div className="px-5 pb-8 space-y-4">
+      <p className="text-xs text-[#888] leading-relaxed">
+        Create a Pull Request to save your lyrics. Once reviewed and merged, you can find it in the Community section.
+      </p>
+
       {/* Mode badge */}
       {isEdit && (
         <div className="text-xs text-[#888] bg-[#F0F0EC] rounded-lg px-3 py-2">
