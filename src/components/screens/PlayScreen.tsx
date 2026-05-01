@@ -44,7 +44,7 @@ function useMediaQuery(query: string) {
 
 interface PiPProps {
   containerRef: (el: HTMLDivElement | null) => void
-  progressBarRef: RefObject<HTMLDivElement>
+  progressBarRef: RefObject<HTMLDivElement | null>
 }
 
 function DraggablePiP({ containerRef, progressBarRef }: PiPProps) {
