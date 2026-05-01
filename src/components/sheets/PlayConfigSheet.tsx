@@ -26,13 +26,13 @@ export function PlayConfigSheet() {
         onChange={(v) => setPlayConfig({ pinyin: v })}
       />
       <ToggleRow
-        label="Translation"
+        label={`Translation${song?.language ? ` · ${song.language}` : ''}`}
         checked={playConfig.translation}
         onChange={(v) => setPlayConfig({ translation: v })}
       />
       {hasSecondLang && (
         <ToggleRow
-          label={`2nd language (${song!.secondLanguage})`}
+          label={`2nd · ${song!.secondLanguage}`}
           checked={playConfig.secondLang}
           onChange={(v) => setPlayConfig({ secondLang: v })}
         />

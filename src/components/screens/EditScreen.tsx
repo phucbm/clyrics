@@ -7,8 +7,8 @@ import { FAB } from '../shell/FAB'
 import { GenerateConfigSheet } from '../sheets/GenerateConfigSheet'
 import { PlayConfigSheet } from '../sheets/PlayConfigSheet'
 import { EditSongSheet } from '../sheets/EditSongSheet'
-import { ArrowLeft, Lightning, Note, Play, Plus, Trash, Warning } from '@phosphor-icons/react'
-import type { LyricLine } from '../../types'
+import { ArrowLeft, Lightning, PencilSimple, Play, Plus, Trash, Warning } from '@phosphor-icons/react'
+import type { LyricLine, PlayConfig } from '../../types'
 
 interface LineViewProps {
   line: LyricLine
@@ -16,9 +16,10 @@ interface LineViewProps {
   onEdit: () => void
   onUpdate: (field: keyof LyricLine, value: string) => void
   onDelete: () => void
+  playConfig: PlayConfig
 }
 
-function LineView({ line, isEditing, onEdit, onUpdate, onDelete }: LineViewProps) {
+function LineView({ line, isEditing, onEdit, onUpdate, onDelete, playConfig }: LineViewProps) {
   if (isEditing) {
     return (
       <div className="py-4 border-b border-[#E8E8E4] space-y-2 last:border-b-0">
@@ -41,6 +42,14 @@ function LineView({ line, isEditing, onEdit, onUpdate, onDelete }: LineViewProps
           value={line.translation}
           onChange={(e) => onUpdate('translation', e.target.value)}
         />
+        {line.secondTranslation !== undefined && (
+          <input
+            className="w-full text-sm text-[#666] bg-[#F0F0EC] rounded-lg px-3 py-2 placeholder-[#BBB]"
+            placeholder="2nd translation"
+            value={line.secondTranslation}
+            onChange={(e) => onUpdate('secondTranslation', e.target.value)}
+          />
+        )}
         <div className="flex justify-end">
           <button
             onClick={onDelete}
@@ -59,14 +68,17 @@ function LineView({ line, isEditing, onEdit, onUpdate, onDelete }: LineViewProps
       onClick={onEdit}
       className="w-full text-left py-4 border-b border-[#E8E8E4] last:border-b-0 hover:bg-[#F0F0EC] -mx-1 px-1 rounded-lg transition-colors"
     >
-      {line.pinyin && (
+      {playConfig.pinyin && line.pinyin && (
         <p className="text-xs text-[#888] mb-0.5 font-mono tracking-wide">{line.pinyin}</p>
       )}
       <p className="text-xl font-medium text-[#0F0F0F] leading-snug tracking-tight">
         {line.chinese || <span className="text-[#CCC]">Chinese</span>}
       </p>
-      {line.translation && (
+      {playConfig.translation && line.translation && (
         <p className="text-sm italic text-[#666] mt-1">{line.translation}</p>
+      )}
+      {playConfig.secondLang && line.secondTranslation && (
+        <p className="text-sm text-[#777] mt-0.5">{line.secondTranslation}</p>
       )}
     </button>
   )
@@ -75,7 +87,7 @@ function LineView({ line, isEditing, onEdit, onUpdate, onDelete }: LineViewProps
 export function EditScreen() {
   const song = useActiveSong()
   const { updateSong, deleteSong, setActiveSong } = useSongStore()
-  const { navigateTo } = useUIStore()
+  const { navigateTo, playConfig } = useUIStore()
   const { open } = useBottomSheet()
   const [editingLineId, setEditingLineId] = useState<string | null>(null)
 
@@ -193,6 +205,7 @@ export function EditScreen() {
                 onEdit={() => setEditingLineId(line.id)}
                 onUpdate={(field, value) => updateLine(line.id, field, value)}
                 onDelete={() => deleteLine(line.id)}
+                playConfig={playConfig}
               />
             ))}
             <button
@@ -215,7 +228,7 @@ export function EditScreen() {
       <div className="absolute bottom-6 right-5 z-20 flex flex-col-reverse gap-3">
         {/* Primary (bottom): Edit */}
         <FAB onClick={() => open(<EditSongSheet song={song} />, 'Edit Song')} variant="secondary" label="Edit song">
-          <Note size={20} weight="fill" />
+          <PencilSimple size={20} weight="fill" />
         </FAB>
         {/* Generate */}
         <FAB onClick={() => open(<GenerateConfigSheet />, 'Generate')} variant="secondary" label="Generate lyrics">
