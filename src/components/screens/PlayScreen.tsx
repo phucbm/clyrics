@@ -420,7 +420,11 @@ export function PlayScreen() {
         )}
 
         {/* Scroll area — overflow:hidden, content moves via translateY */}
-        <div ref={bodyRef} className="flex-1 overflow-hidden">
+        <div ref={bodyRef} className="flex-1 overflow-hidden relative">
+            {/* Top fade */}
+            <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+            {/* Bottom fade */}
+            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
             <div ref={contentRef} style={{willChange: 'transform'}}>
 
                 <div style={{height: videoId && !isDesktop ? '20vh' : '42vh'}}/>
@@ -465,7 +469,7 @@ export function PlayScreen() {
       {/* Bottom touch/hover zone — focus mode only, reveals controls */}
       {focusMode && (
         <div
-          className="absolute bottom-0 inset-x-0 h-1/4 z-10"
+          className="absolute bottom-0 inset-x-0 h-[100px] z-10"
           onPointerDown={isDesktop ? undefined : revealControls}
           onMouseEnter={isDesktop ? revealControls : undefined}
         >

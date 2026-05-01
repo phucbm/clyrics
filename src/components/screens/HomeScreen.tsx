@@ -8,6 +8,8 @@ import { Plus, ArrowRight } from '@phosphor-icons/react'
 import type { Song } from '../../types'
 
 function SongCard({ song, onClick }: { song: Song; onClick: () => void }) {
+  const langs = [...new Set(song.lines.flatMap((l) => l.translations.map((t) => t.lang)))]
+
   return (
     <button
       onClick={onClick}
@@ -20,9 +22,16 @@ function SongCard({ song, onClick }: { song: Song; onClick: () => void }) {
             {song.source}
           </span>
         </div>
-        <p className="text-xs text-[#888] mt-0.5">
-          {[song.artist, `${song.lines.length} lines`].filter((v) => v && v !== 'Unknown').join(' · ')}
-        </p>
+        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          <p className="text-xs text-[#888]">
+            {[song.artist, `${song.lines.length} lines`].filter((v) => v && v !== 'Unknown').join(' · ')}
+          </p>
+          {langs.map((lang) => (
+            <span key={lang} className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#E8F0FE] text-[#4A6FA5] font-medium uppercase">
+              {lang}
+            </span>
+          ))}
+        </div>
       </div>
       <ArrowRight size={14} className="text-[#CCC] group-hover:text-[#555] transition-colors shrink-0" />
     </button>
