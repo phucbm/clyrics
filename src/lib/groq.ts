@@ -96,7 +96,6 @@ export async function generateLyrics(
 
     return {
       id: existing?.id ?? `${Date.now()}-${i}`,
-      order: i,
       chinese: l.chinese,
       pinyin: overridePinyin || !existing?.pinyin ? (l.pinyin ?? '') : existing.pinyin,
       translations: merged,

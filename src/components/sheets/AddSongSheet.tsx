@@ -30,7 +30,7 @@ export function AddSongSheet() {
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
-      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, order: i, chinese, pinyin: '', translations: [] }))
+      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translations: [] }))
 
     const song: Song = {
       id: nanoid(),

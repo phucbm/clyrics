@@ -33,17 +33,20 @@ export function EditSongSheet({ song }: Props) {
   }
 
   function parseDraftLines() {
+    const byText = new Map(song.lines.map((l) => [l.chinese, l]))
     return stripToChineseOnly(rawLyrics)
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
-      .map((chinese, i) => ({
-        id: song.lines[i]?.id ?? `${Date.now()}-${i}`,
-        order: i,
-        chinese,
-        pinyin: song.lines[i]?.pinyin ?? '',
-        translations: song.lines[i]?.translations ?? [],
-      }))
+      .map((chinese, i) => {
+        const existing = byText.get(chinese)
+        return {
+          id: existing?.id ?? `${Date.now()}-${i}`,
+          chinese,
+          pinyin: existing?.pinyin ?? '',
+          translations: existing?.translations ?? [],
+        }
+      })
   }
 
   function handleSave() {
@@ -80,7 +83,7 @@ export function EditSongSheet({ song }: Props) {
       source: 'local',
       createdAt: Date.now(),
       authors: [],
-      lines: song.lines.map((l, i) => ({ ...l, id: nanoid(), order: i })),
+      lines: song.lines.map((l) => ({ ...l, id: nanoid() })),
     }
     addSong(copy)
     close()

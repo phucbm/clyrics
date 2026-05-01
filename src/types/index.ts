@@ -7,7 +7,6 @@ export interface Translation {
 
 export interface LyricLine {
   id: string
-  order: number
   chinese: string
   pinyin: string
   translations: Translation[]

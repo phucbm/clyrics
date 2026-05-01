@@ -9,7 +9,7 @@ const container = {
 function itemVariant(side: 'left' | 'right') {
   return {
     hidden: { opacity: 0, x: side === 'right' ? 48 : -48 },
-    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 380, damping: 26 } },
+    show: { opacity: 1, x: 0, transition: { type: 'spring' as const, stiffness: 380, damping: 26 } },
   }
 }
 

@@ -1,19 +1,13 @@
 import { nanoid } from 'nanoid'
 import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+  ArrowLeft,
+  GitPullRequest,
+  Lightning,
+  PencilSimple,
+  Play,
+  Plus,
+  Warning,
+} from '@phosphor-icons/react'
 import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
@@ -24,19 +18,7 @@ import { PlayConfigSheet } from '../sheets/PlayConfigSheet'
 import { EditSongSheet } from '../sheets/EditSongSheet'
 import { ContributeSheet } from '../sheets/ContributeSheet'
 import { LineEditSheet } from '../sheets/LineEditSheet'
-import {
-  ArrowLeft,
-  DotsSixVertical,
-  GitPullRequest,
-  Lightning,
-  PencilSimple,
-  Play,
-  Plus,
-  Warning,
-} from '@phosphor-icons/react'
 import type { LyricLine, PlayConfig } from '../../types'
-
-
 
 interface LineViewProps {
   line: LyricLine
@@ -44,62 +26,32 @@ interface LineViewProps {
   playConfig: PlayConfig
   primaryLang: string
   secondaryLang: string | undefined
-  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>
 }
 
-function SortableLineView(props: Omit<LineViewProps, 'dragHandleProps'>) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: props.line.id,
-  })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-    position: 'relative' as const,
-    zIndex: isDragging ? 10 : undefined,
-  }
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      <LineView {...props} dragHandleProps={{ ...attributes, ...listeners }} />
-    </div>
-  )
-}
-
-function LineView({ line, onEdit, playConfig, primaryLang, secondaryLang, dragHandleProps }: LineViewProps) {
+function LineView({ line, onEdit, playConfig, primaryLang, secondaryLang }: LineViewProps) {
   const primaryText = line.translations.find((t) => t.lang === primaryLang)?.text ?? ''
   const secondaryText = secondaryLang
     ? (line.translations.find((t) => t.lang === secondaryLang)?.text ?? '')
     : ''
 
   return (
-    <div className="flex items-start gap-1">
-      <button
-        className="mt-4 p-1 text-[#CCC] hover:text-[#888] cursor-grab active:cursor-grabbing touch-none shrink-0"
-        aria-label="Drag to reorder"
-        {...dragHandleProps}
-      >
-        <DotsSixVertical size={14} />
-      </button>
-      <button
-        onClick={onEdit}
-        className="flex-1 text-left py-4 border-b border-[#E8E8E4] last:border-b-0 hover:bg-[#F0F0EC] px-1 rounded-lg transition-colors"
-      >
-        {playConfig.pinyin && line.pinyin && (
-          <p className="text-xs text-[#888] mb-0.5 font-mono tracking-wide">{line.pinyin}</p>
-        )}
-        <p className="text-xl font-medium text-[#0F0F0F] leading-snug tracking-tight">
-          {line.chinese || <span className="text-[#CCC]">Chinese</span>}
-        </p>
-        {playConfig.translation && primaryText && (
-          <p className="text-sm italic text-[#666] mt-1">{primaryText}</p>
-        )}
-        {playConfig.secondLang && secondaryText && (
-          <p className="text-sm text-[#777] mt-0.5">{secondaryText}</p>
-        )}
-      </button>
-    </div>
+    <button
+      onClick={onEdit}
+      className="w-full text-left py-4 border-b border-[#E8E8E4] last:border-b-0 hover:bg-[#F0F0EC] px-1 rounded-lg transition-colors"
+    >
+      {playConfig.pinyin && line.pinyin && (
+        <p className="text-xs text-[#888] mb-0.5 font-mono tracking-wide">{line.pinyin}</p>
+      )}
+      <p className="text-xl font-medium text-[#0F0F0F] leading-snug tracking-tight">
+        {line.chinese || <span className="text-[#CCC]">Chinese</span>}
+      </p>
+      {playConfig.translation && primaryText && (
+        <p className="text-sm italic text-[#666] mt-1">{primaryText}</p>
+      )}
+      {playConfig.secondLang && secondaryText && (
+        <p className="text-sm text-[#777] mt-0.5">{secondaryText}</p>
+      )}
+    </button>
   )
 }
 
@@ -108,8 +60,6 @@ export function EditScreen() {
   const { updateSong, setActiveSong } = useSongStore()
   const { navigateTo, playConfig, primaryLang, secondaryLang } = useUIStore()
   const { open } = useBottomSheet()
-
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   function goBack() {
     setActiveSong(null)
@@ -125,22 +75,18 @@ export function EditScreen() {
 
   function deleteLine(lineId: string) {
     if (!song) return
-    const filtered = song.lines
-      .filter((l) => l.id !== lineId)
-      .map((l, i) => ({ ...l, order: i }))
-    updateSong(song.id, { lines: filtered })
+    updateSong(song.id, { lines: song.lines.filter((l) => l.id !== lineId) })
   }
 
   function duplicateLine(copy: LyricLine) {
     if (!song) return
     const idx = song.lines.findIndex((l) => l.id === copy.id)
-    // copy.id is already a new nanoid from the sheet
     const insertAfter = idx >= 0 ? idx : song.lines.length - 1
     const newLines = [
       ...song.lines.slice(0, insertAfter + 1),
       copy,
       ...song.lines.slice(insertAfter + 1),
-    ].map((l, i) => ({ ...l, order: i }))
+    ]
     updateSong(song.id, { lines: newLines })
   }
 
@@ -162,22 +108,12 @@ export function EditScreen() {
     if (!song) return
     const newLine: LyricLine = {
       id: nanoid(),
-      order: song.lines.length,
       chinese: '',
       pinyin: '',
       translations: [],
     }
     updateSong(song.id, { lines: [...song.lines, newLine] })
     openLineSheet(newLine)
-  }
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over || active.id === over.id || !song) return
-    const oldIndex = song.lines.findIndex((l) => l.id === active.id)
-    const newIndex = song.lines.findIndex((l) => l.id === over.id)
-    const reordered = arrayMove(song.lines, oldIndex, newIndex).map((l, i) => ({ ...l, order: i }))
-    updateSong(song.id, { lines: reordered })
   }
 
   if (!song) {
@@ -208,10 +144,7 @@ export function EditScreen() {
         </div>
       </header>
 
-      <div
-        className="flex-1 overflow-y-auto px-5 pb-32"
-        onClick={() => {}}
-      >
+      <div className="flex-1 overflow-y-auto px-5 pb-32">
         {song.lines.length > 0
           && !song.lines.some((l) => l.translations.length > 0) && (
           <div className="flex items-center gap-3 mt-3 mb-1 px-4 py-3 bg-[#F0F0EC] border border-[#E0E0DC] rounded-xl">
@@ -240,20 +173,16 @@ export function EditScreen() {
           </div>
         ) : (
           <div>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={song.lines.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-                {song.lines.map((line) => (
-                  <SortableLineView
-                    key={line.id}
-                    line={line}
-                    onEdit={() => openLineSheet(line)}
-                    playConfig={playConfig}
-                    primaryLang={primaryLang}
-                    secondaryLang={secondaryLang}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
+            {song.lines.map((line) => (
+              <LineView
+                key={line.id}
+                line={line}
+                onEdit={() => openLineSheet(line)}
+                playConfig={playConfig}
+                primaryLang={primaryLang}
+                secondaryLang={secondaryLang}
+              />
+            ))}
 
             <button
               onClick={addLine}

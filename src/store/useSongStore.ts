@@ -29,7 +29,6 @@ function migrateLine(line: Record<string, unknown>, index: number): LyricLine {
 
   return {
     id: (line.id as string) ?? `migrated-${index}`,
-    order: typeof line.order === 'number' ? line.order : index,
     chinese: (line.chinese as string) ?? '',
     pinyin: (line.pinyin as string) ?? '',
     translations,
