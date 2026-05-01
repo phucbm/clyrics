@@ -24,7 +24,7 @@ function loadYTApi(onReady: () => void) {
   }
 }
 
-export function useYouTubePlayer(videoId: string | null, loop = false) {
+export function useYouTubePlayer(videoId: string | null, loop = false, onEnded?: () => void) {
   // Callback ref — tracks when the container div mounts/unmounts
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
   const containerRef = useCallback((el: HTMLDivElement | null) => setContainerEl(el), [])
@@ -32,6 +32,11 @@ export function useYouTubePlayer(videoId: string | null, loop = false) {
   const playerRef = useRef<any>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const loopRef = useRef(loop)
+  const onEndedRef = useRef(onEnded)
+
+  useEffect(() => { loopRef.current = loop }, [loop])
+  useEffect(() => { onEndedRef.current = onEnded }, [onEnded])
 
   useEffect(() => {
     if (!videoId || !containerEl) return
@@ -45,7 +50,16 @@ export function useYouTubePlayer(videoId: string | null, loop = false) {
         events: {
           onReady: () => { if (!destroyed) setIsReady(true) },
           onStateChange: (e: any) => {
-            if (!destroyed) setIsPlaying(e.data === window.YT.PlayerState.PLAYING)
+            if (destroyed) return
+            const state = e.data
+            setIsPlaying(state === window.YT.PlayerState.PLAYING)
+            if (state === window.YT.PlayerState.ENDED) {
+              onEndedRef.current?.()
+              if (loopRef.current) {
+                playerRef.current?.seekTo(0, true)
+                playerRef.current?.playVideo()
+              }
+            }
           },
         },
       })
@@ -61,10 +75,6 @@ export function useYouTubePlayer(videoId: string | null, loop = false) {
       playerRef.current = null
     }
   }, [videoId, containerEl])
-
-  useEffect(() => {
-    if (isReady) playerRef.current?.setLoop(loop)
-  }, [loop, isReady])
 
   function play() { playerRef.current?.playVideo() }
   function pause() { playerRef.current?.pauseVideo() }

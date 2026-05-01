@@ -142,7 +142,18 @@ export function PlayScreen() {
   const hintShownRef = useRef(localStorage.getItem(HINT_LS_KEY) === '1')
 
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
-  const { containerRef, isPlaying, isReady, play, togglePlay, seekTo, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop)
+  const [loopCountdown, setLoopCountdown] = useState<number | null>(null)
+
+  const handleEnded = useCallback(() => {
+    setLoopCountdown(null)
+    if (playConfig.loop) {
+      // hook already seeks to 0 + plays; sync scroll after it settles
+      setTimeout(() => syncToVideo(), 200)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playConfig.loop])
+
+  const { containerRef, isPlaying, isReady, play, togglePlay, seekTo, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop, handleEnded)
   const progressBarRef = useRef<HTMLDivElement>(null)
   const [scrubPct, setScrubPct] = useState(0)
   const [showScrubber, setShowScrubber] = useState(false)
@@ -175,12 +186,25 @@ export function PlayScreen() {
     }
   }, [autoplay, isReady, play, setAutoplay])
 
-  // Poll video progress for the % button
+  // Poll video progress for the % button + loop countdown
   useEffect(() => {
     if (!videoId) { setScrubPct(0); return }
-    const id = setInterval(() => setScrubPct(Math.round(getProgress() * 100)), 1000)
+    const id = setInterval(() => {
+      setScrubPct(Math.round(getProgress() * 100))
+      if (playConfig.loop && isPlaying) {
+        const { currentTime, duration } = getTimeInfo()
+        const remaining = duration - currentTime
+        if (duration && remaining > 0 && remaining <= 5) {
+          setLoopCountdown(Math.ceil(remaining))
+        } else {
+          setLoopCountdown(null)
+        }
+      } else {
+        setLoopCountdown(null)
+      }
+    }, 250)
     return () => clearInterval(id)
-  }, [videoId])
+  }, [videoId, playConfig.loop, isPlaying])
 
   // Focus mode + auto-hide + first-play hint
   useEffect(() => {
@@ -495,6 +519,15 @@ export function PlayScreen() {
             </FAB>
           )}
       </div>
+
+      {/* Loop countdown toast */}
+      {loopCountdown !== null && videoId && (
+        <div className="absolute bottom-24 inset-x-0 flex justify-center z-30 pointer-events-none">
+          <div className="px-4 py-2 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm tabular-nums">
+            Loop in {loopCountdown}s
+          </div>
+        </div>
+      )}
 
       {/* Video scrubber popup */}
       {showScrubber && videoId && (
