@@ -80,24 +80,26 @@ export async function contributeSong(song: Song, contributor: string): Promise<s
   const mainSha = ref.object.sha
 
   let fileSha: string | undefined
-  let finalSong = { ...song }
+  let resolvedPath = filePath
+  let finalSong = { ...song, authors: [...new Set([...song.authors, contributor])] }
 
-  if (song.source === 'repo') {
-    try {
-      const { data: file } = await octokit.rest.repos.getContent({
-        owner: OWNER, repo: REPO, path: filePath,
-      })
-      if ('sha' in file && 'content' in file) {
+  // Always check if file exists — update if same song, suffix path if slug collision
+  try {
+    const { data: file } = await octokit.rest.repos.getContent({
+      owner: OWNER, repo: REPO, path: filePath,
+    })
+    if ('sha' in file && 'content' in file) {
+      const existing = JSON.parse(atob(file.content.replace(/\n/g, ''))) as Song
+      if (existing.id === song.id) {
         fileSha = file.sha
-        const existing = JSON.parse(atob(file.content.replace(/\n/g, ''))) as Song
         const mergedAuthors = [...new Set([...(existing.authors ?? []), contributor])]
         finalSong = { ...song, authors: mergedAuthors }
+      } else {
+        resolvedPath = `songs/${song.id}-2.json`
       }
-    } catch {
-      // File not found — treat as new
     }
-  } else {
-    finalSong = { ...song, authors: [...new Set([...song.authors, contributor])] }
+  } catch {
+    // File not found — create new
   }
 
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalSong, null, 2))))
@@ -110,7 +112,7 @@ export async function contributeSong(song: Song, contributor: string): Promise<s
 
   await octokit.rest.repos.createOrUpdateFileContents({
     owner: OWNER, repo: REPO,
-    path: filePath,
+    path: resolvedPath,
     message: prTitle(song),
     content,
     branch,

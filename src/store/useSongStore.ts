@@ -4,12 +4,12 @@ import type { Song, LyricLine } from '../types'
 
 interface SongStore {
   songs: Song[]
-  activeSongId: string | null
+  activeSong: Song | null
 
   addSong: (song: Song) => void
   updateSong: (id: string, updates: Partial<Song>) => void
   deleteSong: (id: string) => void
-  setActiveSong: (id: string | null) => void
+  setActiveSong: (song: Song | null) => void
 }
 
 // Migrate lines from old shape { translation, secondTranslation } to new { translations[], order }
@@ -54,19 +54,20 @@ export const useSongStore = create<SongStore>()(
   persist(
     (set) => ({
       songs: [],
-      activeSongId: null,
+      activeSong: null,
 
       addSong: (song) => set((s) => ({ songs: [song, ...s.songs] })),
       updateSong: (id, updates) =>
         set((s) => ({
           songs: s.songs.map((song) => (song.id === id ? { ...song, ...updates } : song)),
+          activeSong: s.activeSong?.id === id ? { ...s.activeSong, ...updates } : s.activeSong,
         })),
       deleteSong: (id) =>
         set((s) => ({
           songs: s.songs.filter((song) => song.id !== id),
-          activeSongId: s.activeSongId === id ? null : s.activeSongId,
+          activeSong: s.activeSong?.id === id ? null : s.activeSong,
         })),
-      setActiveSong: (id) => set({ activeSongId: id }),
+      setActiveSong: (song) => set({ activeSong: song }),
     }),
     {
       name: 'clyrics_songs',
@@ -82,7 +83,4 @@ export const useSongStore = create<SongStore>()(
   )
 )
 
-export const useActiveSong = () => {
-  const { songs, activeSongId } = useSongStore()
-  return songs.find((s) => s.id === activeSongId) ?? null
-}
+export const useActiveSong = () => useSongStore((s) => s.activeSong)

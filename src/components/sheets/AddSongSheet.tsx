@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { nanoid } from 'nanoid'
 import { useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { Warning } from '@phosphor-icons/react'
+import { makeSongId } from '../../lib/utils'
 import type { Song } from '../../types'
 
 export function AddSongSheet() {
@@ -33,7 +33,7 @@ export function AddSongSheet() {
       .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translations: [] }))
 
     const song: Song = {
-      id: nanoid(),
+      id: makeSongId(title.trim(), artist.trim()),
       title: title.trim() || 'Untitled',
       artist: artist.trim() || '',
       youtubeUrl: youtubeUrl.trim() || undefined,
@@ -43,7 +43,7 @@ export function AddSongSheet() {
       source: 'local',
     }
     addSong(song)
-    setActiveSong(song.id)
+    setActiveSong(song)
     close()
     navigateTo('edit')
   }

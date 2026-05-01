@@ -1,12 +1,13 @@
 import {createPortal} from 'react-dom'
 import {useCallback, useEffect, useRef, useState, type RefObject} from 'react'
-import {useActiveSong} from '../../store/useSongStore'
+import {useActiveSong, useSongStore} from '../../store/useSongStore'
 import {useUIStore} from '../../store/useUIStore'
 import {FAB} from '../shell/FAB'
 import {useYouTubePlayer} from '../../hooks/useYouTubePlayer'
 import {extractVideoId} from '../../hooks/useYouTube'
-import {ArrowLeft, Pause, Play} from '@phosphor-icons/react'
+import {ArrowLeft, Pause, Play, PencilSimple} from '@phosphor-icons/react'
 import {FABGroup} from '../shell/FABGroup'
+import type {Song} from '../../types'
 
 const AVG_LINE_PX = 80   // estimated px per lyric group
 const SPEED_PRESETS = [0, 0.2, 0.4, 0.6, 0.8, 1, 2, 3]
@@ -133,7 +134,16 @@ function DraggablePiP({ containerRef, progressBarRef, onReveal }: PiPProps) {
 
 export function PlayScreen() {
   const song = useActiveSong()
-    const {playConfig, setPlayConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
+  const {addSong, setActiveSong} = useSongStore()
+  const {playConfig, setPlayConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
+
+  function handleForkAndEdit() {
+    if (!song) return
+    const forked: Song = {...song, source: 'local', createdAt: Date.now()}
+    addSong(forked)
+    setActiveSong(forked)
+    navigateTo('edit')
+  }
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
@@ -488,21 +498,22 @@ export function PlayScreen() {
       )}
 
       {/* Back FAB */}
-      <div className={`absolute bottom-6 left-5 z-20 transition-opacity duration-500 ${fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <FABGroup side="left">
-          <FAB onClick={() => navigateTo(prevScreen === 'home' ? 'home' : 'edit')} variant="secondary" label="Back to Edit">
+      <div className="absolute bottom-6 left-5 z-20">
+        <FABGroup side="left" className="flex flex-col items-center gap-3" visible={fabVisible}>
+          {song?.source === 'repo' && (
+            <FAB onClick={handleForkAndEdit} variant="secondary" label="Save to My Songs">
+              <PencilSimple size={20} />
+            </FAB>
+          )}
+          <FAB onClick={() => navigateTo(prevScreen === 'home' ? 'home' : 'edit')} variant="secondary" label="Back">
             <ArrowLeft size={20} />
           </FAB>
         </FABGroup>
       </div>
 
-        {/* Speed + Play/Pause FABs — both modes, auto-hide in focus */}
-      <div
-          className={`absolute bottom-6 right-5 z-20 transition-opacity duration-500 ${
-          fabVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <FABGroup side="right" className="flex flex-col items-center gap-3">
+      {/* Speed + Play/Pause FABs — both modes, auto-hide in focus */}
+      <div className="absolute bottom-6 right-5 z-20">
+        <FABGroup side="right" className="flex flex-col items-center gap-3" visible={fabVisible}>
           {videoId && (
               <FAB onClick={() => { setScrubValue(scrubPct); setShowScrubber(v => !v) }} variant="secondary" label="Video progress">
                   <span className="text-xs font-bold tabular-nums leading-none">{scrubPct}%</span>

@@ -213,9 +213,11 @@ export function EditScreen() {
         <FAB onClick={() => open(<GenerateConfigSheet />, 'Generate')} variant="secondary" label="Generate lyrics">
           <Lightning size={20} weight="fill" />
         </FAB>
-        <FAB onClick={() => open(<ContributeSheet song={song} />, 'Contribute')} variant="secondary" label="Contribute via PR">
-          <GitPullRequest size={20} weight="fill" />
-        </FAB>
+        {song.source === 'local' && (
+          <FAB onClick={() => open(<ContributeSheet song={song} />, 'Contribute')} variant="secondary" label="Contribute via PR">
+            <GitPullRequest size={20} weight="fill" />
+          </FAB>
+        )}
         <FAB onClick={() => open(<PlayConfigSheet />, 'Play')} label="Play">
           <Play size={20} weight="fill" />
         </FAB>

@@ -39,13 +39,17 @@ export function SongCard({ song, onEdit, onPlay }: Props) {
         <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-[#0F0F0F] truncate">{song.title}</p>
-            {isLocal && (
+            {isLocal ? (
               <button
                 onClick={(e) => { e.stopPropagation(); setShowPopup((v) => !v) }}
                 className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-md bg-[#FFF3E0] text-[#B06000] font-medium uppercase hover:bg-[#FFE0B2] transition-colors"
               >
                 personal
               </button>
+            ) : (
+              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-md bg-[#E8F5E9] text-[#2E7D32] font-medium uppercase">
+                community
+              </span>
             )}
           </div>
           <p className="text-xs text-[#888] mt-0.5">
