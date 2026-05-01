@@ -3,13 +3,22 @@ import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { ToggleRow } from '../ui/Toggle'
 import { Play } from '@phosphor-icons/react'
+import type { ScrollSpeed } from '../../types'
+
+const SPEEDS: { value: ScrollSpeed; label: string }[] = [
+  { value: 'off', label: 'Off' },
+  { value: 'slow', label: 'Slow' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'fast', label: 'Fast' },
+]
 
 export function PlayConfigSheet() {
-  const { playConfig, setPlayConfig, navigateTo } = useUIStore()
+  const { playConfig, setPlayConfig, navigateTo, setAutoplay } = useUIStore()
   const { close } = useBottomSheet()
   const song = useActiveSong()
 
   function handlePlay() {
+    setAutoplay(true)
     close()
     navigateTo('play')
   }
@@ -35,12 +44,26 @@ export function PlayConfigSheet() {
           onChange={(v) => setPlayConfig({ secondLang: v })}
         />
       )}
-      <ToggleRow
-        label="Auto scroll"
-        sublabel="Syncs scroll to video duration"
-        checked={playConfig.autoScroll}
-        onChange={(v) => setPlayConfig({ autoScroll: v })}
-      />
+
+      {/* Scroll speed */}
+      <div className="pt-2 pb-1">
+        <p className="text-sm font-medium text-[#0F0F0F] mb-2">Auto scroll</p>
+        <div className="flex gap-2">
+          {SPEEDS.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => setPlayConfig({ scrollSpeed: value })}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                playConfig.scrollSpeed === value
+                  ? 'bg-[#0F0F0F] text-white border-[#0F0F0F]'
+                  : 'bg-white text-[#888] border-[#E0E0DC] hover:text-[#0F0F0F]'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="pt-4">
         <button

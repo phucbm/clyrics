@@ -20,7 +20,7 @@ function SongCard({ song, onClick }: { song: Song; onClick: () => void }) {
           </span>
         </div>
         <p className="text-xs text-[#888] mt-0.5">
-          {song.artist} · {song.lines.length} lines
+          {[song.artist, `${song.lines.length} lines`].filter((v) => v && v !== 'Unknown').join(' · ')}
         </p>
       </div>
       <ArrowRight size={14} className="text-[#CCC] group-hover:text-[#555] transition-colors shrink-0" />

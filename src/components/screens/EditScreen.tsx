@@ -6,7 +6,8 @@ import { useBottomSheet } from '../shell/BottomSheet'
 import { FAB } from '../shell/FAB'
 import { GenerateConfigSheet } from '../sheets/GenerateConfigSheet'
 import { PlayConfigSheet } from '../sheets/PlayConfigSheet'
-import { ArrowLeft, Lightning, Play, Plus, Trash, Warning } from '@phosphor-icons/react'
+import { EditSongSheet } from '../sheets/EditSongSheet'
+import { ArrowLeft, Lightning, Note, Play, Plus, Trash, Warning } from '@phosphor-icons/react'
 import type { LyricLine } from '../../types'
 
 interface LineViewProps {
@@ -127,22 +128,14 @@ export function EditScreen() {
 
   return (
     <div className="h-full flex flex-col relative">
-      {/* Header */}
+      {/* Header — song title + artist (display only) */}
       <header className="shrink-0 px-5 pt-4 pb-3 border-b border-[#E0E0DC] bg-[#F8F7F5]">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <input
-              className="w-full text-base font-semibold text-[#0F0F0F] bg-transparent placeholder-[#CCC] truncate"
-              value={song.title}
-              onChange={(e) => updateSong(song.id, { title: e.target.value || 'Untitled' })}
-              placeholder="Untitled"
-            />
-            <input
-              className="w-full text-xs text-[#888] bg-transparent placeholder-[#CCC] mt-0.5"
-              value={song.artist}
-              onChange={(e) => updateSong(song.id, { artist: e.target.value || 'Unknown' })}
-              placeholder="Artist"
-            />
+            <p className="text-base font-semibold text-[#0F0F0F] truncate">{song.title}</p>
+            {song.artist && song.artist !== 'Unknown' && (
+              <p className="text-xs text-[#888] mt-0.5">{song.artist}</p>
+            )}
           </div>
           <button
             onClick={handleDelete}
@@ -152,12 +145,6 @@ export function EditScreen() {
             <Trash size={14} />
           </button>
         </div>
-        <input
-          className="w-full mt-2 text-xs text-[#888] bg-transparent placeholder-[#CCC]"
-          placeholder="YouTube URL (optional)"
-          value={song.youtubeUrl ?? ''}
-          onChange={(e) => updateSong(song.id, { youtubeUrl: e.target.value || undefined })}
-        />
       </header>
 
       {/* Body */}
@@ -200,16 +187,22 @@ export function EditScreen() {
         )}
       </div>
 
-      {/* FABs: left = back, right = [⚡ generate (bottom/primary), ▶ play (above/secondary)] */}
+      {/* FABs — left: back | right (bottom→top): Edit (primary), Generate, Play */}
       <div className="absolute bottom-6 left-5 z-20">
         <FAB onClick={goBack} variant="secondary" label="Back to Home">
           <ArrowLeft size={20} />
         </FAB>
       </div>
       <div className="absolute bottom-6 right-5 z-20 flex flex-col-reverse gap-3">
-        <FAB onClick={() => open(<GenerateConfigSheet />, 'Generate')} label="Generate lyrics">
+        {/* Primary (bottom): Edit */}
+        <FAB onClick={() => open(<EditSongSheet song={song} />, 'Edit Song')} label="Edit song">
+          <Note size={20} weight="fill" />
+        </FAB>
+        {/* Generate */}
+        <FAB onClick={() => open(<GenerateConfigSheet />, 'Generate')} variant="secondary" label="Generate lyrics">
           <Lightning size={20} weight="fill" />
         </FAB>
+        {/* Play (top) */}
         <FAB onClick={() => open(<PlayConfigSheet />, 'Play')} variant="secondary" label="Play">
           <Play size={20} weight="fill" />
         </FAB>

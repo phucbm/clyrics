@@ -22,11 +22,13 @@ export interface Song {
   source: 'local' | 'repo'
 }
 
+export type ScrollSpeed = 'off' | 'slow' | 'normal' | 'fast'
+
 export interface PlayConfig {
   pinyin: boolean
   translation: boolean
   secondLang: boolean
-  autoScroll: boolean
+  scrollSpeed: ScrollSpeed
 }
 
 export interface GenerateConfig {

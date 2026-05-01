@@ -13,10 +13,10 @@ export function useYouTubePlayer(videoId: string | null) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     if (!videoId) return
-
     let destroyed = false
 
     function initPlayer() {
@@ -26,7 +26,10 @@ export function useYouTubePlayer(videoId: string | null) {
         playerVars: { rel: 0, modestbranding: 1 },
         events: {
           onReady: (e: any) => {
-            if (!destroyed) setDuration(e.target.getDuration())
+            if (!destroyed) {
+              setDuration(e.target.getDuration())
+              setIsReady(true)
+            }
           },
           onStateChange: (e: any) => {
             if (!destroyed) setIsPlaying(e.data === window.YT.PlayerState.PLAYING)
@@ -52,6 +55,7 @@ export function useYouTubePlayer(videoId: string | null) {
 
     return () => {
       destroyed = true
+      setIsReady(false)
       playerRef.current?.destroy()
       playerRef.current = null
     }
@@ -68,5 +72,12 @@ export function useYouTubePlayer(videoId: string | null) {
     return () => clearInterval(interval)
   }, [isPlaying, duration])
 
-  return { containerRef, currentTime, duration, isPlaying }
+  function play() { playerRef.current?.playVideo() }
+  function pause() { playerRef.current?.pauseVideo() }
+  function togglePlay() {
+    if (isPlaying) pause()
+    else play()
+  }
+
+  return { containerRef, currentTime, duration, isPlaying, isReady, play, pause, togglePlay }
 }

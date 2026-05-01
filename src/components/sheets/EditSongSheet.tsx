@@ -1,53 +1,50 @@
 import { useState } from 'react'
-import { nanoid } from 'nanoid'
 import { useSongStore } from '../../store/useSongStore'
-import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { generateLyrics, getGroqKey } from '../../lib/groq'
 import { Sparkle, Warning } from '@phosphor-icons/react'
 import type { Song } from '../../types'
 
-export function AddSongSheet() {
-  const { addSong, setActiveSong } = useSongStore()
-  const { navigateTo } = useUIStore()
+interface Props {
+  song: Song
+}
+
+export function EditSongSheet({ song }: Props) {
+  const { updateSong } = useSongStore()
   const { close } = useBottomSheet()
 
-  const [title, setTitle] = useState('')
-  const [artist, setArtist] = useState('')
-  const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [rawLyrics, setRawLyrics] = useState('')
+  const [title, setTitle] = useState(song.title)
+  const [artist, setArtist] = useState(song.artist)
+  const [youtubeUrl, setYoutubeUrl] = useState(song.youtubeUrl ?? '')
+  const [rawLyrics, setRawLyrics] = useState(
+    song.lines.map((l) => l.chinese).join('\n')
+  )
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const hasKey = !!getGroqKey()
-
-  function buildSong(lines: { id: string; chinese: string; pinyin: string; translation: string }[]): Song {
-    return {
-      id: nanoid(),
-      title: title.trim() || 'Untitled',
-      artist: artist.trim() || '',
-      youtubeUrl: youtubeUrl.trim() || undefined,
-      language: 'vi',
-      lines,
-      createdAt: Date.now(),
-      source: 'local',
-    }
-  }
 
   function parseDraftLines() {
     return rawLyrics
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
-      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translation: '' }))
+      .map((chinese, i) => ({
+        id: song.lines[i]?.id ?? `${Date.now()}-${i}`,
+        chinese,
+        pinyin: song.lines[i]?.pinyin ?? '',
+        translation: song.lines[i]?.translation ?? '',
+      }))
   }
 
   function handleSave() {
-    const song = buildSong(parseDraftLines())
-    addSong(song)
-    setActiveSong(song.id)
+    updateSong(song.id, {
+      title: title.trim() || 'Untitled',
+      artist: artist.trim() || '',
+      youtubeUrl: youtubeUrl.trim() || undefined,
+      lines: parseDraftLines(),
+    })
     close()
-    navigateTo('edit')
   }
 
   async function handleGenerate() {
@@ -55,18 +52,16 @@ export function AddSongSheet() {
     setGenerating(true)
     setError(null)
     try {
-      const lines = await generateLyrics(rawLyrics.trim(), 'vi')
-      const song = buildSong(lines)
-      addSong(song)
-      setActiveSong(song.id)
+      const lines = await generateLyrics(rawLyrics.trim(), song.language)
+      updateSong(song.id, {
+        title: title.trim() || 'Untitled',
+        artist: artist.trim() || '',
+        youtubeUrl: youtubeUrl.trim() || undefined,
+        lines,
+      })
       close()
-      navigateTo('edit')
     } catch (e) {
-      setError(
-        e instanceof Error && e.message === 'NO_KEY'
-          ? 'No Groq API key. Add it in Settings.'
-          : e instanceof Error ? e.message : 'Generation failed'
-      )
+      setError(e instanceof Error ? e.message : 'Generation failed')
     } finally {
       setGenerating(false)
     }
@@ -97,7 +92,7 @@ export function AddSongSheet() {
         <textarea
           className={`${inputCls} resize-none leading-relaxed`}
           style={{ fontFamily: "ui-monospace, 'SF Mono', monospace", minHeight: '160px' }}
-          placeholder="Paste Chinese lyrics here, one line per row"
+          placeholder="One Chinese line per row"
           value={rawLyrics}
           onChange={(e) => setRawLyrics(e.target.value)}
         />
@@ -113,8 +108,7 @@ export function AddSongSheet() {
       <div className="flex gap-3 pt-1">
         <button
           onClick={handleSave}
-          disabled={!rawLyrics.trim()}
-          className="flex-1 py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-30 hover:bg-[#2a2a2a] transition-colors"
+          className="flex-1 py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
         >
           Save
         </button>
