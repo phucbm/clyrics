@@ -149,20 +149,36 @@ interface ForkConfirmProps {
 }
 
 function ForkConfirmSheet({ existingCopy, onEditCopy, onNewCopy }: ForkConfirmProps) {
-  const { close } = useBottomSheet()
+  const { close, setFooter } = useBottomSheet()
 
-  if (existingCopy) {
-    return (
-      <div className="px-5 pb-8 space-y-3">
-        <p className="text-sm text-[#444] leading-relaxed">
-          You already have a copy of this song in My Songs.
-        </p>
+  useEffect(() => {
+    if (existingCopy) {
+      setFooter(
         <button
           onClick={() => { close(); onEditCopy(existingCopy) }}
           className="w-full py-3.5 rounded-xl bg-[#0F0F0F] text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
         >
           Edit this copy
         </button>
+      )
+    } else {
+      setFooter(
+        <button
+          onClick={() => { close(); onNewCopy() }}
+          className="w-full py-3.5 rounded-xl bg-[#0F0F0F] text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+        >
+          Make a copy
+        </button>
+      )
+    }
+  }, [])
+
+  if (existingCopy) {
+    return (
+      <div className="px-5 pb-4 space-y-3">
+        <p className="text-sm text-[#444] leading-relaxed">
+          You already have a copy of this song in My Songs.
+        </p>
         <button
           onClick={() => { close(); onNewCopy() }}
           className="w-full py-3.5 rounded-xl border border-[#E4E2DE] text-sm font-medium text-[#555] hover:bg-[#F0F0EC] transition-colors"
@@ -177,24 +193,13 @@ function ForkConfirmSheet({ existingCopy, onEditCopy, onNewCopy }: ForkConfirmPr
   }
 
   return (
-    <div className="px-5 pb-8 space-y-4">
+    <div className="px-5 pb-4 space-y-4">
       <p className="text-sm text-[#444] leading-relaxed">
         A personal copy of this song will be saved to your device. Edit freely, then share back as a new song or as improvements to the original.
       </p>
-      <div className="flex gap-3">
-        <button
-          onClick={close}
-          className="flex-1 py-3.5 rounded-xl border border-[#E4E2DE] text-sm font-medium text-[#555] hover:bg-[#F0F0EC] transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => { close(); onNewCopy() }}
-          className="flex-1 py-3.5 rounded-xl bg-[#0F0F0F] text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
-        >
-          Make a copy
-        </button>
-      </div>
+      <button onClick={close} className="w-full py-2 text-sm text-[#AAA] hover:text-[#555] transition-colors">
+        Cancel
+      </button>
     </div>
   )
 }
@@ -309,9 +314,12 @@ export function PlayScreen() {
   }, [videoId, playConfig.loop, isPlaying])
 
   // Focus mode + auto-hide + first-play hint
+  // When video is hidden, YouTube player isn't mounted so isPlaying stays false.
+  // Treat hideVideo + scrollSpeed > 0 as "active" so FABs still auto-hide.
   useEffect(() => {
-    setFocusMode(isPlaying)
-    if (isPlaying) {
+    const shouldFocus = isPlaying || (!!videoId && playConfig.hideVideo && playConfig.scrollSpeed > 0)
+    setFocusMode(shouldFocus)
+    if (shouldFocus) {
       revealControls()
       if (!hintShownRef.current) {
         hintShownRef.current = true
@@ -329,7 +337,7 @@ export function PlayScreen() {
       clearTimeout(hideTimerRef.current)
       clearTimeout(hintTimerRef.current)
     }
-  }, [isPlaying, revealControls])
+  }, [isPlaying, videoId, playConfig.hideVideo, playConfig.scrollSpeed, revealControls])
 
   // CSS-transition progress bar
   function startProgressAnimation() {
