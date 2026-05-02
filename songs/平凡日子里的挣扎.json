@@ -1,5 +1,5 @@
 {
-  "id": "平凡日子里的挣扎",
+  "id": "nN5Qsq98wAzeqvIrLv2qa",
   "title": "平凡日子里的挣扎",
   "artist": "",
   "youtubeUrl": "https://www.youtube.com/watch?v=BHssgvVxyws",
@@ -9,7 +9,6 @@
   "lines": [
     {
       "id": "1777620544984-0",
-      "order": 0,
       "chinese": "我看过满脸是灰的人",
       "pinyin": "wǒ kàn guò mǎn liǎn shì huī de rén",
       "translations": [
@@ -25,7 +24,6 @@
     },
     {
       "id": "1777620544984-1",
-      "order": 1,
       "chinese": "笑着说生活多美",
       "pinyin": "xiào zhe shuō shēnghuó duō měi",
       "translations": [
@@ -40,24 +38,22 @@
       ]
     },
     {
-      "id": "1777620544984-2",
-      "order": 2,
+      "id": "7fI6PDlhmnla4WBR9897J",
       "chinese": "也见过功成名就的人",
       "pinyin": "yě jiàn guò gōng chéng míng jiù de rén",
       "translations": [
         {
-          "lang": "Vietnamese",
-          "text": "Cũng đã gặp người thành công danh tiếng."
-        },
-        {
           "lang": "English",
           "text": "I have also seen people who have achieved fame and success."
+        },
+        {
+          "lang": "Vietnamese",
+          "text": "Cũng đã gặp người thành công danh tiếng."
         }
       ]
     },
     {
       "id": "1777620544984-3",
-      "order": 3,
       "chinese": "总是满身酒味",
       "pinyin": "zǒng shì mǎn shēn jiǔ wèi",
       "translations": [
@@ -73,7 +69,6 @@
     },
     {
       "id": "1777620544984-4",
-      "order": 4,
       "chinese": "我看过夜深都不回家的人",
       "pinyin": "wǒ kàn guò yè shēn dōu bù huí jiā de rén",
       "translations": [
@@ -89,7 +84,6 @@
     },
     {
       "id": "1777620544984-5",
-      "order": 5,
       "chinese": "总期待明天多美",
       "pinyin": "zǒng qídài míngtiān duō měi",
       "translations": [
@@ -105,7 +99,6 @@
     },
     {
       "id": "1777620544984-6",
-      "order": 6,
       "chinese": "也见过看起来不错的人",
       "pinyin": "yě jiàn guò kàn qǐlái bú cuò de rén",
       "translations": [
@@ -121,7 +114,6 @@
     },
     {
       "id": "1777620544984-7",
-      "order": 7,
       "chinese": "偷偷抹眼泪",
       "pinyin": "tōu tōu mǒ yǎnlèi",
       "translations": [
@@ -136,328 +128,7 @@
       ]
     },
     {
-      "id": "1777620544984-9",
-      "order": 8,
-      "chinese": "认真生活的人",
-      "pinyin": "rènzhēn shēnghuó de rén",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Người sống nghiêm túc."
-        },
-        {
-          "lang": "English",
-          "text": "People who live earnestly."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-8",
-      "order": 9,
-      "chinese": "我知道",
-      "pinyin": "wǒ zhī dào",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Tôi biết."
-        },
-        {
-          "lang": "English",
-          "text": "I know."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-10",
-      "order": 10,
-      "chinese": "总是百般滋味",
-      "pinyin": "zǒng shì bǎi bān zī wèi",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Luôn đầy đủ mọi cảm xúc."
-        },
-        {
-          "lang": "English",
-          "text": "Always full of myriad flavors."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-11",
-      "order": 11,
-      "chinese": "也知道",
-      "pinyin": "yě zhī dào",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Cũng biết."
-        },
-        {
-          "lang": "English",
-          "text": "Also know."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-12",
-      "order": 12,
-      "chinese": "成年人的世界",
-      "pinyin": "chéngnián rén de shìjiè",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Thế giới của người lớn."
-        },
-        {
-          "lang": "English",
-          "text": "The adult world."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-13",
-      "order": 13,
-      "chinese": "会在瞬间崩溃",
-      "pinyin": "huì zài shùnjiān bēngkuì",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Sẽ sụp đổ trong chớp mắt."
-        },
-        {
-          "lang": "English",
-          "text": "Can collapse in an instant."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-14",
-      "order": 14,
-      "chinese": "我们都在平凡日子里拼命挣扎",
-      "pinyin": "wǒmen dōu zài píngfán rìzi lǐ pīnmìng zhēngzhá",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Chúng ta đều trong những ngày bình thường vật lộn hết sức."
-        },
-        {
-          "lang": "English",
-          "text": "We are all struggling desperately in ordinary days."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-15",
-      "order": 15,
-      "chinese": "拼命想活成别人期待的人呐",
-      "pinyin": "pīnmìng xiǎng huó chéng biérén qídài de rén na",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Cố gắng sống thành người mà người khác mong đợi."
-        },
-        {
-          "lang": "English",
-          "text": "Striving to become the person others expect."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-16",
-      "order": 16,
-      "chinese": "就算四海为家",
-      "pinyin": "jiù suàn sì hǎi wéi jiā",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Dù coi bốn biển làm nhà."
-        },
-        {
-          "lang": "English",
-          "text": "Even if the four seas become home."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-17",
-      "order": 17,
-      "chinese": "就算风吹雨打",
-      "pinyin": "jiù suàn fēng chuī yǔ dǎ",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Dù gió mưa táp tùng."
-        },
-        {
-          "lang": "English",
-          "text": "Even if wind blows and rain hits."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-18",
-      "order": 18,
-      "chinese": "也要微笑着说我还好",
-      "pinyin": "yě yào wēixiào zhe shuō wǒ hái hǎo",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Cũng phải mỉm cười nói tôi vẫn ổn."
-        },
-        {
-          "lang": "English",
-          "text": "Still smile and say I'm okay."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-19",
-      "order": 19,
-      "chinese": "我们躲在无人的角落里舔舐伤疤",
-      "pinyin": "wǒmen duǒ zài wú rén de jiǎoluò lǐ tiǎnshì shāngbā",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Chúng ta trốn trong góc không người, liếm vết thương."
-        },
-        {
-          "lang": "English",
-          "text": "We hide in empty corners licking our scars."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-20",
-      "order": 20,
-      "chinese": "拼命的不想让眼泪流下",
-      "pinyin": "pīnmìng de bù xiǎng ràng yǎnlèi liú xià",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Cố gắng không muốn nước mắt rơi."
-        },
-        {
-          "lang": "English",
-          "text": "Striving not to let tears fall."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-21",
-      "order": 21,
-      "chinese": "就算满身的疤",
-      "pinyin": "jiù suàn mǎn shēn de bā",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Dù cơ thể đầy vết sẹo."
-        },
-        {
-          "lang": "English",
-          "text": "Even if covered in scars."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-22",
-      "order": 22,
-      "chinese": "就算丢盔卸甲",
-      "pinyin": "jiù suàn diū kuī xiè jiǎ",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Dù bỏ áo giáp."
-        },
-        {
-          "lang": "English",
-          "text": "Even if we discard armor."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-23",
-      "order": 23,
-      "chinese": "也不想让别人看自己的笑话",
-      "pinyin": "yě bù xiǎng ràng biérén kàn zìjǐ de xiàohuà",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Cũng không muốn người khác thấy mình là trò cười."
-        },
-        {
-          "lang": "English",
-          "text": "Also don't want others to see our ridicule."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-24",
-      "order": 24,
-      "chinese": "我看过为生活穿梭的人",
-      "pinyin": "wǒ kàn guò wèi shēnghuó chuān suō de rén",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Tôi đã thấy người chạy vòng cho cuộc sống."
-        },
-        {
-          "lang": "English",
-          "text": "I have seen people who shuttle through life."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-25",
-      "order": 25,
-      "chinese": "从未分过黑夜和白昼",
-      "pinyin": "cóng wèi fēn guò hēi yè hé bái zhòu",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Chưa bao giờ phân chia đêm và ngày."
-        },
-        {
-          "lang": "English",
-          "text": "Never distinguishing night from day."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-26",
-      "order": 26,
-      "chinese": "也见过衣食无忧的人",
-      "pinyin": "yě jiàn guò yī shí wú yōu de rén",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Cũng đã gặp người không lo lắng về ăn mặc."
-        },
-        {
-          "lang": "English",
-          "text": "I have also seen people without worries about food and clothing."
-        }
-      ]
-    },
-    {
-      "id": "1777620544984-27",
-      "order": 27,
-      "chinese": "总忧心忡忡的满脸忧愁",
-      "pinyin": "zǒng yōu xīn hōng hōng de mǎn liǎn yōu chóu",
-      "translations": [
-        {
-          "lang": "Vietnamese",
-          "text": "Luôn lo lắng, khuôn mặt đầy buồn phiền."
-        },
-        {
-          "lang": "English",
-          "text": "Always worried, with a face full of sorrow."
-        }
-      ]
-    },
-    {
       "id": "1777620544984-28",
-      "order": 28,
       "chinese": "我知道",
       "pinyin": "wǒ zhī dào",
       "translations": [
@@ -473,7 +144,6 @@
     },
     {
       "id": "1777620544984-29",
-      "order": 29,
       "chinese": "认真生活的人",
       "pinyin": "rènzhēn shēnghuó de rén",
       "translations": [
@@ -489,7 +159,6 @@
     },
     {
       "id": "1777620544984-30",
-      "order": 30,
       "chinese": "总是百般滋味",
       "pinyin": "zǒng shì bǎi bān zī wèi",
       "translations": [
@@ -505,7 +174,6 @@
     },
     {
       "id": "1777620544984-31",
-      "order": 31,
       "chinese": "也知道",
       "pinyin": "yě zhī dào",
       "translations": [
@@ -521,7 +189,6 @@
     },
     {
       "id": "1777620544984-32",
-      "order": 32,
       "chinese": "成年人的世界",
       "pinyin": "chéngnián rén de shìjiè",
       "translations": [
@@ -537,7 +204,6 @@
     },
     {
       "id": "1777620544984-33",
-      "order": 33,
       "chinese": "会在瞬间崩溃",
       "pinyin": "huì zài shùnjiān bēngkuì",
       "translations": [
@@ -553,7 +219,6 @@
     },
     {
       "id": "1777620544984-34",
-      "order": 34,
       "chinese": "我们都在平凡日子里拼命挣扎",
       "pinyin": "wǒmen dōu zài píngfán rìzi lǐ pīnmìng zhēngzhá",
       "translations": [
@@ -569,7 +234,6 @@
     },
     {
       "id": "1777620544984-35",
-      "order": 35,
       "chinese": "拼命想活成别人期待的人呐",
       "pinyin": "pīnmìng xiǎng huó chéng biérén qídài de rén na",
       "translations": [
@@ -585,7 +249,6 @@
     },
     {
       "id": "1777620544984-36",
-      "order": 36,
       "chinese": "就算四海为家",
       "pinyin": "jiù suàn sì hǎi wéi jiā",
       "translations": [
@@ -601,7 +264,6 @@
     },
     {
       "id": "1777620544984-37",
-      "order": 37,
       "chinese": "就算风吹雨打",
       "pinyin": "jiù suàn fēng chuī yǔ dǎ",
       "translations": [
@@ -617,7 +279,6 @@
     },
     {
       "id": "1777620544984-38",
-      "order": 38,
       "chinese": "也要微笑着说我还好",
       "pinyin": "yě yào wēixiào zhe shuō wǒ hái hǎo",
       "translations": [
@@ -633,7 +294,6 @@
     },
     {
       "id": "1777620544984-39",
-      "order": 39,
       "chinese": "我们躲在无人的角落里舔舐伤疤",
       "pinyin": "wǒmen duǒ zài wú rén de jiǎoluò lǐ tiǎnshì shāngbā",
       "translations": [
@@ -649,7 +309,306 @@
     },
     {
       "id": "1777620544984-40",
-      "order": 40,
+      "chinese": "拼命的不想让眼泪流下",
+      "pinyin": "pīnmìng de bù xiǎng ràng yǎnlèi liú xià",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cố gắng không muốn nước mắt rơi."
+        },
+        {
+          "lang": "English",
+          "text": "Striving not to let tears fall."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-21",
+      "chinese": "就算满身的疤",
+      "pinyin": "jiù suàn mǎn shēn de bā",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù cơ thể đầy vết sẹo."
+        },
+        {
+          "lang": "English",
+          "text": "Even if covered in scars."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-22",
+      "chinese": "就算丢盔卸甲",
+      "pinyin": "jiù suàn diū kuī xiè jiǎ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù bỏ áo giáp."
+        },
+        {
+          "lang": "English",
+          "text": "Even if we discard armor."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-23",
+      "chinese": "也不想让别人看自己的笑话",
+      "pinyin": "yě bù xiǎng ràng biérén kàn zìjǐ de xiàohuà",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cũng không muốn người khác thấy mình là trò cười."
+        },
+        {
+          "lang": "English",
+          "text": "Also don't want others to see our ridicule."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-24",
+      "chinese": "我看过为生活穿梭的人",
+      "pinyin": "wǒ kàn guò wèi shēnghuó chuān suō de rén",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Tôi đã thấy người chạy vòng cho cuộc sống."
+        },
+        {
+          "lang": "English",
+          "text": "I have seen people who shuttle through life."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-25",
+      "chinese": "从未分过黑夜和白昼",
+      "pinyin": "cóng wèi fēn guò hēi yè hé bái zhòu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chưa bao giờ phân chia đêm và ngày."
+        },
+        {
+          "lang": "English",
+          "text": "Never distinguishing night from day."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-26",
+      "chinese": "也见过衣食无忧的人",
+      "pinyin": "yě jiàn guò yī shí wú yōu de rén",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cũng đã gặp người không lo lắng về ăn mặc."
+        },
+        {
+          "lang": "English",
+          "text": "I have also seen people without worries about food and clothing."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-27",
+      "chinese": "总忧心忡忡的满脸忧愁",
+      "pinyin": "zǒng yōu xīn hōng hōng de mǎn liǎn yōu chóu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Luôn lo lắng, khuôn mặt đầy buồn phiền."
+        },
+        {
+          "lang": "English",
+          "text": "Always worried, with a face full of sorrow."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-28",
+      "chinese": "我知道",
+      "pinyin": "wǒ zhī dào",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Tôi biết."
+        },
+        {
+          "lang": "English",
+          "text": "I know."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-29",
+      "chinese": "认真生活的人",
+      "pinyin": "rènzhēn shēnghuó de rén",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Người sống nghiêm túc."
+        },
+        {
+          "lang": "English",
+          "text": "People who live earnestly."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-30",
+      "chinese": "总是百般滋味",
+      "pinyin": "zǒng shì bǎi bān zī wèi",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Luôn đầy đủ mọi cảm xúc."
+        },
+        {
+          "lang": "English",
+          "text": "Always full of myriad flavors."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-31",
+      "chinese": "也知道",
+      "pinyin": "yě zhī dào",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cũng biết."
+        },
+        {
+          "lang": "English",
+          "text": "Also know."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-32",
+      "chinese": "成年人的世界",
+      "pinyin": "chéngnián rén de shìjiè",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thế giới của người lớn."
+        },
+        {
+          "lang": "English",
+          "text": "The adult world."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-33",
+      "chinese": "会在瞬间崩溃",
+      "pinyin": "huì zài shùnjiān bēngkuì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Sẽ sụp đổ trong chớp mắt."
+        },
+        {
+          "lang": "English",
+          "text": "Can collapse in an instant."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-34",
+      "chinese": "我们都在平凡日子里拼命挣扎",
+      "pinyin": "wǒmen dōu zài píngfán rìzi lǐ pīnmìng zhēngzhá",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta đều trong những ngày bình thường vật lộn hết sức."
+        },
+        {
+          "lang": "English",
+          "text": "We are all struggling desperately in ordinary days."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-35",
+      "chinese": "拼命想活成别人期待的人呐",
+      "pinyin": "pīnmìng xiǎng huó chéng biérén qídài de rén na",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cố gắng sống thành người mà người khác mong đợi."
+        },
+        {
+          "lang": "English",
+          "text": "Striving to become the person others expect."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-36",
+      "chinese": "就算四海为家",
+      "pinyin": "jiù suàn sì hǎi wéi jiā",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù coi bốn biển làm nhà."
+        },
+        {
+          "lang": "English",
+          "text": "Even if the four seas become home."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-37",
+      "chinese": "就算风吹雨打",
+      "pinyin": "jiù suàn fēng chuī yǔ dǎ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù gió mưa."
+        },
+        {
+          "lang": "English",
+          "text": "Even if wind blows and rain hits."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-38",
+      "chinese": "也要微笑着说我还好",
+      "pinyin": "yě yào wēixiào zhe shuō wǒ hái hǎo",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cũng phải mỉm cười nói tôi vẫn ổn."
+        },
+        {
+          "lang": "English",
+          "text": "Still smile and say I'm okay."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-39",
+      "chinese": "我们躲在无人的角落里舔舐伤疤",
+      "pinyin": "wǒmen duǒ zài wú rén de jiǎoluò lǐ tiǎnshì shāngbā",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta trốn trong góc không người, liếm vết thương."
+        },
+        {
+          "lang": "English",
+          "text": "We hide in empty corners licking our scars."
+        }
+      ]
+    },
+    {
+      "id": "1777620544984-40",
       "chinese": "拼命的不想让眼泪流下",
       "pinyin": "pīnmìng de bù xiǎng ràng yǎnlèi liú xià",
       "translations": [
@@ -665,7 +624,6 @@
     },
     {
       "id": "7fI6PDlhmnla4WBR9897J",
-      "order": 41,
       "chinese": "也见过功成名就的人",
       "pinyin": "yě jiàn guò gōng chéng míng jiù de rén",
       "translations": [
@@ -680,6 +638,7 @@
       ]
     }
   ],
-  "createdAt": 1777608770183,
-  "source": "local"
+  "createdAt": 1777696720303,
+  "source": "local",
+  "copiedFrom": "平凡日子里的挣扎"
 }
