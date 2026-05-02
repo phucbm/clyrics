@@ -10,6 +10,7 @@ import {ArrowLeft, MusicNote, Pause, Play, PencilSimple} from '@phosphor-icons/r
 import {FABGroup} from '../shell/FABGroup'
 import {useBottomSheet} from '../shell/BottomSheet'
 import {PlayConfigSheet} from '../sheets/PlayConfigSheet'
+import {ShareSheet} from '../sheets/ShareSheet'
 import type {Song} from '../../types'
 
 const AVG_LINE_PX = 80   // estimated px per lyric group
@@ -618,6 +619,13 @@ export function PlayScreen() {
       {/* Back FAB */}
       <div className="absolute bottom-6 left-5 z-20">
         <FABGroup side="left" className="flex flex-col items-center gap-3" visible={fabVisible}>
+          <FAB onClick={() => openSheet(<ShareSheet song={song} />, 'Share')} variant="secondary" label="Share">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+              <polyline points="16 6 12 2 8 6"/>
+              <line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </FAB>
           {song?.source === 'repo' && (
             <FAB onClick={confirmForkAndEdit} variant="secondary" label="Save to My Songs">
               <PencilSimple size={20} />
