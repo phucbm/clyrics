@@ -47,8 +47,8 @@ export function useRepoSongs() {
           })
         )
         const fetched: Song[] = results
-          .filter((r): r is PromiseFulfilledResult<Song> => r.status === 'fulfilled')
-          .map((r) => ({ ...r.value, source: 'repo' as const }))
+          .filter((r) => r.status === 'fulfilled')
+          .map((r) => ({ ...(r as PromiseFulfilledResult<Song>).value, source: 'repo' as const }))
 
         if (!cancelled) {
           cache = fetched
