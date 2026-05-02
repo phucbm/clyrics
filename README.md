@@ -15,9 +15,13 @@ C-Lyrics is a community hub for Chinese music fans and language learners worldwi
 [clyrics.phucbm.com](https://clyrics.phucbm.com)
 
 ## Contribute Songs
-Open C-Lyrics, load or create a song, hit the PR button. No GitHub account setup needed on your end - just a username and personal access token with `repo` scope. Your song goes straight to the community library.
+Open C-Lyrics, load or create a song, hit the PR button. No account or token needed - just pick a nickname. Your song goes straight to the community library.
 
 Want to contribute to the app itself? PRs and issues welcome at [phucbm/clyrics](https://github.com/phucbm/clyrics).
+
+## Docs
+- [Lyrics Generation](.claude/docs/lyrics-generation.md) — how AI pinyin + translation works
+- [Contribution Flow](.claude/docs/contribution-flow.md) — how songs get submitted to the community library
 
 ## Dev Setup
 ```bash
