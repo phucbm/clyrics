@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { nanoid } from 'nanoid'
-import { ArrowCounterClockwise, CopySimple, ArrowsClockwise } from '@phosphor-icons/react'
+import { ArrowCounterClockwise, CopySimple, Sparkle } from '@phosphor-icons/react'
 import { useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
@@ -175,7 +175,7 @@ export function EditSongSheet({ song }: Props) {
               className="shrink-0 p-2 rounded-xl border border-[#E0E0DC] text-[#888] hover:text-[#0F0F0F] disabled:opacity-40 transition-colors"
               title="Regenerate pinyin"
             >
-              <ArrowsClockwise size={14} className={generatingPinyin ? 'animate-spin' : ''} />
+              <Sparkle size={14} className={generatingPinyin ? 'animate-pulse' : ''} />
             </button>
           )}
         </div>
