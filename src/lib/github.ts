@@ -1,5 +1,6 @@
 import { Octokit } from 'octokit'
 import { SignJWT, importPKCS8 } from 'jose'
+import { nanoid } from 'nanoid'
 import type { Song } from '../types'
 
 const OWNER = 'phucbm'
@@ -106,12 +107,15 @@ async function createPR(
   filePath: string,
   fileSha?: string,
 ): Promise<string> {
-  const branch = `song/${slugify(song.artist)}-${slugify(song.title)}-${Date.now()}`
+  const baseName = [song.artist, song.title].filter(Boolean).join('-') || song.id
+  const branch = `song/${baseName}-${nanoid(6)}`
 
   const { data: ref } = await octokit.rest.git.getRef({ owner: OWNER, repo: REPO, ref: 'heads/main' })
   const mainSha = ref.object.sha
 
-  const finalSong = { ...song, authors: [...new Set([...song.authors, nickname])] }
+  // Strip internal-only fields before publishing
+  const { source: _source, copiedFrom: _copiedFrom, ...songData } = song
+  const finalSong = { ...songData, authors: [...new Set([...song.authors, nickname])] }
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalSong, null, 2))))
 
   await octokit.rest.git.createRef({ owner: OWNER, repo: REPO, ref: `refs/heads/${branch}`, sha: mainSha })
@@ -133,7 +137,19 @@ async function createPR(
     head: branch,
     base: 'main',
     body: prBody(song, nickname),
+    labels: [mode],
   })
+
+  try {
+    await octokit.rest.pulls.requestReviewers({
+      owner: OWNER,
+      repo: REPO,
+      pull_number: pr.number,
+      reviewers: [OWNER],
+    })
+  } catch {
+    // reviewer request non-fatal
+  }
 
   return pr.html_url
 }
@@ -156,5 +172,5 @@ export async function contributeEditSong(song: Song, nickname: string, originalI
   } catch {
     // file gone — still submit, it'll create
   }
-  return createPR(octokit, song, nickname, 'edit', filePath, fileSha)
+  return createPR(octokit, { ...song, id: originalId }, nickname, 'edit', filePath, fileSha)
 }

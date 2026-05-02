@@ -640,11 +640,13 @@ export function PlayScreen() {
               <line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
           </FAB>
-          {song?.source === 'repo' && (
-            <FAB onClick={confirmForkAndEdit} variant="secondary" label="Save to My Songs">
-              <PencilSimple size={20} />
-            </FAB>
-          )}
+          <FAB
+            onClick={song?.source === 'repo' ? confirmForkAndEdit : () => navigateTo('edit')}
+            variant="secondary"
+            label={song?.source === 'repo' ? 'Save to My Songs' : 'Edit'}
+          >
+            <PencilSimple size={20} />
+          </FAB>
           <FAB onClick={() => navigateTo(prevScreen === 'home' ? 'home' : 'edit')} variant="secondary" label="Back">
             <ArrowLeft size={20} />
           </FAB>
