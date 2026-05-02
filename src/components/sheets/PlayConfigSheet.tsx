@@ -2,38 +2,39 @@ import { useActiveSong } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { ToggleRow } from '../ui/Toggle'
-import { CaretLeft, CaretRight, Play } from '@phosphor-icons/react'
+import { Play } from '@phosphor-icons/react'
+// import { CaretLeft, CaretRight, Play } from '@phosphor-icons/react'  // kept for old arrow speed UI
 
-const SPEED_PRESETS = [0, 0.2, 0.5, 0.8, 1, 2, 3]
+// New simplified speed presets
+const SPEED_PRESETS = [
+  { value: 0,   label: 'Off'    },
+  { value: 0.1, label: 'Slow'   },
+  { value: 0.2, label: 'Normal' },
+  { value: 0.4, label: 'Fast'   },
+]
 
-export function PlayConfigSheet() {
+// Old presets — kept for reference if arrow UI is re-enabled
+// const SPEED_PRESETS_OLD = [0, 0.2, 0.5, 0.8, 1, 2, 3]
+
+interface PlayConfigSheetProps {
+  isPlaying?: boolean
+}
+
+export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
   const { playConfig, setPlayConfig, navigateTo, setAutoplay, primaryLang, secondaryLang, setLangs } = useUIStore()
   const { close } = useBottomSheet()
   const song = useActiveSong()
 
-  // Available langs derived from song translations
   const availableLangs = song
     ? [...new Set(song.lines.flatMap((l) => l.translations.map((t) => t.lang)))]
     : []
 
   function handlePlay() {
-    setAutoplay(true)
+    if (!isPlaying) setAutoplay(true)
     close()
     navigateTo('play')
   }
 
-  const speed = playConfig.scrollSpeed
-  const idx = SPEED_PRESETS.indexOf(speed)
-  const safeIdx = idx >= 0 ? idx : 0
-
-  function decrease() {
-    if (safeIdx > 0) setPlayConfig({ scrollSpeed: SPEED_PRESETS[safeIdx - 1] })
-  }
-  function increase() {
-    if (safeIdx < SPEED_PRESETS.length - 1) setPlayConfig({ scrollSpeed: SPEED_PRESETS[safeIdx + 1] })
-  }
-
-  const label = speed === 0 ? 'Off' : speed % 1 === 0 ? speed.toString() : speed.toFixed(1)
   const activeCount = (playConfig.translation ? 1 : 0) + (playConfig.secondLang ? 1 : 0)
 
   function isLangActive(lang: string) {
@@ -95,7 +96,27 @@ export function PlayConfigSheet() {
         onChange={(v) => setPlayConfig({ loop: v })}
       />
 
-      {/* Scroll speed */}
+      {/* Auto scroll — segmented button group */}
+      <div className="pt-3 pb-1">
+        <p className="text-sm font-medium text-[#0F0F0F] mb-3">Auto scroll</p>
+        <div className="flex rounded-xl overflow-hidden border border-[#E4E2DE]">
+          {SPEED_PRESETS.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => setPlayConfig({ scrollSpeed: value })}
+              className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
+                playConfig.scrollSpeed === value
+                  ? 'bg-[#0F0F0F] text-white'
+                  : 'text-[#555] hover:bg-[#F0F0EC]'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Old arrow-based speed UI — kept for reference, not active
       <div className="pt-3 pb-1 flex items-center justify-between">
         <p className="text-sm font-medium text-[#0F0F0F]">Auto scroll</p>
         <div className="flex items-center gap-2">
@@ -109,21 +130,22 @@ export function PlayConfigSheet() {
           <span className="text-sm tabular-nums w-8 text-center font-medium">{label}</span>
           <button
             onClick={increase}
-            disabled={safeIdx === SPEED_PRESETS.length - 1}
+            disabled={safeIdx === SPEED_PRESETS_OLD.length - 1}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-[#0F0F0F] hover:bg-[#F0F0EC] disabled:opacity-30 transition-colors"
           >
             <CaretRight size={14} weight="bold" />
           </button>
         </div>
       </div>
+      */}
 
       <div className="pt-4">
         <button
           onClick={handlePlay}
           className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
         >
-          <Play size={16} weight="fill" />
-          Play
+          {!isPlaying && <Play size={16} weight="fill" />}
+          {isPlaying ? 'Apply' : 'Apply and Play'}
         </button>
       </div>
     </div>

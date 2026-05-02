@@ -5,12 +5,13 @@ import {useUIStore} from '../../store/useUIStore'
 import {FAB} from '../shell/FAB'
 import {useYouTubePlayer} from '../../hooks/useYouTubePlayer'
 import {extractVideoId} from '../../hooks/useYouTube'
-import {ArrowLeft, Pause, Play, PencilSimple} from '@phosphor-icons/react'
+import {ArrowLeft, MusicNote, Pause, Play, PencilSimple} from '@phosphor-icons/react'
 import {FABGroup} from '../shell/FABGroup'
+import {useBottomSheet} from '../shell/BottomSheet'
+import {PlayConfigSheet} from '../sheets/PlayConfigSheet'
 import type {Song} from '../../types'
 
 const AVG_LINE_PX = 80   // estimated px per lyric group
-const SPEED_PRESETS = [0, 0.2, 0.4, 0.6, 0.8, 1, 2, 3]
 
 function toPxPerSec(linesPerSec: number) {
     return linesPerSec * AVG_LINE_PX
@@ -48,9 +49,10 @@ interface PiPProps {
   containerRef: (el: HTMLDivElement | null) => void
   progressBarRef: RefObject<HTMLDivElement | null>
   onReveal?: () => void
+  onProgressDrag: (e: React.PointerEvent<HTMLDivElement>) => void
 }
 
-function DraggablePiP({ containerRef, progressBarRef, onReveal }: PiPProps) {
+function DraggablePiP({ containerRef, progressBarRef, onReveal, onProgressDrag }: PiPProps) {
   const [pip, setPip] = useState(loadPiP)
   const pipRef = useRef(pip)
 
@@ -113,9 +115,15 @@ function DraggablePiP({ containerRef, progressBarRef, onReveal }: PiPProps) {
     >
       <div ref={containerRef} className="w-full h-full bg-black" style={{ pointerEvents: 'none' }} />
 
-      {/* Progress bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-        <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
+      {/* Progress bar — taller touch target for drag-to-seek */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-6 flex items-end cursor-pointer"
+        onPointerDown={onProgressDrag}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="w-full h-1 bg-white/20 pointer-events-none">
+          <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
+        </div>
       </div>
 
       {/* Resize grip — bottom-right corner */}
@@ -132,23 +140,60 @@ function DraggablePiP({ containerRef, progressBarRef, onReveal }: PiPProps) {
   )
 }
 
+function ForkConfirmSheet({ onConfirm }: { onConfirm: () => void }) {
+  const { close } = useBottomSheet()
+
+  function handleConfirm() {
+    close()
+    onConfirm()
+  }
+
+  return (
+    <div className="px-5 pb-8 space-y-4">
+      <p className="text-sm text-[#444] leading-relaxed">
+        A personal copy of this song will be saved to your device. You own it — edit freely, then share your work back as a new song or as improvements to this one.
+      </p>
+      <div className="flex gap-3">
+        <button
+          onClick={close}
+          className="flex-1 py-3.5 rounded-xl border border-[#E4E2DE] text-sm font-medium text-[#555] hover:bg-[#F0F0EC] transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleConfirm}
+          className="flex-1 py-3.5 rounded-xl bg-[#0F0F0F] text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+        >
+          Make a copy
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function PlayScreen() {
   const song = useActiveSong()
   const {addSong, setActiveSong} = useSongStore()
-  const {playConfig, setPlayConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
+  const {playConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
+  const {open: openSheet} = useBottomSheet()
 
-  function handleForkAndEdit() {
-    if (!song) return
-    const forked: Song = {...song, source: 'local', createdAt: Date.now()}
-    addSong(forked)
-    setActiveSong(forked)
-    navigateTo('edit')
+  function confirmForkAndEdit() {
+    openSheet(
+      <ForkConfirmSheet onConfirm={() => {
+        if (!song) return
+        const forked: Song = {...song, source: 'local', createdAt: Date.now()}
+        addSong(forked)
+        setActiveSong(forked)
+        navigateTo('edit')
+      }} />,
+      'Edit this song'
+    )
   }
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
-    const contentRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -160,7 +205,6 @@ export function PlayScreen() {
   const handleEnded = useCallback(() => {
     setLoopCountdown(null)
     if (playConfig.loop) {
-      // hook already seeks to 0 + plays; sync scroll after it settles
       setTimeout(() => syncToVideo(), 200)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,22 +212,19 @@ export function PlayScreen() {
 
   const { containerRef, isPlaying, isReady, play, togglePlay, seekTo, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop, handleEnded)
   const progressBarRef = useRef<HTMLDivElement>(null)
-  const [scrubPct, setScrubPct] = useState(0)
-  const [showScrubber, setShowScrubber] = useState(false)
-  const [scrubValue, setScrubValue] = useState(0)
 
-    // Refs so wheel/touch handlers always see current values without re-registering
-    const speedRef = useRef(0)
-    const isPlayingRef = useRef(false)
-    const videoIdRef = useRef<string | null>(null)
-    const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-    const touchStartYRef = useRef(0)
-    const touchScrollPosRef = useRef(0)
+  // Refs so wheel/touch handlers always see current values without re-registering
+  const speedRef = useRef(0)
+  const isPlayingRef = useRef(false)
+  const videoIdRef = useRef<string | null>(null)
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const touchStartYRef = useRef(0)
+  const touchScrollPosRef = useRef(0)
 
-  // Auto-hide controls logic
+  // Auto-hide controls — 2s after last action
   const scheduleHide = useCallback(() => {
     clearTimeout(hideTimerRef.current)
-    hideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000)
+    hideTimerRef.current = setTimeout(() => setControlsVisible(false), 2000)
   }, [])
 
   const revealControls = useCallback(() => {
@@ -199,11 +240,10 @@ export function PlayScreen() {
     }
   }, [autoplay, isReady, play, setAutoplay])
 
-  // Poll video progress for the % button + loop countdown
+  // Poll video progress for loop countdown
   useEffect(() => {
-    if (!videoId) { setScrubPct(0); return }
+    if (!videoId) return
     const id = setInterval(() => {
-      setScrubPct(Math.round(getProgress() * 100))
       if (playConfig.loop && isPlaying) {
         const { currentTime, duration } = getTimeInfo()
         const remaining = duration - currentTime
@@ -242,165 +282,191 @@ export function PlayScreen() {
     }
   }, [isPlaying, revealControls])
 
-    // CSS-transition progress bar — mirrors scroll animation approach
-    function startProgressAnimation() {
-        const el = progressBarRef.current
-        if (!el) return
-        const { currentTime, duration } = getTimeInfo()
-        if (!duration) return
-        const pct = (currentTime / duration) * 100
-        const remaining = duration - currentTime
-        el.style.transition = 'none'
-        el.style.width = `${pct}%`
-        void el.offsetWidth
-        el.style.transition = `width ${remaining}s linear`
-        el.style.width = '100%'
+  // CSS-transition progress bar
+  function startProgressAnimation() {
+    const el = progressBarRef.current
+    if (!el) return
+    const { currentTime, duration } = getTimeInfo()
+    if (!duration) return
+    const pct = (currentTime / duration) * 100
+    const remaining = duration - currentTime
+    el.style.transition = 'none'
+    el.style.width = `${pct}%`
+    void el.offsetWidth
+    el.style.transition = `width ${remaining}s linear`
+    el.style.width = '100%'
+  }
+
+  function pauseProgressAnimation() {
+    const el = progressBarRef.current
+    if (!el) return
+    const computed = getComputedStyle(el).width
+    const parent = el.parentElement
+    const pct = parent ? (parseFloat(computed) / parent.clientWidth) * 100 : 0
+    el.style.transition = 'none'
+    el.style.width = `${pct}%`
+  }
+
+  // ── Transform-based auto-scroll ───────────────────────────────────────────
+
+  function getScrollPos(): number {
+    if (!contentRef.current) return 0
+    const t = getComputedStyle(contentRef.current).transform
+    if (t === 'none') return 0
+    return -new DOMMatrix(t).m42
+  }
+
+  function getMaxScroll(): number {
+    if (!contentRef.current || !bodyRef.current) return 0
+    return Math.max(0, contentRef.current.scrollHeight - bodyRef.current.clientHeight)
+  }
+
+  function setScrollImmediate(px: number) {
+    const el = contentRef.current
+    if (!el) return
+    el.style.transition = 'none'
+    el.style.transform = `translateY(${-px}px)`
+  }
+
+  function startScrollAnimation(fromPx: number) {
+    const el = contentRef.current
+    if (!el) return
+    const speed = speedRef.current
+    if (speed === 0) return
+    const max = getMaxScroll()
+    const clamped = Math.min(fromPx, max)
+    if (clamped >= max) return
+    const duration = (max - clamped) / speed
+
+    el.style.transition = 'none'
+    el.style.transform = `translateY(${-clamped}px)`
+    void el.offsetHeight
+    el.style.transition = `transform ${duration}s linear`
+    el.style.transform = `translateY(${-max}px)`
+  }
+
+  function pauseAnimation(): number {
+    const pos = getScrollPos()
+    setScrollImmediate(pos)
+    return pos
+  }
+
+  function resumeIfActive() {
+    if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
+      startScrollAnimation(getScrollPos())
     }
+  }
 
-    function pauseProgressAnimation() {
-        const el = progressBarRef.current
-        if (!el) return
-        const computed = getComputedStyle(el).width
-        const parent = el.parentElement
-        const pct = parent ? (parseFloat(computed) / parent.clientWidth) * 100 : 0
-        el.style.transition = 'none'
-        el.style.width = `${pct}%`
-    }
-
-    // ── Transform-based auto-scroll ───────────────────────────────────────────
-
-    function getScrollPos(): number {
-        if (!contentRef.current) return 0
-        const t = getComputedStyle(contentRef.current).transform
-        if (t === 'none') return 0
-        return -new DOMMatrix(t).m42
-    }
-
-    function getMaxScroll(): number {
-        if (!contentRef.current || !bodyRef.current) return 0
-        return Math.max(0, contentRef.current.scrollHeight - bodyRef.current.clientHeight)
-    }
-
-    function setScrollImmediate(px: number) {
-        const el = contentRef.current
-        if (!el) return
-        el.style.transition = 'none'
-        el.style.transform = `translateY(${-px}px)`
-    }
-
-    function startScrollAnimation(fromPx: number) {
-        const el = contentRef.current
-        if (!el) return
-        const speed = speedRef.current
-        if (speed === 0) return
-        const max = getMaxScroll()
-        const clamped = Math.min(fromPx, max)
-        if (clamped >= max) return
-        const duration = (max - clamped) / speed
-
-        el.style.transition = 'none'
-        el.style.transform = `translateY(${-clamped}px)`
-        void el.offsetHeight // force reflow so browser registers the no-transition position
-        el.style.transition = `transform ${duration}s linear`
-        el.style.transform = `translateY(${-max}px)`
-    }
-
-    function pauseAnimation(): number {
-        const pos = getScrollPos()
-        setScrollImmediate(pos)
-        return pos
-    }
-
-    function resumeIfActive() {
-        if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
-            startScrollAnimation(getScrollPos())
-        }
-    }
-
-    // Wheel — intercept on the overflow:hidden container
-    useEffect(() => {
-        const el = bodyRef.current
-        if (!el) return
-
-        function onWheel(e: WheelEvent) {
-            e.preventDefault()
-            const current = pauseAnimation()
-            const max = getMaxScroll()
-            const next = Math.max(0, Math.min(max, current + e.deltaY))
-            setScrollImmediate(next)
-            clearTimeout(resumeTimerRef.current)
-            resumeTimerRef.current = setTimeout(resumeIfActive, 500)
-        }
-
-        el.addEventListener('wheel', onWheel, {passive: false})
-        return () => el.removeEventListener('wheel', onWheel)
-  }, [])
-
-    // Touch — intercept on the overflow:hidden container
+  // Wheel — intercept on the overflow:hidden container
   useEffect(() => {
-      const el = bodyRef.current
-      if (!el) return
+    const el = bodyRef.current
+    if (!el) return
 
-      function onTouchStart(e: TouchEvent) {
-          touchStartYRef.current = e.touches[0].clientY
-          touchScrollPosRef.current = pauseAnimation()
-          clearTimeout(resumeTimerRef.current)
-      }
+    function onWheel(e: WheelEvent) {
+      e.preventDefault()
+      const current = pauseAnimation()
+      const max = getMaxScroll()
+      const next = Math.max(0, Math.min(max, current + e.deltaY))
+      setScrollImmediate(next)
+      clearTimeout(resumeTimerRef.current)
+      resumeTimerRef.current = setTimeout(resumeIfActive, 500)
+    }
 
-      function onTouchMove(e: TouchEvent) {
-          e.preventDefault()
-          const dy = touchStartYRef.current - e.touches[0].clientY
-          const max = getMaxScroll()
-          const next = Math.max(0, Math.min(max, touchScrollPosRef.current + dy))
-          setScrollImmediate(next)
-      }
+    el.addEventListener('wheel', onWheel, {passive: false})
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
 
-      function onTouchEnd() {
-          resumeTimerRef.current = setTimeout(resumeIfActive, 500)
-      }
+  // Touch — intercept on the overflow:hidden container
+  useEffect(() => {
+    const el = bodyRef.current
+    if (!el) return
 
-      el.addEventListener('touchstart', onTouchStart, {passive: true})
-      el.addEventListener('touchmove', onTouchMove, {passive: false})
-      el.addEventListener('touchend', onTouchEnd, {passive: true})
-      return () => {
-          el.removeEventListener('touchstart', onTouchStart)
-          el.removeEventListener('touchmove', onTouchMove)
-          el.removeEventListener('touchend', onTouchEnd)
+    function onTouchStart(e: TouchEvent) {
+      touchStartYRef.current = e.touches[0].clientY
+      touchScrollPosRef.current = pauseAnimation()
+      clearTimeout(resumeTimerRef.current)
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      e.preventDefault()
+      const dy = touchStartYRef.current - e.touches[0].clientY
+      const max = getMaxScroll()
+      const next = Math.max(0, Math.min(max, touchScrollPosRef.current + dy))
+      setScrollImmediate(next)
+    }
+
+    function onTouchEnd() {
+      resumeTimerRef.current = setTimeout(resumeIfActive, 500)
+    }
+
+    el.addEventListener('touchstart', onTouchStart, {passive: true})
+    el.addEventListener('touchmove', onTouchMove, {passive: false})
+    el.addEventListener('touchend', onTouchEnd, {passive: true})
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove', onTouchMove)
+      el.removeEventListener('touchend', onTouchEnd)
     }
   }, [])
 
-    // Start/stop animation on play state or speed change
-    useEffect(() => {
-        speedRef.current = toPxPerSec(playConfig.scrollSpeed)
-        isPlayingRef.current = isPlaying
-        videoIdRef.current = videoId
+  // Start/stop animation on play state or speed change
+  useEffect(() => {
+    speedRef.current = toPxPerSec(playConfig.scrollSpeed)
+    isPlayingRef.current = isPlaying
+    videoIdRef.current = videoId
 
-        if (videoId && isPlaying) {
-            syncToVideo()
-        } else if (speedRef.current > 0 && !videoId) {
-            startScrollAnimation(getScrollPos())
-        } else {
-            pauseAnimation()
-            if (videoId) pauseProgressAnimation()
-        }
+    if (videoId && isPlaying) {
+      syncToVideo()
+    } else if (speedRef.current > 0 && !videoId) {
+      startScrollAnimation(getScrollPos())
+    } else {
+      pauseAnimation()
+      if (videoId) pauseProgressAnimation()
+    }
   }, [playConfig.scrollSpeed, videoId, isPlaying])
 
-    function syncToVideo() {
-        const progress = getProgress()
-        const max = getMaxScroll()
-        const targetPx = progress * max
-        pauseAnimation()
-        setScrollImmediate(targetPx)
-        pauseProgressAnimation()
-        setTimeout(() => {
-            if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
-                startScrollAnimation(targetPx)
-            }
-            if (isPlayingRef.current) startProgressAnimation()
-        }, 50)
+  function syncToVideo() {
+    const progress = getProgress()
+    const max = getMaxScroll()
+    const targetPx = progress * max
+    pauseAnimation()
+    setScrollImmediate(targetPx)
+    pauseProgressAnimation()
+    setTimeout(() => {
+      if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
+        startScrollAnimation(targetPx)
+      }
+      if (isPlayingRef.current) startProgressAnimation()
+    }, 50)
+  }
+
+  // Drag-to-seek on progress bar (mobile inline + PiP)
+  function handleProgressDrag(e: React.PointerEvent<HTMLDivElement>) {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+
+    function seek(clientX: number) {
+      const f = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+      seekTo(f)
+      const bar = progressBarRef.current
+      if (bar) {
+        bar.style.transition = 'none'
+        bar.style.width = `${f * 100}%`
+      }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    seek(e.clientX)
+
+    function onMove(ev: PointerEvent) { seek(ev.clientX) }
+    function onUp() {
+      document.removeEventListener('pointermove', onMove)
+      document.removeEventListener('pointerup', onUp)
+    }
+    document.addEventListener('pointermove', onMove)
+    document.addEventListener('pointerup', onUp)
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (!song) {
     return (
@@ -417,63 +483,76 @@ export function PlayScreen() {
   const fabVisible = !focusMode || controlsVisible
 
   return (
-    <div className="h-full flex flex-col relative">
+    <div className="h-full flex flex-col relative" style={{paddingTop: 'env(safe-area-inset-top)'}}>
 
-        {/* Mobile video — outside scroll container so sticky isn't needed */}
-        {videoId && !isDesktop && (
-            <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={revealControls}>
-                <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
-                <img src="/icon.png" alt="" className="absolute bottom-3 right-3 w-7 h-7 rounded-md opacity-60 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                    <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
-                </div>
+      {/* Mobile video — outside scroll container so sticky isn't needed */}
+      {videoId && !isDesktop && (
+        <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={revealControls}>
+          <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
+          <img src="/icon.png" alt="" className="absolute bottom-3 right-3 w-7 h-7 rounded-md opacity-60 pointer-events-none" />
+
+          {/* Progress bar — taller touch target for drag-to-seek */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-6 flex items-end cursor-pointer"
+            onPointerDown={handleProgressDrag}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-full h-1 bg-white/20 pointer-events-none">
+              <div ref={progressBarRef} className="h-full bg-white/80" style={{ width: '0%' }} />
             </div>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* Scroll area — overflow:hidden, content moves via translateY */}
-        <div ref={bodyRef} className="flex-1 overflow-hidden relative">
-            {/* Top fade */}
-            <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-            {/* Bottom fade */}
-            <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-            <div ref={contentRef} style={{willChange: 'transform'}}>
+      {/* Scroll area — overflow:hidden, content moves via translateY */}
+      <div ref={bodyRef} className="flex-1 overflow-hidden relative">
+        {/* Top fade */}
+        <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+        <div ref={contentRef} style={{willChange: 'transform'}}>
 
-                <div style={{height: videoId && !isDesktop ? '20vh' : '42vh'}}/>
+          <div style={{height: videoId && !isDesktop ? '20vh' : '42vh'}}/>
 
-                <div className="px-6">
-                    <h2 className="text-3xl font-bold tracking-tight text-[#0F0F0F] leading-tight">{song.title}</h2>
-                    {showArtist && <p className="text-sm text-[#888] mt-1.5">{song.artist}</p>}
+          <div className="px-6">
+            <h2 className="text-3xl font-bold tracking-tight text-[#0F0F0F] leading-tight">{song.title}</h2>
+            {showArtist && <p className="text-sm text-[#888] mt-1.5">{song.artist}</p>}
+          </div>
+
+          <div className="h-12"/>
+
+          <div className="px-6 pb-40 space-y-8">
+            {song.lines.map((line) => {
+              const primaryText = line.translations.find((t) => t.lang === primaryLang)?.text
+              const secondaryText = secondaryLang
+                ? line.translations.find((t) => t.lang === secondaryLang)?.text
+                : undefined
+              return (
+                <div key={line.id}>
+                  {playConfig.pinyin && line.pinyin && (
+                    <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
+                  )}
+                  <p className="text-2xl font-semibold text-[#0F0F0F] leading-tight tracking-tight">{line.chinese}</p>
+                  {playConfig.translation && primaryText && (
+                    <p className="text-sm italic text-[#555] mt-1.5 leading-relaxed">{primaryText}</p>
+                  )}
+                  {playConfig.secondLang && secondaryText && (
+                    <p className="text-sm text-[#777] mt-1 leading-relaxed">{secondaryText}</p>
+                  )}
                 </div>
-
-                <div className="h-12"/>
-
-                <div className="px-6 pb-40 space-y-8">
-                    {song.lines.map((line) => {
-                        const primaryText = line.translations.find((t) => t.lang === primaryLang)?.text
-                        const secondaryText = secondaryLang
-                            ? line.translations.find((t) => t.lang === secondaryLang)?.text
-                            : undefined
-                        return (
-                            <div key={line.id}>
-                                {playConfig.pinyin && line.pinyin && (
-                                    <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
-                                )}
-                                <p className="text-2xl font-semibold text-[#0F0F0F] leading-tight tracking-tight">{line.chinese}</p>
-                                {playConfig.translation && primaryText && (
-                                    <p className="text-sm italic text-[#555] mt-1.5 leading-relaxed">{primaryText}</p>
-                                )}
-                                {playConfig.secondLang && secondaryText && (
-                                    <p className="text-sm text-[#777] mt-1 leading-relaxed">{secondaryText}</p>
-                                )}
-                            </div>
-                        )
-                    })}
-                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
 
       {videoId && isDesktop && screen === 'play' && createPortal(
-        <DraggablePiP containerRef={containerRef} progressBarRef={progressBarRef} onReveal={revealControls} />,
+        <DraggablePiP
+          containerRef={containerRef}
+          progressBarRef={progressBarRef}
+          onReveal={revealControls}
+          onProgressDrag={handleProgressDrag}
+        />,
         document.body
       )}
 
@@ -501,7 +580,7 @@ export function PlayScreen() {
       <div className="absolute bottom-6 left-5 z-20">
         <FABGroup side="left" className="flex flex-col items-center gap-3" visible={fabVisible}>
           {song?.source === 'repo' && (
-            <FAB onClick={handleForkAndEdit} variant="secondary" label="Save to My Songs">
+            <FAB onClick={confirmForkAndEdit} variant="secondary" label="Save to My Songs">
               <PencilSimple size={20} />
             </FAB>
           )}
@@ -511,34 +590,22 @@ export function PlayScreen() {
         </FABGroup>
       </div>
 
-      {/* Speed + Play/Pause FABs — both modes, auto-hide in focus */}
+      {/* Play config + Play/Pause FABs */}
       <div className="absolute bottom-6 right-5 z-20">
         <FABGroup side="right" className="flex flex-col items-center gap-3" visible={fabVisible}>
+          {/* Sync button — hidden temporarily, keep for future use */}
           {videoId && (
-              <FAB onClick={() => { setScrubValue(scrubPct); setShowScrubber(v => !v) }} variant="secondary" label="Video progress">
-                  <span className="text-xs font-bold tabular-nums leading-none">{scrubPct}%</span>
-              </FAB>
-          )}
-          {videoId && (
+            <div className="hidden">
               <FAB onClick={syncToVideo} variant="secondary" label="Sync to video">
-                  <span className="text-xs font-bold">sync</span>
+                <span className="text-xs font-bold">sync</span>
               </FAB>
+            </div>
           )}
-          {videoId && <FAB
-              onClick={() => {
-                  const idx = SPEED_PRESETS.indexOf(playConfig.scrollSpeed)
-                  const next = idx >= 0 ? (idx + 1) % SPEED_PRESETS.length : 0
-                  setPlayConfig({scrollSpeed: SPEED_PRESETS[next]})
-              }}
-              variant="secondary"
-              label="Scroll speed"
-          >
-          <span className="text-xs font-bold tabular-nums leading-none">
-            {playConfig.scrollSpeed === 0 ? 'off' : playConfig.scrollSpeed % 1 === 0
-                ? playConfig.scrollSpeed.toString()
-                : playConfig.scrollSpeed.toFixed(1)}
-          </span>
-          </FAB>}
+          {videoId && (
+            <FAB onClick={() => openSheet(<PlayConfigSheet isPlaying={isPlaying} />, 'Play Config')} variant="secondary" label="Play config">
+              <MusicNote size={20} />
+            </FAB>
+          )}
           {videoId && (
             <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
               {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
@@ -553,33 +620,6 @@ export function PlayScreen() {
           <div className="px-4 py-2 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm tabular-nums">
             Loop in {loopCountdown}s
           </div>
-        </div>
-      )}
-
-      {/* Video scrubber popup */}
-      {showScrubber && videoId && (
-        <div className="absolute bottom-6 right-[4.5rem] z-30 bg-white rounded-2xl shadow-xl border border-black/10 p-4 w-56">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-xs font-semibold text-[#333]">{scrubValue}%</span>
-            <button
-              onClick={() => setShowScrubber(false)}
-              className="text-[#999] hover:text-[#333] text-xs leading-none"
-            >✕</button>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={scrubValue}
-            onChange={e => {
-              const v = Number(e.target.value)
-              setScrubValue(v)
-              seekTo(v / 100)
-            }}
-            onPointerUp={() => setTimeout(syncToVideo, 150)}
-            className="w-full accent-[#0F0F0F]"
-          />
         </div>
       )}
     </div>

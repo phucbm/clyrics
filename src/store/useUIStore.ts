@@ -33,7 +33,7 @@ export const useUIStore = create<UIStore>()(
         pinyin: true,
         translation: true,
         secondLang: false,
-        scrollSpeed: 1,
+        scrollSpeed: 0.2,
         loop: true,
       },
       generateConfig: {
