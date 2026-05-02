@@ -35,6 +35,7 @@ export const useUIStore = create<UIStore>()(
         secondLang: false,
         scrollSpeed: 0.2,
         loop: true,
+        hideVideo: false,
       },
       generateConfig: {
         translateLang: 'Vietnamese',

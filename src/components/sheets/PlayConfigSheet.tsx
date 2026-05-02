@@ -96,6 +96,14 @@ export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
         onChange={(v) => setPlayConfig({ loop: v })}
       />
 
+      {song?.youtubeUrl && (
+        <ToggleRow
+          label="Hide video"
+          checked={playConfig.hideVideo}
+          onChange={(v) => setPlayConfig({ hideVideo: v })}
+        />
+      )}
+
       {/* Auto scroll — segmented button group */}
       <div className="pt-3 pb-1">
         <p className="text-sm font-medium text-[#0F0F0F] mb-3">Auto scroll</p>

@@ -31,6 +31,7 @@ export interface PlayConfig {
   secondLang: boolean
   scrollSpeed: number
   loop: boolean
+  hideVideo: boolean
 }
 
 export interface GenerateConfig {

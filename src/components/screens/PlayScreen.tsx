@@ -401,7 +401,7 @@ export function PlayScreen() {
   }
 
   function resumeIfActive() {
-    if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
+    if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current || playConfig.hideVideo)) {
       startScrollAnimation(getScrollPos())
     }
   }
@@ -464,15 +464,16 @@ export function PlayScreen() {
     isPlayingRef.current = isPlaying
     videoIdRef.current = videoId
 
-    if (videoId && isPlaying) {
+    const treatAsNoVideo = !videoId || playConfig.hideVideo
+    if (videoId && !playConfig.hideVideo && isPlaying) {
       syncToVideo()
-    } else if (speedRef.current > 0 && !videoId) {
+    } else if (speedRef.current > 0 && treatAsNoVideo) {
       startScrollAnimation(getScrollPos())
     } else {
       pauseAnimation()
-      if (videoId) pauseProgressAnimation()
+      if (videoId && !playConfig.hideVideo) pauseProgressAnimation()
     }
-  }, [playConfig.scrollSpeed, videoId, isPlaying])
+  }, [playConfig.scrollSpeed, playConfig.hideVideo, videoId, isPlaying])
 
   function syncToVideo() {
     const progress = getProgress()
@@ -482,7 +483,7 @@ export function PlayScreen() {
     setScrollImmediate(targetPx)
     pauseProgressAnimation()
     setTimeout(() => {
-      if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current)) {
+      if (speedRef.current > 0 && (!videoIdRef.current || isPlayingRef.current || playConfig.hideVideo)) {
         startScrollAnimation(targetPx)
       }
       if (isPlayingRef.current) startProgressAnimation()
@@ -535,7 +536,7 @@ export function PlayScreen() {
     <div className="h-full flex flex-col relative">
 
       {/* Mobile video — outside scroll container so sticky isn't needed */}
-      {videoId && !isDesktop && (
+      {videoId && !isDesktop && !playConfig.hideVideo && (
         <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={toggleControls}>
           <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
           <img src="/icon.png" alt="" className="absolute bottom-3 right-3 w-7 h-7 rounded-md opacity-60 pointer-events-none" />
@@ -561,7 +562,7 @@ export function PlayScreen() {
         <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
         <div ref={contentRef} style={{willChange: 'transform'}}>
 
-          <div style={{height: videoId && !isDesktop ? '20vh' : '42vh'}}/>
+          <div style={{height: videoId && !isDesktop && !playConfig.hideVideo ? '20vh' : '42vh'}}/>
 
           <div className="px-6">
             <h2 className="text-3xl font-bold tracking-tight text-[#0F0F0F] leading-tight">{song.title}</h2>
@@ -595,7 +596,7 @@ export function PlayScreen() {
         </div>
       </div>
 
-      {videoId && isDesktop && screen === 'play' && createPortal(
+      {videoId && isDesktop && !playConfig.hideVideo && screen === 'play' && createPortal(
         <DraggablePiP
           containerRef={containerRef}
           progressBarRef={progressBarRef}
@@ -607,7 +608,7 @@ export function PlayScreen() {
 
       {/* Bottom touch/hover zone — focus mode only, reveals controls */}
       {/* Desktop: always show for hover-to-reveal. Mobile: only when no video (youtube tap handles it otherwise) */}
-      {focusMode && (isDesktop || !videoId) && (
+      {focusMode && (isDesktop || !videoId || playConfig.hideVideo) && (
         <div
           className="absolute bottom-0 inset-x-0 h-[100px] z-10"
           onPointerDown={isDesktop ? undefined : revealControls}
@@ -622,7 +623,7 @@ export function PlayScreen() {
             <span className="px-4 py-2 bg-black/60 text-white/90 text-xs rounded-full backdrop-blur-sm">
               {isDesktop
                 ? 'Hover here to show pause button'
-                : videoId
+                : videoId && !playConfig.hideVideo
                   ? 'Tap on youtube to show pause button'
                   : 'Tap here to show pause button'}
             </span>
@@ -669,7 +670,7 @@ export function PlayScreen() {
               <MusicNote size={20} />
             </FAB>
           )}
-          {videoId && (
+          {videoId && !playConfig.hideVideo && (
             <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
               {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
             </FAB>
