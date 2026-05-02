@@ -1,6 +1,23 @@
 import { Play, Globe, Lock } from '@phosphor-icons/react'
 import type { Song } from '../../types'
 
+export function SongCardSkeleton() {
+  return (
+    <div className="relative animate-pulse">
+      <div className="w-full px-4 py-3.5 bg-white border border-[#E0E0DC] rounded-xl flex items-center gap-3 shadow-sm">
+        <div className="flex-1 min-w-0 pr-8">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="h-3.5 bg-[#E8E8E4] rounded w-2/5" />
+            <div className="h-2.5 w-2.5 bg-[#E8E8E4] rounded-full shrink-0" />
+          </div>
+          <div className="h-3 bg-[#E8E8E4] rounded w-3/5" />
+        </div>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-[#F0F0EC]" />
+      </div>
+    </div>
+  )
+}
+
 interface Props {
   song: Song
   onEdit: () => void

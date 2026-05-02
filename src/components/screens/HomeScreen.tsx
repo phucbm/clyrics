@@ -4,7 +4,7 @@ import { useBottomSheet } from '../shell/BottomSheet'
 import { FAB } from '../shell/FAB'
 import { FABGroup } from '../shell/FABGroup'
 import { AddSongSheet } from '../sheets/AddSongSheet'
-import { SongCard } from '../cards/SongCard'
+import { SongCard, SongCardSkeleton } from '../cards/SongCard'
 import { useRepoSongs, invalidateRepoSongsCache } from '../../hooks/useRepoSongs'
 import { Plus } from '@phosphor-icons/react'
 import { AppFooter } from '../shell/AppFooter'
@@ -81,7 +81,9 @@ export function HomeScreen() {
         <section>
           <h2 className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2 px-1">Community Songs</h2>
           {repoLoading ? (
-            <p className="text-sm text-[#888] px-1">Loading…</p>
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => <SongCardSkeleton key={i} />)}
+            </div>
           ) : repoSongs.length === 0 ? (
             <p className="text-sm text-[#888] px-1">No community songs yet.</p>
           ) : (
