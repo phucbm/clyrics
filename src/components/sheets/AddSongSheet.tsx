@@ -4,6 +4,7 @@ import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { Warning } from '@phosphor-icons/react'
 import { makeSongId } from '../../lib/utils'
+import { generateTitlePinyin, getGroqKey } from '../../lib/groq'
 import type { Song } from '../../types'
 
 export function AddSongSheet() {
@@ -24,7 +25,7 @@ export function AddSongSheet() {
       .join('\n')
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!rawLyrics.trim()) { setError('Add some lyrics first.'); return }
     const lines = stripToChineseOnly(rawLyrics)
       .split('\n')
@@ -32,9 +33,16 @@ export function AddSongSheet() {
       .filter(Boolean)
       .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translations: [] }))
 
+    const titleStr = title.trim() || 'Untitled'
+    let titlePinyin: string | undefined
+    if (getGroqKey()) {
+      try { titlePinyin = await generateTitlePinyin(titleStr) } catch { /* skip */ }
+    }
+
     const song: Song = {
       id: makeSongId(title.trim(), artist.trim()),
-      title: title.trim() || 'Untitled',
+      title: titleStr,
+      titlePinyin,
       artist: artist.trim() || '',
       youtubeUrl: youtubeUrl.trim() || undefined,
       authors: [],

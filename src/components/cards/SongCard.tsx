@@ -42,9 +42,12 @@ export function SongCard({ song, onEdit, onPlay }: Props) {
 
   return (
     <div className="relative">
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onEdit}
-        className="w-full text-left px-4 py-3.5 bg-white border border-[#E0E0DC] rounded-xl hover:border-[#0F0F0F] transition-all flex items-center gap-3 shadow-sm active:scale-[0.98]"
+        onKeyDown={(e) => e.key === 'Enter' && onEdit()}
+        className="w-full text-left px-4 py-3.5 bg-white border border-[#E0E0DC] rounded-xl hover:border-[#0F0F0F] transition-all flex items-center gap-3 shadow-sm active:scale-[0.98] cursor-pointer"
       >
         <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center gap-2">
@@ -55,6 +58,9 @@ export function SongCard({ song, onEdit, onPlay }: Props) {
               <span className="shrink-0 text-[#2E7D32]"><Globe size={11} weight="fill" /></span>
             )}
           </div>
+          {song.titlePinyin && (
+            <p className="text-xs text-[#AAA] truncate">{song.titlePinyin}</p>
+          )}
           <p className="text-xs text-[#888] mt-0.5">
             {[
               song.artist,
@@ -73,7 +79,7 @@ export function SongCard({ song, onEdit, onPlay }: Props) {
         >
           <Play size={15} weight="fill" />
         </button>
-      </button>
+      </div>
     </div>
   )
 }

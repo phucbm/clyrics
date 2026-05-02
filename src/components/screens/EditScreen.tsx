@@ -84,7 +84,7 @@ export function EditScreen() {
     const insertAfter = idx >= 0 ? idx : song.lines.length - 1
     const newLines = [
       ...song.lines.slice(0, insertAfter + 1),
-      copy,
+      { ...copy, id: nanoid() },
       ...song.lines.slice(insertAfter + 1),
     ]
     updateSong(song.id, { lines: newLines })

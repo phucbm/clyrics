@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { nanoid } from 'nanoid'
-import { ArrowCounterClockwise, CopySimple } from '@phosphor-icons/react'
+import { ArrowCounterClockwise, CopySimple, ArrowsClockwise } from '@phosphor-icons/react'
 import { useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { LyricsEditorSheet } from './LyricsEditorSheet'
+import { generateTitlePinyin, getGroqKey } from '../../lib/groq'
 import type { Song } from '../../types'
 
 const RAW_BASE = 'https://raw.githubusercontent.com/phucbm/clyrics/main'
@@ -19,6 +20,9 @@ export function EditSongSheet({ song }: Props) {
   const { open, closeAll, setFooter } = useBottomSheet()
 
   const [title, setTitle] = useState(song.title)
+  const [titlePinyin, setTitlePinyin] = useState(song.titlePinyin ?? '')
+  const [generatingPinyin, setGeneratingPinyin] = useState(false)
+  const [pinyinError, setPinyinError] = useState<string | null>(null)
   const [artist, setArtist] = useState(song.artist)
   const [youtubeUrl, setYoutubeUrl] = useState(song.youtubeUrl ?? '')
   const [rawLyrics, setRawLyrics] = useState(
@@ -53,11 +57,27 @@ export function EditSongSheet({ song }: Props) {
   function handleSave() {
     updateSong(song.id, {
       title: title.trim() || 'Untitled',
+      titlePinyin: titlePinyin.trim() || undefined,
       artist: artist.trim() || '',
       youtubeUrl: youtubeUrl.trim() || undefined,
       lines: parseDraftLines(),
     })
     closeAll()
+  }
+
+  async function handleRegenPinyin() {
+    const key = getGroqKey()
+    if (!key) return
+    setGeneratingPinyin(true)
+    setPinyinError(null)
+    try {
+      const result = await generateTitlePinyin(title.trim() || song.title)
+      setTitlePinyin(result)
+    } catch (e) {
+      setPinyinError(e instanceof Error ? e.message : 'Failed')
+    } finally {
+      setGeneratingPinyin(false)
+    }
   }
 
   const handleSaveRef = useRef(handleSave)
@@ -141,6 +161,25 @@ export function EditSongSheet({ song }: Props) {
       <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Title</label>
         <input className={inputCls} placeholder="Song title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <div className="flex items-center gap-2">
+          <input
+            className={`${inputCls} flex-1 text-xs`}
+            placeholder="Title pinyin"
+            value={titlePinyin}
+            onChange={(e) => setTitlePinyin(e.target.value)}
+          />
+          {getGroqKey() && (
+            <button
+              onClick={handleRegenPinyin}
+              disabled={generatingPinyin}
+              className="shrink-0 p-2 rounded-xl border border-[#E0E0DC] text-[#888] hover:text-[#0F0F0F] disabled:opacity-40 transition-colors"
+              title="Regenerate pinyin"
+            >
+              <ArrowsClockwise size={14} className={generatingPinyin ? 'animate-spin' : ''} />
+            </button>
+          )}
+        </div>
+        {pinyinError && <p className="text-xs text-red-500">{pinyinError}</p>}
       </div>
 
       <div className="space-y-1">

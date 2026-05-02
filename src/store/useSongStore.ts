@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { nanoid } from 'nanoid'
 import type { Song, LyricLine } from '../types'
 
 interface SongStore {
@@ -37,14 +38,22 @@ function migrateLine(line: Record<string, unknown>, index: number): LyricLine {
 
 function migrateSong(song: Record<string, unknown>): Song {
   const rawLines = Array.isArray(song.lines) ? song.lines : []
+  const seenIds = new Set<string>()
+  const lines = rawLines.map((l, i) => {
+    const line = migrateLine(l as Record<string, unknown>, i)
+    if (seenIds.has(line.id)) line.id = nanoid()
+    seenIds.add(line.id)
+    return line
+  })
   return {
     id: song.id as string,
     title: (song.title as string) ?? 'Untitled',
+    titlePinyin: song.titlePinyin as string | undefined,
     artist: (song.artist as string) ?? '',
     youtubeUrl: song.youtubeUrl as string | undefined,
     youtubeDuration: song.youtubeDuration as number | undefined,
     authors: Array.isArray(song.authors) ? (song.authors as string[]) : [],
-    lines: rawLines.map((l, i) => migrateLine(l as Record<string, unknown>, i)),
+    lines,
     createdAt: (song.createdAt as number) ?? Date.now(),
     source: (song.source as 'local' | 'repo') ?? 'local',
     copiedFrom: song.copiedFrom as string | undefined,

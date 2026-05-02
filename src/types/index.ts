@@ -15,6 +15,7 @@ export interface LyricLine {
 export interface Song {
   id: string
   title: string
+  titlePinyin?: string
   artist: string
   youtubeUrl?: string
   youtubeDuration?: number
