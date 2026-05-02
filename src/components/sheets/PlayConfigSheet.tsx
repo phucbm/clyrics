@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import { useActiveSong } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
@@ -22,7 +23,7 @@ interface PlayConfigSheetProps {
 
 export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
   const { playConfig, setPlayConfig, navigateTo, setAutoplay, primaryLang, secondaryLang, setLangs } = useUIStore()
-  const { close } = useBottomSheet()
+  const { close, setFooter } = useBottomSheet()
   const song = useActiveSong()
 
   const availableLangs = song
@@ -34,6 +35,21 @@ export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
     close()
     navigateTo('play')
   }
+
+  const handlePlayRef = useRef(handlePlay)
+  handlePlayRef.current = handlePlay
+
+  useEffect(() => {
+    setFooter(
+      <button
+        onClick={() => handlePlayRef.current()}
+        className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
+      >
+        {!isPlaying && <Play size={16} weight="fill" />}
+        {isPlaying ? 'Apply' : 'Apply and Play'}
+      </button>
+    )
+  }, [isPlaying])
 
   const activeCount = (playConfig.translation ? 1 : 0) + (playConfig.secondLang ? 1 : 0)
 
@@ -65,7 +81,7 @@ export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
   }
 
   return (
-    <div className="px-5 pb-8 space-y-1">
+    <div className="px-5 pb-4 space-y-1">
       <ToggleRow
         label="Pinyin"
         checked={playConfig.pinyin}
@@ -146,16 +162,6 @@ export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
         </div>
       </div>
       */}
-
-      <div className="pt-4">
-        <button
-          onClick={handlePlay}
-          className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
-        >
-          {!isPlaying && <Play size={16} weight="fill" />}
-          {isPlaying ? 'Apply' : 'Apply and Play'}
-        </button>
-      </div>
     </div>
   )
 }

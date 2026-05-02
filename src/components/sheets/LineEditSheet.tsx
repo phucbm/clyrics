@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { nanoid } from 'nanoid'
 import { CopySimple } from '@phosphor-icons/react'
 import { useBottomSheet } from '../shell/BottomSheet'
@@ -16,7 +16,7 @@ interface Props {
 const cls = 'w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-[#0F0F0F] placeholder-[#AAA] focus:border-[#0F0F0F] transition-colors outline-none resize-none leading-relaxed'
 
 export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDelete, onDuplicate }: Props) {
-  const { close } = useBottomSheet()
+  const { close, setFooter } = useBottomSheet()
 
   const [chinese, setChinese] = useState(line.chinese)
   const [pinyin, setPinyin] = useState(line.pinyin)
@@ -59,9 +59,22 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
     close()
   }
 
+  const handleSaveRef = useRef(handleSave)
+  handleSaveRef.current = handleSave
+
+  useEffect(() => {
+    setFooter(
+      <button
+        onClick={() => handleSaveRef.current()}
+        className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+      >
+        Save
+      </button>
+    )
+  }, [])
+
   return (
-    <div className="px-5 pb-8 space-y-3">
-      {/* Duplicate button — top right */}
+    <div className="px-5 pb-4 space-y-3">
       <div className="flex justify-end -mb-1">
         <button
           onClick={handleDuplicate}
@@ -121,14 +134,7 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
         </div>
       )}
 
-      <button
-        onClick={handleSave}
-        className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
-      >
-        Save
-      </button>
-
-      <div className="flex justify-center pt-1">
+      <div className="flex justify-center pt-1 pb-2">
         <button
           onClick={handleDelete}
           className="text-xs text-[#BBB] hover:text-red-500 underline underline-offset-2 transition-colors"

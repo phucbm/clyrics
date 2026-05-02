@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
@@ -21,7 +21,7 @@ export function GenerateConfigSheet() {
   const song = useActiveSong()
   const { updateSong } = useSongStore()
   const { generateConfig, setGenerateConfig, setPlayConfig, setLangs } = useUIStore()
-  const { close } = useBottomSheet()
+  const { close, setFooter } = useBottomSheet()
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,6 +61,23 @@ export function GenerateConfigSheet() {
     }
   }
 
+  const handleGenerateRef = useRef(handleGenerate)
+  handleGenerateRef.current = handleGenerate
+
+  useEffect(() => {
+    if (!hasKey) return
+    setFooter(
+      <button
+        onClick={() => handleGenerateRef.current()}
+        disabled={generating || !song}
+        className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
+      >
+        <Lightning size={16} weight="fill" />
+        {generating ? 'Generating…' : 'Generate'}
+      </button>
+    )
+  }, [generating, hasKey, song])
+
   if (!hasKey) {
     return (
       <div className="px-5 pb-8">
@@ -81,7 +98,7 @@ export function GenerateConfigSheet() {
   }
 
   return (
-    <div className="px-5 pb-8 space-y-4">
+    <div className="px-5 pb-4 space-y-4">
       <div>
         <label className="text-xs font-medium text-[#888]">Primary language</label>
         <select
@@ -140,15 +157,6 @@ export function GenerateConfigSheet() {
           <span>{error}</span>
         </div>
       )}
-
-      <button
-        onClick={handleGenerate}
-        disabled={generating || !song}
-        className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
-      >
-        <Lightning size={16} weight="fill" />
-        {generating ? 'Generating…' : 'Generate'}
-      </button>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { contributeNewSong, contributeEditSong, getPRListUrl, prTitle, songBaseName, slugify } from '../../lib/github'
 import { useRepoSongs } from '../../hooks/useRepoSongs'
@@ -31,7 +31,7 @@ const NICKNAME_KEY = 'clyrics_nickname'
 const MIN_LENGTH = 2
 
 export function ContributeSheet({ song }: Props) {
-  const { close } = useBottomSheet()
+  const { close, setFooter } = useBottomSheet()
   const { songs: repoSongs } = useRepoSongs()
   const isCopy = !!song.copiedFrom
   const [mode, setMode] = useState<'new' | 'edit'>('new')
@@ -68,32 +68,55 @@ export function ContributeSheet({ song }: Props) {
     }
   }
 
-  if (status === 'success' && prUrl) {
+  const submitRef = useRef(submit)
+  submitRef.current = submit
+
+  useEffect(() => {
+    if (status === 'success' && prUrl) {
+      setFooter(
+        <div className="space-y-2">
+          <a
+            href={prUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
+          >
+            <ArrowSquareOut size={14} />
+            View PR on GitHub
+          </a>
+          <button onClick={close} className="w-full py-2 text-sm text-[#AAA] hover:text-[#555] transition-colors">
+            Done
+          </button>
+        </div>
+      )
+    } else {
+      setFooter(
+        <button
+          onClick={() => submitRef.current()}
+          disabled={!canSubmit}
+          className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
+        >
+          <GitPullRequest size={15} weight="fill" />
+          {status === 'loading' ? 'Creating PR…' : 'Send contribution'}
+        </button>
+      )
+    }
+  }, [status, prUrl, canSubmit])
+
+  if (status === 'success') {
     return (
-      <div className="px-5 pb-8 space-y-4">
+      <div className="px-5 pb-4 space-y-4">
         <div className="flex flex-col items-center gap-3 py-6 text-center">
           <CheckCircle size={32} weight="fill" className="text-green-500" />
           <p className="text-sm font-semibold text-[#0F0F0F]">PR created!</p>
           <p className="text-xs text-[#888]">Your song is under review. Thank you for contributing.</p>
         </div>
-        <a
-          href={prUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
-        >
-          <ArrowSquareOut size={14} />
-          View PR on GitHub
-        </a>
-        <button onClick={close} className="w-full py-2 text-sm text-[#AAA] hover:text-[#555] transition-colors">
-          Done
-        </button>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pb-8 space-y-4">
+    <div className="px-5 pb-4 space-y-4">
       <p className="text-xs text-[#888] leading-relaxed">
         Create a Pull Request to add your lyrics. Once reviewed and merged, it appears in Community Songs.
       </p>
@@ -197,15 +220,6 @@ export function ContributeSheet({ song }: Props) {
           <span className="break-all">{error}</span>
         </div>
       )}
-
-      <button
-        onClick={submit}
-        disabled={!canSubmit}
-        className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
-      >
-        <GitPullRequest size={15} weight="fill" />
-        {status === 'loading' ? 'Creating PR…' : 'Send contribution'}
-      </button>
     </div>
   )
 }

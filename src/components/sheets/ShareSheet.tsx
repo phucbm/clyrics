@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useState, useEffect } from 'react'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { useUIStore } from '../../store/useUIStore'
 import { LinkSimple, TextT, Translate, YoutubeLogo } from '@phosphor-icons/react'
@@ -11,9 +11,17 @@ interface ShareSheetProps {
 type CopyState = Record<string, boolean>
 
 export function ShareSheet({ song }: ShareSheetProps) {
-  const { close } = useBottomSheet()
+  const { close, setFooter } = useBottomSheet()
   const { playConfig, primaryLang, secondaryLang } = useUIStore()
   const [copied, setCopied] = useState<CopyState>({})
+
+  useEffect(() => {
+    setFooter(
+      <button onClick={close} className="w-full py-2 text-sm text-[#AAA] hover:text-[#555] transition-colors">
+        Cancel
+      </button>
+    )
+  }, [])
 
   function markCopied(key: string) {
     setCopied((s) => ({ ...s, [key]: true }))
@@ -101,7 +109,7 @@ export function ShareSheet({ song }: ShareSheetProps) {
   ]
 
   return (
-    <div className="px-5 pb-8 space-y-2">
+    <div className="px-5 pb-4 space-y-2">
       {rows.map(({ key, icon, label, sublabel, action, disabled }) => (
         <button
           key={key}
@@ -125,9 +133,6 @@ export function ShareSheet({ song }: ShareSheetProps) {
           )}
         </button>
       ))}
-      <button onClick={close} className="w-full py-2 text-sm text-[#AAA] hover:text-[#555] transition-colors">
-        Cancel
-      </button>
     </div>
   )
 }
