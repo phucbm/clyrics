@@ -5,6 +5,7 @@ import {BottomSheetProvider} from './components/shell/BottomSheet'
 import {HomeScreen} from './components/screens/HomeScreen'
 import {EditScreen} from './components/screens/EditScreen'
 import {PlayScreen} from './components/screens/PlayScreen'
+import {useUrlSync} from './hooks/useUrlSync'
 
 const SCREENS = {
   home: HomeScreen,
@@ -55,10 +56,16 @@ export default function App() {
   const { screen, direction } = useUIStore()
   const Screen = SCREENS[screen]
   const { align, setAlign } = useAlign()
+  const { ready } = useUrlSync()
 
   return (
     <div className={`min-h-dvh flex ${JUSTIFY[align]} bg-[#ECEAE6]`}>
       <div className="w-full max-w-[600px] h-dvh flex flex-col relative bg-[#F8F7F5] overflow-hidden">
+        {!ready && (
+          <div className="absolute inset-0 z-50 bg-[#F8F7F5] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full border-2 border-[#0F0F0F]/20 border-t-[#0F0F0F] animate-spin" />
+          </div>
+        )}
         <BottomSheetProvider>
           <div className="flex-1 relative overflow-hidden">
             <AnimatePresence mode="sync" custom={direction} initial={false}>
