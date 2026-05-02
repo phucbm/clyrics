@@ -68,6 +68,7 @@ export function ShareSheet({ song }: ShareSheetProps) {
       label: 'Copy link',
       sublabel: shareUrl,
       action: () => copy('url', shareUrl),
+      disabled: song.source !== 'repo',
     },
     {
       key: 'text',
