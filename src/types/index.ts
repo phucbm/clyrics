@@ -22,6 +22,7 @@ export interface Song {
   lines: LyricLine[]
   createdAt: number
   source: 'local' | 'repo'
+  copiedFrom?: string
 }
 
 export interface PlayConfig {

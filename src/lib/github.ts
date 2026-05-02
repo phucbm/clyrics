@@ -6,6 +6,20 @@ const OWNER = 'phucbm'
 const REPO = 'clyrics'
 const PR_LIST_URL = `https://github.com/${OWNER}/${REPO}/pulls`
 
+export function slugify(str: string) {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function songBaseName(song: { artist: string; title: string; id: string }) {
+  const parts = [song.artist, song.title].map((s) => s.trim()).filter(Boolean)
+  return parts.length > 0 ? parts.join('-') : song.id
+}
+
 async function getInstallationToken(): Promise<string> {
   const appId = import.meta.env.VITE_GITHUB_APP_ID as string
   const installationId = import.meta.env.VITE_GITHUB_APP_INSTALLATION_ID as string
@@ -45,13 +59,28 @@ async function getOctokit(): Promise<Octokit> {
   return new Octokit({ auth: token })
 }
 
-export function prTitle(song: Song) {
-  return song.source === 'repo'
-    ? `fix: update song "${song.title}" by ${song.artist}`
-    : `feat: add song "${song.title}" by ${song.artist}`
+async function resolveNewFilePath(song: Song, octokit: Octokit): Promise<string> {
+  const base = songBaseName(song)
+  let names: string[] = []
+  try {
+    const { data } = await octokit.rest.repos.getContent({ owner: OWNER, repo: REPO, path: 'songs' })
+    names = Array.isArray(data) ? (data as Array<{ name: string }>).map((f) => f.name) : []
+  } catch {
+    // songs dir doesn't exist yet — any name is free
+  }
+  if (!names.includes(`${base}.json`)) return `songs/${base}.json`
+  let n = 2
+  while (names.includes(`${base}-${n}.json`)) n++
+  return `songs/${base}-${n}.json`
 }
 
-export function prBody(song: Song, contributor: string) {
+export function prTitle(song: Song, nickname: string, mode: 'new' | 'edit') {
+  const nick = slugify(nickname)
+  const prefix = mode === 'edit' ? '[edit]' : '[new]'
+  return `${prefix} ${song.artist} - ${song.title} by ${nick}`
+}
+
+export function prBody(song: Song, nickname: string) {
   const langs = [...new Set(song.lines.flatMap((l) => l.translations.map((t) => t.lang)))]
   return [
     `**Title:** ${song.title}`,
@@ -60,7 +89,7 @@ export function prBody(song: Song, contributor: string) {
     `**Languages:** ${langs.join(', ') || 'none'}`,
     '',
     '---',
-    `Contributed by: ${contributor}`,
+    `Contributed by: ${nickname}`,
     `_Added via C-Lyrics app. To request removal, open an issue or comment on this PR._`,
   ].join('\n')
 }
@@ -69,63 +98,63 @@ export function getPRListUrl() {
   return PR_LIST_URL
 }
 
-export async function contributeSong(song: Song, contributor: string): Promise<string> {
-  const octokit = await getOctokit()
-  const filePath = `songs/${song.id}.json`
-  const branch = `song/${song.id}-${Date.now()}`
+async function createPR(
+  octokit: Octokit,
+  song: Song,
+  nickname: string,
+  mode: 'new' | 'edit',
+  filePath: string,
+  fileSha?: string,
+): Promise<string> {
+  const branch = `song/${slugify(song.artist)}-${slugify(song.title)}-${Date.now()}`
 
-  const { data: ref } = await octokit.rest.git.getRef({
-    owner: OWNER, repo: REPO, ref: 'heads/main',
-  })
+  const { data: ref } = await octokit.rest.git.getRef({ owner: OWNER, repo: REPO, ref: 'heads/main' })
   const mainSha = ref.object.sha
 
-  let fileSha: string | undefined
-  let resolvedPath = filePath
-  let finalSong = { ...song, authors: [...new Set([...song.authors, contributor])] }
-
-  // Always check if file exists — update if same song, suffix path if slug collision
-  try {
-    const { data: file } = await octokit.rest.repos.getContent({
-      owner: OWNER, repo: REPO, path: filePath,
-    })
-    if ('sha' in file && 'content' in file) {
-      const existing = JSON.parse(atob(file.content.replace(/\n/g, ''))) as Song
-      if (existing.id === song.id) {
-        fileSha = file.sha
-        const mergedAuthors = [...new Set([...(existing.authors ?? []), contributor])]
-        finalSong = { ...song, authors: mergedAuthors }
-      } else {
-        resolvedPath = `songs/${song.id}-2.json`
-      }
-    }
-  } catch {
-    // File not found — create new
-  }
-
+  const finalSong = { ...song, authors: [...new Set([...song.authors, nickname])] }
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalSong, null, 2))))
 
-  await octokit.rest.git.createRef({
-    owner: OWNER, repo: REPO,
-    ref: `refs/heads/${branch}`,
-    sha: mainSha,
-  })
+  await octokit.rest.git.createRef({ owner: OWNER, repo: REPO, ref: `refs/heads/${branch}`, sha: mainSha })
 
   await octokit.rest.repos.createOrUpdateFileContents({
-    owner: OWNER, repo: REPO,
-    path: resolvedPath,
-    message: prTitle(song),
+    owner: OWNER,
+    repo: REPO,
+    path: filePath,
+    message: prTitle(song, nickname, mode),
     content,
     branch,
     ...(fileSha ? { sha: fileSha } : {}),
   })
 
   const { data: pr } = await octokit.rest.pulls.create({
-    owner: OWNER, repo: REPO,
-    title: prTitle(song),
+    owner: OWNER,
+    repo: REPO,
+    title: prTitle(song, nickname, mode),
     head: branch,
     base: 'main',
-    body: prBody(song, contributor),
+    body: prBody(song, nickname),
   })
 
   return pr.html_url
+}
+
+export async function contributeNewSong(song: Song, nickname: string, resolvedFileName?: string): Promise<string> {
+  const octokit = await getOctokit()
+  const filePath = resolvedFileName
+    ? `songs/${resolvedFileName}`
+    : await resolveNewFilePath(song, octokit)
+  return createPR(octokit, song, nickname, 'new', filePath)
+}
+
+export async function contributeEditSong(song: Song, nickname: string, originalId: string): Promise<string> {
+  const octokit = await getOctokit()
+  const filePath = `songs/${originalId}.json`
+  let fileSha: string | undefined
+  try {
+    const { data: file } = await octokit.rest.repos.getContent({ owner: OWNER, repo: REPO, path: filePath })
+    if ('sha' in file) fileSha = file.sha
+  } catch {
+    // file gone — still submit, it'll create
+  }
+  return createPR(octokit, song, nickname, 'edit', filePath, fileSha)
 }

@@ -1,4 +1,5 @@
 import {createPortal} from 'react-dom'
+import {nanoid} from 'nanoid'
 import {useCallback, useEffect, useRef, useState, type RefObject} from 'react'
 import {useActiveSong, useSongStore} from '../../store/useSongStore'
 import {useUIStore} from '../../store/useUIStore'
@@ -140,18 +141,44 @@ function DraggablePiP({ containerRef, progressBarRef, onReveal, onProgressDrag }
   )
 }
 
-function ForkConfirmSheet({ onConfirm }: { onConfirm: () => void }) {
+interface ForkConfirmProps {
+  existingCopy: Song | null
+  onEditCopy: (copy: Song) => void
+  onNewCopy: () => void
+}
+
+function ForkConfirmSheet({ existingCopy, onEditCopy, onNewCopy }: ForkConfirmProps) {
   const { close } = useBottomSheet()
 
-  function handleConfirm() {
-    close()
-    onConfirm()
+  if (existingCopy) {
+    return (
+      <div className="px-5 pb-8 space-y-3">
+        <p className="text-sm text-[#444] leading-relaxed">
+          You already have a copy of this song in My Songs.
+        </p>
+        <button
+          onClick={() => { close(); onEditCopy(existingCopy) }}
+          className="w-full py-3.5 rounded-xl bg-[#0F0F0F] text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+        >
+          Edit this copy
+        </button>
+        <button
+          onClick={() => { close(); onNewCopy() }}
+          className="w-full py-3.5 rounded-xl border border-[#E4E2DE] text-sm font-medium text-[#555] hover:bg-[#F0F0EC] transition-colors"
+        >
+          Make a new copy
+        </button>
+        <button onClick={close} className="w-full py-2 text-sm text-[#AAA] hover:text-[#555] transition-colors">
+          Cancel
+        </button>
+      </div>
+    )
   }
 
   return (
     <div className="px-5 pb-8 space-y-4">
       <p className="text-sm text-[#444] leading-relaxed">
-        A personal copy of this song will be saved to your device. You own it — edit freely, then share your work back as a new song or as improvements to this one.
+        A personal copy of this song will be saved to your device. Edit freely, then share back as a new song or as improvements to the original.
       </p>
       <div className="flex gap-3">
         <button
@@ -161,7 +188,7 @@ function ForkConfirmSheet({ onConfirm }: { onConfirm: () => void }) {
           Cancel
         </button>
         <button
-          onClick={handleConfirm}
+          onClick={() => { close(); onNewCopy() }}
           className="flex-1 py-3.5 rounded-xl bg-[#0F0F0F] text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
         >
           Make a copy
@@ -173,19 +200,31 @@ function ForkConfirmSheet({ onConfirm }: { onConfirm: () => void }) {
 
 export function PlayScreen() {
   const song = useActiveSong()
-  const {addSong, setActiveSong} = useSongStore()
+  const {songs, addSong, setActiveSong} = useSongStore()
   const {playConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
   const {open: openSheet} = useBottomSheet()
 
+  function forkSong(): Song {
+    const forked: Song = {
+      ...song!,
+      id: nanoid(),
+      source: 'local',
+      copiedFrom: song!.id,
+      createdAt: Date.now(),
+    }
+    addSong(forked)
+    return forked
+  }
+
   function confirmForkAndEdit() {
+    if (!song) return
+    const existingCopy = songs.find((s) => s.copiedFrom === song.id) ?? null
     openSheet(
-      <ForkConfirmSheet onConfirm={() => {
-        if (!song) return
-        const forked: Song = {...song, source: 'local', createdAt: Date.now()}
-        addSong(forked)
-        setActiveSong(forked)
-        navigateTo('edit')
-      }} />,
+      <ForkConfirmSheet
+        existingCopy={existingCopy}
+        onEditCopy={(copy) => { setActiveSong(copy); navigateTo('edit') }}
+        onNewCopy={() => { const f = forkSong(); setActiveSong(f); navigateTo('edit') }}
+      />,
       'Edit this song'
     )
   }

@@ -47,6 +47,7 @@ function migrateSong(song: Record<string, unknown>): Song {
     lines: rawLines.map((l, i) => migrateLine(l as Record<string, unknown>, i)),
     createdAt: (song.createdAt as number) ?? Date.now(),
     source: (song.source as 'local' | 'repo') ?? 'local',
+    copiedFrom: song.copiedFrom as string | undefined,
   }
 }
 
