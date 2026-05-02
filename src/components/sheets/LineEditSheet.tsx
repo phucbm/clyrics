@@ -13,7 +13,7 @@ interface Props {
   onDuplicate: (copy: LyricLine) => void
 }
 
-const cls = 'w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-sm text-[#0F0F0F] placeholder-[#AAA] focus:border-[#0F0F0F] transition-colors outline-none resize-none leading-relaxed'
+const cls = 'w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-[#0F0F0F] placeholder-[#AAA] focus:border-[#0F0F0F] transition-colors outline-none resize-none leading-relaxed'
 
 export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDelete, onDuplicate }: Props) {
   const { close } = useBottomSheet()
@@ -75,7 +75,7 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
       <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Pinyin</label>
         <textarea
-          className={`${cls} font-mono text-xs`}
+          className={`${cls} font-mono`}
           style={{ minHeight: '52px' }}
           placeholder="pīnyīn"
           value={pinyin}

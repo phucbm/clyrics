@@ -98,7 +98,7 @@ export function EditSongSheet({ song }: Props) {
   }
 
   const inputCls =
-    'w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-sm text-[#0F0F0F] placeholder-[#AAA] focus:border-[#0F0F0F] transition-colors'
+    'w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-[#0F0F0F] placeholder-[#AAA] focus:border-[#0F0F0F] transition-colors'
 
   return (
     <div className="px-5 pb-8 space-y-3">
