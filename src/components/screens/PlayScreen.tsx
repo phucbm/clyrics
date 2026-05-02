@@ -272,6 +272,15 @@ export function PlayScreen() {
     scheduleHide()
   }, [scheduleHide])
 
+  const toggleControls = useCallback(() => {
+    if (controlsVisible) {
+      clearTimeout(hideTimerRef.current)
+      setControlsVisible(false)
+    } else {
+      revealControls()
+    }
+  }, [controlsVisible, revealControls])
+
   // Autoplay once player is ready
   useEffect(() => {
     if (autoplay && isReady) {
@@ -523,11 +532,11 @@ export function PlayScreen() {
   const fabVisible = !focusMode || controlsVisible
 
   return (
-    <div className="h-full flex flex-col relative" style={{paddingTop: 'env(safe-area-inset-top)'}}>
+    <div className="h-full flex flex-col relative">
 
       {/* Mobile video — outside scroll container so sticky isn't needed */}
       {videoId && !isDesktop && (
-        <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={revealControls}>
+        <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={toggleControls}>
           <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
           <img src="/icon.png" alt="" className="absolute bottom-3 right-3 w-7 h-7 rounded-md opacity-60 pointer-events-none" />
 
@@ -597,7 +606,8 @@ export function PlayScreen() {
       )}
 
       {/* Bottom touch/hover zone — focus mode only, reveals controls */}
-      {focusMode && (
+      {/* Desktop: always show for hover-to-reveal. Mobile: only when no video (youtube tap handles it otherwise) */}
+      {focusMode && (isDesktop || !videoId) && (
         <div
           className="absolute bottom-0 inset-x-0 h-[100px] z-10"
           onPointerDown={isDesktop ? undefined : revealControls}
@@ -610,7 +620,11 @@ export function PlayScreen() {
             }`}
           >
             <span className="px-4 py-2 bg-black/60 text-white/90 text-xs rounded-full backdrop-blur-sm">
-              {isDesktop ? 'Hover here to show pause button' : 'Tap here to show pause button'}
+              {isDesktop
+                ? 'Hover here to show pause button'
+                : videoId
+                  ? 'Tap on youtube to show pause button'
+                  : 'Tap here to show pause button'}
             </span>
           </div>
         </div>

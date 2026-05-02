@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { serwist } from '@serwist/vite'
+import pkg from './package.json'
 
 export default defineConfig({
   plugins: [
@@ -15,6 +16,9 @@ export default defineConfig({
       rollupFormat: 'iife',
     }),
   ],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   server: {
     port: 5173
   }

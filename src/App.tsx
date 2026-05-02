@@ -60,7 +60,7 @@ export default function App() {
 
   return (
     <div className={`min-h-dvh flex ${JUSTIFY[align]} bg-[#ECEAE6]`}>
-      <div className="w-full max-w-[600px] h-dvh flex flex-col relative bg-[#F8F7F5] overflow-hidden">
+      <div className="w-full max-w-[600px] h-dvh flex flex-col relative bg-[#F8F7F5] overflow-hidden" style={{paddingTop: 'env(safe-area-inset-top)'}}>
         {!ready && (
           <div className="absolute inset-0 z-50 bg-[#F8F7F5] flex items-center justify-center">
             <div className="w-6 h-6 rounded-full border-2 border-[#0F0F0F]/20 border-t-[#0F0F0F] animate-spin" />
