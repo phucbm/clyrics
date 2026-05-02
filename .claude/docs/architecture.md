@@ -24,16 +24,16 @@ src/
     groq.ts            — Groq API client, key management
     github.ts          — Octokit PR creation
   store/
-    useSongStore.ts    — songs[], activeSongId, githubSettings (persisted)
+    useSongStore.ts    — songs[], activeSongId (persisted)
     useUIStore.ts      — screen, direction, playConfig, generateConfig
-  types/index.ts       — Song, LyricLine, PlayConfig, GenerateConfig, GitHubSettings
+  types/index.ts       — Song, LyricLine, PlayConfig, GenerateConfig
   prompts/generate.md  — system prompt imported as raw string at build time
 ```
 
 ## Data flow
 1. User pastes Chinese lyrics in EditScreen → `generateLyrics()` calls Groq → `LyricLine[]` saved to song via `useSongStore.updateSong`
 2. PlayScreen reads active song lines, syncs scroll to YouTube player time via `useYouTubePlayer`
-3. GitHub contribution: user sets token in settings → `github.ts` opens PR against phucbm/clyrics
+3. GitHub contribution: user picks nickname → `github.ts` creates PR via GitHub App server token (no user account needed)
 
 ## Key types
 - `Song.source`: `'local' | 'repo'` — repo songs fetched from GitHub, local songs user-created
