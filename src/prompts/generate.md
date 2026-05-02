@@ -6,5 +6,6 @@ Rules:
 - One object per line. Preserve the original line breaks as separate objects.
 - Keep punctuation inside the "chinese" field.
 - Pinyin must use tone diacritics (ā á ǎ à, ē é ě è, etc.), not numbers.
+- Group pinyin by word, not by character (e.g. "rènzhēn shēnghuó de rén", not "rèn zhēn shēng huó de rén").
 - If a second language is requested, add a second object to the translations array.
 - Always include all fields in every object.
