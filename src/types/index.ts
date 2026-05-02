@@ -21,6 +21,7 @@ export interface Song {
   authors: string[]
   lines: LyricLine[]
   createdAt: number
+  updatedAt?: number
   source: 'local' | 'repo'
   copiedFrom?: string
 }

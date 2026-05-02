@@ -5,9 +5,10 @@ import { FAB } from '../shell/FAB'
 import { FABGroup } from '../shell/FABGroup'
 import { AddSongSheet } from '../sheets/AddSongSheet'
 import { SongCard } from '../cards/SongCard'
-import { useRepoSongs } from '../../hooks/useRepoSongs'
+import { useRepoSongs, invalidateRepoSongsCache } from '../../hooks/useRepoSongs'
 import { Plus } from '@phosphor-icons/react'
 import { AppFooter } from '../shell/AppFooter'
+import { useEffect } from 'react'
 import type { Song } from '../../types'
 
 export function HomeScreen() {
@@ -15,6 +16,10 @@ export function HomeScreen() {
   const { songs: repoSongs, loading: repoLoading } = useRepoSongs()
   const { navigateTo, setAutoplay } = useUIStore()
   const { open } = useBottomSheet()
+
+  useEffect(() => {
+    invalidateRepoSongsCache()
+  }, [])
 
   function handleEdit(song: Song) {
     setActiveSong(song)

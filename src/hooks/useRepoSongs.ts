@@ -7,6 +7,10 @@ const CACHE_TTL = 5 * 60 * 1000
 let cache: Song[] | null = null
 let cacheTime = 0
 
+export function invalidateRepoSongsCache() {
+  cacheTime = 0
+}
+
 export function useRepoSongs() {
   const [songs, setSongs] = useState<Song[]>(cache ?? [])
   const [loading, setLoading] = useState(cache === null)
@@ -29,8 +33,18 @@ export function useRepoSongs() {
       })
       .then(async (files: Array<{ download_url: string; name: string }>) => {
         const jsonFiles = files.filter((f) => f.name.endsWith('.json'))
+        const COMMITS_API = 'https://api.github.com/repos/phucbm/clyrics/commits'
         const results = await Promise.allSettled(
-          jsonFiles.map((f) => fetch(f.download_url).then((r) => r.json()))
+          jsonFiles.map(async (f) => {
+            const [data, commitRes] = await Promise.all([
+              fetch(f.download_url).then((r) => r.json() as Promise<Song>),
+              fetch(`${COMMITS_API}?path=songs/${f.name}&per_page=1`).then((r) => r.json()),
+            ])
+            const updatedAt = commitRes?.[0]?.commit?.committer?.date
+              ? new Date(commitRes[0].commit.committer.date).getTime()
+              : undefined
+            return { ...data, updatedAt }
+          })
         )
         const fetched: Song[] = results
           .filter((r): r is PromiseFulfilledResult<Song> => r.status === 'fulfilled')

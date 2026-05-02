@@ -19,6 +19,17 @@ export function SongCard({ song, onEdit, onPlay }: Props) {
   const langText = langs.join(', ')
   const isLocal = song.source === 'local'
 
+  function relativeTime(ts: number) {
+    const diff = Date.now() - ts
+    const m = Math.floor(diff / 60000)
+    if (m < 60) return `${m}m ago`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `${h}h ago`
+    const d = Math.floor(h / 24)
+    if (d < 30) return `${d}d ago`
+    return new Date(ts).toLocaleDateString()
+  }
+
   useEffect(() => {
     if (!showPopup) return
     function handleClick(e: MouseEvent) {
@@ -53,7 +64,12 @@ export function SongCard({ song, onEdit, onPlay }: Props) {
             )}
           </div>
           <p className="text-xs text-[#888] mt-0.5">
-            {[song.artist, `${song.lines.length} lines`, langText]
+            {[
+              song.artist,
+              `${song.lines.length} lines`,
+              langText,
+              !isLocal && song.updatedAt ? relativeTime(song.updatedAt) : null,
+            ]
               .filter((v) => v && v !== 'Unknown')
               .join(' · ')}
           </p>
