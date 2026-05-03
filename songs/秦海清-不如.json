@@ -1,0 +1,453 @@
+{
+  "id": "不如",
+  "title": "不如",
+  "titlePinyin": "bùrú",
+  "artist": "秦海清",
+  "youtubeUrl": "https://www.youtube.com/watch?v=tHv9XMzEnjo",
+  "authors": [
+    "phucbm"
+  ],
+  "lines": [
+    {
+      "id": "1777781861881-0",
+      "chinese": "不如两清不如发个神经",
+      "pinyin": "bùrú liǎngqīng bùrú fā gè shénjīng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà để mọi chuyện trong sạch hơn là phát điên"
+        }
+      ]
+    },
+    {
+      "id": "1777781861883-1",
+      "chinese": "删掉所有关于你的回忆",
+      "pinyin": "shāndiào suǒyǒu guānyú nǐ de huíyì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Xóa bỏ mọi ký ức về bạn"
+        }
+      ]
+    },
+    {
+      "id": "1777781861883-2",
+      "chinese": "不如狠心不如回到人群",
+      "pinyin": "bùrú hěnxīn bùrú huídào rénqún",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà tàn nhẫn hơn là quay lại đám đông"
+        }
+      ]
+    },
+    {
+      "id": "1777781861884-3",
+      "chinese": "做你的甲乙丙丁",
+      "pinyin": "zuò nǐ de jiǎyǐ bǐngdīng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Làm mọi thứ cho bạn"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-20",
+      "chinese": "可我看到他们说有一对模范情侣",
+      "pinyin": "kě wǒ kàndào tāmen shuō yǒu yíduì mófàn qínglǚ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Nhưng tôi thấy họ nói có một cặp đôi mẫu mực"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-21",
+      "chinese": "不如我和你",
+      "pinyin": "bùrú wǒ hé nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà là tôi và bạn"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-22",
+      "chinese": "可你说没有真正感同身受爱情",
+      "pinyin": "kě nǐ shuō méiyǒu zhēnzhèng gǎntóngshēnshòu àiqíng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Nhưng bạn nói không có tình yêu thực sự đồng cảm"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-23",
+      "chinese": "不如就放弃",
+      "pinyin": "bùrú jiù fàngqì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì bỏ cuộc"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-24",
+      "chinese": "不如我们拥抱后分手",
+      "pinyin": "bùrú wǒmen yōngbào hòu fēnshǒu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà chúng ta ôm nhau rồi chia tay"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-25",
+      "chinese": "不如眼泪有空偷偷流",
+      "pinyin": "bùrú yǎnlèi yǒukōng tōutōu liú",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà nước mắt lặng lẽ chảy khi có thời gian"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-26",
+      "chinese": "不如这次就还你自由",
+      "pinyin": "bùrú zhècì jiù hái nǐ zìyóu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì lần này tôi sẽ trả lại cho bạn tự do"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-27",
+      "chinese": "不如擦肩而过别回头",
+      "pinyin": "bùrú cājiānérguò bié huítóu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà lướt qua nhau mà không quay lại"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-28",
+      "chinese": "不如这次你说对不起",
+      "pinyin": "bùrú zhècì nǐ shuō duìbùqǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì lần này bạn nói xin lỗi"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-29",
+      "chinese": "我一定告诉你没关系",
+      "pinyin": "wǒ yídìng gàosù nǐ méiguānxì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Tôi sẽ nói với bạn không sao"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-30",
+      "chinese": "不如回到最初的相遇",
+      "pinyin": "bùrú huídào zuìchū de xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà trở lại lần gặp đầu tiên"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-31",
+      "chinese": "把爱藏在相遇的缝隙",
+      "pinyin": "bǎ ài cángzài xiāngyù de fèngxì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Giấu tình yêu trong khe hở của cuộc gặp"
+        }
+      ]
+    },
+    {
+      "id": "1777781861890-16",
+      "chinese": "不如放弃不如交给酒精",
+      "pinyin": "bùrú fàngqì bùrú jiāogěi jiǔjīng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà bỏ cuộc hơn là giao cho rượu"
+        }
+      ]
+    },
+    {
+      "id": "1777781861890-17",
+      "chinese": "不如迷失在有你的过去",
+      "pinyin": "bùrú míshī zài yǒunǐde guòqù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà lạc lối trong quá khứ có bạn"
+        }
+      ]
+    },
+    {
+      "id": "1777781861890-18",
+      "chinese": "不如任性不如放过自己",
+      "pinyin": "bùrú rènxìng bùrú fàngguò zìjǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà bướng bỉnh hơn là tha cho chính mình"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-19",
+      "chinese": "不如就让你满意",
+      "pinyin": "bùrú jiùràng nǐ mǎnyì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì để bạn hài lòng"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-20",
+      "chinese": "可我看到他们说有一对模范情侣",
+      "pinyin": "kě wǒ kàndào tāmen shuō yǒu yíduì mófàn qínglǚ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Nhưng tôi thấy họ nói có một cặp đôi mẫu mực"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-21",
+      "chinese": "不如我和你",
+      "pinyin": "bùrú wǒ hé nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà là tôi và bạn"
+        }
+      ]
+    },
+    {
+      "id": "1777781861891-22",
+      "chinese": "可你说没有真正感同身受爱情",
+      "pinyin": "kě nǐ shuō méiyǒu zhēnzhèng gǎntóngshēnshòu àiqíng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Nhưng bạn nói không có tình yêu thực sự đồng cảm"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-23",
+      "chinese": "不如就放弃",
+      "pinyin": "bùrú jiù fàngqì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì bỏ cuộc"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-24",
+      "chinese": "不如我们拥抱后分手",
+      "pinyin": "bùrú wǒmen yōngbào hòu fēnshǒu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà chúng ta ôm nhau rồi chia tay"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-25",
+      "chinese": "不如眼泪有空偷偷流",
+      "pinyin": "bùrú yǎnlèi yǒukōng tōutōu liú",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà nước mắt lặng lẽ chảy khi có thời gian"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-26",
+      "chinese": "不如这次就还你自由",
+      "pinyin": "bùrú zhècì jiù hái nǐ zìyóu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì lần này tôi sẽ trả lại cho bạn tự do"
+        }
+      ]
+    },
+    {
+      "id": "1777781861892-27",
+      "chinese": "不如擦肩而过别回头",
+      "pinyin": "bùrú cājiānérguò bié huítóu",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà lướt qua nhau mà không quay lại"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-28",
+      "chinese": "不如这次你说对不起",
+      "pinyin": "bùrú zhècì nǐ shuō duìbùqǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thì lần này bạn nói xin lỗi"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-29",
+      "chinese": "我一定告诉你没关系",
+      "pinyin": "wǒ yídìng gàosù nǐ méiguānxì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Tôi sẽ nói với bạn không sao"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-30",
+      "chinese": "不如回到最初的相遇",
+      "pinyin": "bùrú huídào zuìchū de xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà trở lại lần gặp đầu tiên"
+        }
+      ]
+    },
+    {
+      "id": "1777781861893-31",
+      "chinese": "把爱藏在相遇的缝隙",
+      "pinyin": "bǎ ài cángzài xiāngyù de fèngxì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Giấu tình yêu trong khe hở của cuộc gặp"
+        }
+      ]
+    },
+    {
+      "id": "1777781861894-32",
+      "chinese": "不如含着眼泪说你好",
+      "pinyin": "bùrú hán zhuó yǎnlèi shuō nǐhǎo",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà ngậm nước mắt nói lời chào"
+        }
+      ]
+    },
+    {
+      "id": "1777781861894-33",
+      "chinese": "你好不好再也不重要",
+      "pinyin": "nǐ hǎo buhǎo zàiyě búzhòngyào",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Bạn có ổn hay không không còn quan trọng"
+        }
+      ]
+    },
+    {
+      "id": "1777781861895-34",
+      "chinese": "不如将过去统统丢掉",
+      "pinyin": "bùrú jiāng guòqù tǒngtǒng diūdiào",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà bỏ hết quá khứ"
+        }
+      ]
+    },
+    {
+      "id": "1777781861895-35",
+      "chinese": "留在记忆最美的一角",
+      "pinyin": "liúzài jìyì zuì měi de yìjiǎo",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Giữ lại góc đẹp nhất trong ký ức"
+        }
+      ]
+    },
+    {
+      "id": "1777781861895-36",
+      "chinese": "不如掉进爱情的游戏",
+      "pinyin": "bùrú diàojìn àiqíng de yóuxì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà rơi vào trò chơi tình yêu"
+        }
+      ]
+    },
+    {
+      "id": "1777781861896-37",
+      "chinese": "反正主角已不再是你",
+      "pinyin": "fǎnzhèng zhǔjué yǐ búzài shì nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù sao thì nhân vật chính không còn là bạn"
+        }
+      ]
+    },
+    {
+      "id": "1777781861896-38",
+      "chinese": "不如偶尔相遇在梦里",
+      "pinyin": "bùrú ǒuěr xiāngyù zài mèng lǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thà thỉnh thoảng gặp nhau trong mơ"
+        }
+      ]
+    },
+    {
+      "id": "1777781861896-39",
+      "chinese": "就算流泪也别把我吵醒",
+      "pinyin": "jiùsuàn liúlèi yě bié bǎwǒ chǎoxǐng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù có rơi nước mắt cũng đừng đánh thức tôi"
+        }
+      ]
+    }
+  ],
+  "createdAt": 1777781861897
+}
