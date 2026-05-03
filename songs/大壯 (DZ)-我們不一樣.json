@@ -1,0 +1,608 @@
+{
+  "id": "大壯-dz-我們不一樣",
+  "title": "我們不一樣",
+  "titlePinyin": "wǒ mén bùyí yàng",
+  "artist": "大壯 (DZ)",
+  "youtubeUrl": "https://youtu.be/ES7SOJkC6Xo",
+  "authors": [
+    "phucbm"
+  ],
+  "lines": [
+    {
+      "id": "1777793153403-20",
+      "chinese": "這麼多年的兄弟",
+      "pinyin": "zhèmó duōnián de xiōngdì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Bao năm qua, anh em"
+        }
+      ]
+    },
+    {
+      "id": "1777793153403-21",
+      "chinese": "有誰比我更瞭解你",
+      "pinyin": "yǒu shuí bǐ wǒ gèng liàojiě nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Ai hiểu bạn hơn tôi"
+        }
+      ]
+    },
+    {
+      "id": "1777793153403-22",
+      "chinese": "太多太多不容易",
+      "pinyin": "tàiduō tàiduō bùróngyì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Quá nhiều, không dễ"
+        }
+      ]
+    },
+    {
+      "id": "1777793153403-23",
+      "chinese": "磨平了歲月和脾氣",
+      "pinyin": "mópíng le suì yuè hé píqì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mài mòn thời gian và tính cách"
+        }
+      ]
+    },
+    {
+      "id": "1777793153404-24",
+      "chinese": "時間轉眼就過去",
+      "pinyin": "shíjiànzhuǎnyǎn jiù guò qù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thời gian trôi nhanh như chớp mắt"
+        }
+      ]
+    },
+    {
+      "id": "1777793153404-25",
+      "chinese": "這身後不散的筵席",
+      "pinyin": "zhèshēnhòu bú sàn de yánxí",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Bữa tiệc này sẽ không tan"
+        }
+      ]
+    },
+    {
+      "id": "1777793153404-26",
+      "chinese": "只因為我們還在",
+      "pinyin": "zhīyīn wéi wǒ ménhuán zài",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Vì chúng ta vẫn còn ở đây"
+        }
+      ]
+    },
+    {
+      "id": "1777793153404-27",
+      "chinese": "心留在原地",
+      "pinyin": "xīn liúzài yuándì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trái tim vẫn ở lại nơi xưa"
+        }
+      ]
+    },
+    {
+      "id": "1777793153404-28",
+      "chinese": "張開手需要多大的勇氣",
+      "pinyin": "zhāngkāi shǒu xūyào duōdà de yǒngqì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mở rộng tay cần bao nhiêu can đảm"
+        }
+      ]
+    },
+    {
+      "id": "1777793153405-29",
+      "chinese": "這片天你我一起撐起",
+      "pinyin": "zhè piàn tiān nǐ wǒ yìqǐ chēng qǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mái trời này, ta cùng nâng lên"
+        }
+      ]
+    },
+    {
+      "id": "1777793153405-30",
+      "chinese": "更努力只為了我們想要的明天",
+      "pinyin": "gèng nǔlì zhī wéi le wǒ mén xiǎngyào de míngtiān",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cố gắng hơn nữa chỉ vì ngày mai chúng ta mong muốn"
+        }
+      ]
+    },
+    {
+      "id": "1777793153405-31",
+      "chinese": "好好的這份情好好珍惜",
+      "pinyin": "hǎohǎo de zhè fèn qíng hǎohǎo zhēnxī",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Hãy trân trọng tình này"
+        }
+      ]
+    },
+    {
+      "id": "1777793153408-48",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "1777793153407-41",
+      "chinese": "每個人都有不同的境遇",
+      "pinyin": "měi gèrén dōu yǒu bùtóngde jìngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mỗi người có số phận khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "1777793153407-42",
+      "chinese": "我們在這裡",
+      "pinyin": "wǒ mén zài zhèlǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta ở đây"
+        }
+      ]
+    },
+    {
+      "id": "1777793153407-43",
+      "chinese": "在這裡等你",
+      "pinyin": "zài zhèlǐ děng nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Đợi bạn ở đây"
+        }
+      ]
+    },
+    {
+      "id": "TSFkHCQsw3JkDehZHzTMm",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "1777793153408-49",
+      "chinese": "雖然會經歷不同的事情",
+      "pinyin": "suīránhuìjīnglì bùtóngde shìqíng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù trải qua những chuyện khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "1777793153408-52",
+      "chinese": "我們都希望",
+      "pinyin": "wǒ mén dōu xīwàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta đều mong"
+        }
+      ]
+    },
+    {
+      "id": "1777793153408-53",
+      "chinese": "來生還能相遇",
+      "pinyin": "láishēnghuán néng xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trong kiếp sau còn gặp lại"
+        }
+      ]
+    },
+    {
+      "id": "8cuf2_2QrXYs8SlPCTO5p",
+      "chinese": "這麼多年的兄弟",
+      "pinyin": "zhèmó duōnián de xiōngdì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Bao năm qua, anh em"
+        }
+      ]
+    },
+    {
+      "id": "uJ4tRzrw6NI2aArKiMXuK",
+      "chinese": "有誰比我更瞭解你",
+      "pinyin": "yǒu shuí bǐ wǒ gèng liàojiě nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Ai hiểu bạn hơn tôi"
+        }
+      ]
+    },
+    {
+      "id": "yWIzdosoSh74Fq-23ttda",
+      "chinese": "太多太多不容易",
+      "pinyin": "tàiduō tàiduō bùróngyì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Quá nhiều, không dễ"
+        }
+      ]
+    },
+    {
+      "id": "PMN-_2WSXJbjnDwbro6-v",
+      "chinese": "磨平了歲月和脾氣",
+      "pinyin": "mópíng le suì yuè hé píqì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mài mòn thời gian và tính cách"
+        }
+      ]
+    },
+    {
+      "id": "6AGQmPSv24hq6OOawSHPG",
+      "chinese": "時間轉眼就過去",
+      "pinyin": "shíjiànzhuǎnyǎn jiù guò qù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Thời gian trôi nhanh như chớp mắt"
+        }
+      ]
+    },
+    {
+      "id": "hgInnqeDMTgLidBl5PZkK",
+      "chinese": "這身後不散的筵席",
+      "pinyin": "zhèshēnhòu bú sàn de yánxí",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Bữa tiệc này sẽ không tan"
+        }
+      ]
+    },
+    {
+      "id": "uC3D1kRxju_Zw3dEPmfao",
+      "chinese": "只因為我們還在",
+      "pinyin": "zhīyīn wéi wǒ ménhuán zài",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Vì chúng ta vẫn còn ở đây"
+        }
+      ]
+    },
+    {
+      "id": "dYDlhrdbmmgr36hrul4MQ",
+      "chinese": "心留在原地",
+      "pinyin": "xīn liúzài yuándì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trái tim vẫn ở lại nơi xưa"
+        }
+      ]
+    },
+    {
+      "id": "7tRh25O0xV5frxRBzH2KA",
+      "chinese": "張開手需要多大的勇氣",
+      "pinyin": "zhāngkāi shǒu xūyào duōdà de yǒngqì",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mở rộng tay cần bao nhiêu can đảm"
+        }
+      ]
+    },
+    {
+      "id": "YeFmc07lKPV6yoMhe0Hqd",
+      "chinese": "這片天你我一起撐起",
+      "pinyin": "zhè piàn tiān nǐ wǒ yìqǐ chēng qǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mái trời này, ta cùng nâng lên"
+        }
+      ]
+    },
+    {
+      "id": "XC-cgcTubcbE4ujpKgkOo",
+      "chinese": "更努力只為了我們想要的明天",
+      "pinyin": "gèng nǔlì zhī wéi le wǒ mén xiǎngyào de míngtiān",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Cố gắng hơn nữa chỉ vì ngày mai chúng ta mong muốn"
+        }
+      ]
+    },
+    {
+      "id": "UJbApXuuq1ODrGKku1KMU",
+      "chinese": "好好的這份情好好珍惜",
+      "pinyin": "hǎohǎo de zhè fèn qíng hǎohǎo zhēnxī",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Hãy trân trọng tình này"
+        }
+      ]
+    },
+    {
+      "id": "kW_6BIVDgbCQxDoSU546S",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "VHDr_wv-0JpNncV28Inc3",
+      "chinese": "每個人都有不同的境遇",
+      "pinyin": "měi gèrén dōu yǒu bùtóngde jìngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mỗi người có số phận khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "6mn0YSyC09Zk9sbw-50MM",
+      "chinese": "我們在這裡",
+      "pinyin": "wǒ mén zài zhèlǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta ở đây"
+        }
+      ]
+    },
+    {
+      "id": "nBpzQINWc1HCf9sdN-TRA",
+      "chinese": "在這裡等你",
+      "pinyin": "zài zhèlǐ děng nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Đợi bạn ở đây"
+        }
+      ]
+    },
+    {
+      "id": "onvGnaivuJSCz0h5HRciW",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "jR5zjrFrOfLE_xTxaVXzj",
+      "chinese": "雖然會經歷不同的事情",
+      "pinyin": "suīránhuìjīnglì bùtóngde shìqíng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù trải qua những chuyện khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "AvTU61abduMGlraKcgsrb",
+      "chinese": "我們都希望",
+      "pinyin": "wǒ mén dōu xīwàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta đều mong"
+        }
+      ]
+    },
+    {
+      "id": "QxCurylrXOBKYCR_Qyxq9",
+      "chinese": "來生還能相遇",
+      "pinyin": "láishēnghuán néng xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trong kiếp sau còn gặp lại"
+        }
+      ]
+    },
+    {
+      "id": "m2Thj79H1B7tm-CvtdMVn",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "StLAO--dM1y6Wadr6qrTG",
+      "chinese": "每個人都有不同的境遇",
+      "pinyin": "měi gèrén dōu yǒu bùtóngde jìngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Mỗi người có số phận khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "1nQGDCg-qdeBiUkYQp8_9",
+      "chinese": "我們在這裡",
+      "pinyin": "wǒ mén zài zhèlǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta ở đây"
+        }
+      ]
+    },
+    {
+      "id": "ecMSJzrOf2rRzYI10c_MW",
+      "chinese": "在這裡等你",
+      "pinyin": "zài zhèlǐ děng nǐ",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Đợi bạn ở đây"
+        }
+      ]
+    },
+    {
+      "id": "Hx_cCtllKwV9-gwOtw7i5",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "b6fpDkmUiL26U1cd2FoFQ",
+      "chinese": "雖然會經歷不同的事情",
+      "pinyin": "suīránhuìjīnglì bùtóngde shìqíng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù trải qua những chuyện khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "aLMBaoRE7AHNygNxm1GMC",
+      "chinese": "我們都希望",
+      "pinyin": "wǒ mén dōu xīwàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta đều mong"
+        }
+      ]
+    },
+    {
+      "id": "Y2Uh19EI4Tx0qYAssVPz9",
+      "chinese": "來生還能相遇",
+      "pinyin": "láishēnghuán néng xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trong kiếp sau còn gặp lại"
+        }
+      ]
+    },
+    {
+      "id": "djHrtOjlISHMMJxXuJVTr",
+      "chinese": "我們不一樣",
+      "pinyin": "wǒ mén bùyí yàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta không giống nhau"
+        }
+      ]
+    },
+    {
+      "id": "Osy5ylEBlUWBZx4UiLXc_",
+      "chinese": "雖然會經歷不同的事情",
+      "pinyin": "suīránhuìjīnglì bùtóngde shìqíng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Dù trải qua những chuyện khác nhau"
+        }
+      ]
+    },
+    {
+      "id": "V5RdHmXqvOEmpDjxGiGtw",
+      "chinese": "我們都希望",
+      "pinyin": "wǒ mén dōu xīwàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta đều mong"
+        }
+      ]
+    },
+    {
+      "id": "DMXJUxYp2TxPfKDg-8hyF",
+      "chinese": "來生還能相遇",
+      "pinyin": "láishēnghuán néng xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trong kiếp sau còn gặp lại"
+        }
+      ]
+    },
+    {
+      "id": "_s1NJCYx75fWateSh_cPq",
+      "chinese": "我們都希望",
+      "pinyin": "wǒ mén dōu xīwàng",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Chúng ta đều mong"
+        }
+      ]
+    },
+    {
+      "id": "7yH6CbPHJiZsHWtoSLH8s",
+      "chinese": "來生還能相遇",
+      "pinyin": "láishēnghuán néng xiāngyù",
+      "translations": [
+        {
+          "lang": "Vietnamese",
+          "text": "Trong kiếp sau còn gặp lại"
+        }
+      ]
+    }
+  ],
+  "createdAt": 1777793153408,
+  "updatedAt": 1777794845487
+}
