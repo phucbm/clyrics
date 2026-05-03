@@ -1,0 +1,51 @@
+name: Notify Discord on New Song
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'songs/*.json'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect added songs and notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          ADDED=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'songs/*.json')
+          if [ -z "$ADDED" ]; then
+            echo "No new songs added, skipping."
+            exit 0
+          fi
+
+          DESCRIPTION=""
+          while IFS= read -r FILE; do
+            TITLE=$(jq -r '.title' "$FILE")
+            ARTIST=$(jq -r '.artist // empty' "$FILE")
+            if [ -n "$ARTIST" ]; then
+              DESCRIPTION="${DESCRIPTION}🎵 **${ARTIST} - ${TITLE}**\n"
+            else
+              DESCRIPTION="${DESCRIPTION}🎵 **${TITLE}**\n"
+            fi
+          done <<< "$ADDED"
+
+          PAYLOAD=$(jq -n \
+            --arg description "$DESCRIPTION" \
+            '{
+              embeds: [{
+                title: "New song added to C-Lyrics",
+                description: $description,
+                color: 3066993
+              }]
+            }')
+
+          curl -fsSL -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"

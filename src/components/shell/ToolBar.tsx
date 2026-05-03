@@ -34,7 +34,7 @@ function ToolBarGroup({ buttons, showLabel }: ToolBarGroupProps) {
   const single = buttons.length === 1
   return (
     <div
-      className={`flex items-center rounded-full border border-black/10 shadow-lg backdrop-blur-xl bg-white/50 ${
+      className={`flex items-center rounded-full border border-white shadow-xl backdrop-blur bg-white/50 ${
         single ? 'w-12 h-12 justify-center' : 'px-1 gap-0.5'
       }`}
     >
