@@ -45,7 +45,7 @@ function LineView({ line, onEdit, playConfig, primaryLang, secondaryLang }: Line
         <p className="text-xs text-[#888] mb-0.5 font-mono tracking-wide">{line.pinyin}</p>
       )}
       <p className="text-xl font-medium text-[#0F0F0F] leading-snug tracking-tight">
-        {line.chinese || <span className="text-[#CCC]">Chinese</span>}
+        {line.chinese || <span className="text-[#CCC]">Empty line</span>}
       </p>
       {playConfig.translation && primaryText && (
         <p className="text-sm italic text-[#666] mt-1">{primaryText}</p>

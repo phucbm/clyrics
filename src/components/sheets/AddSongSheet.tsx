@@ -18,19 +18,10 @@ export function AddSongSheet() {
   const [rawLyrics, setRawLyrics] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  function stripToChineseOnly(text: string): string {
-    return text
-      .split('\n')
-      .map((line) => line.replace(/[^一-鿿㐀-䶿豈-﫿]/g, ''))
-      .join('\n')
-  }
-
   function handleSave() {
     if (!rawLyrics.trim()) { setError('Add some lyrics first.'); return }
-    const lines = stripToChineseOnly(rawLyrics)
+    const lines = rawLyrics
       .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
       .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: linePinyin(chinese), translations: [] }))
 
     const titleStr = title.trim() || 'Untitled'
@@ -101,7 +92,7 @@ export function AddSongSheet() {
       </div>
 
       <p className="text-xs text-[#AAA] text-center">
-        Only Chinese characters are saved,<br/>all other text is stripped automatically.
+        Lyrics saved as-is. Edit individual lines after saving.
       </p>
 
       {error && (
