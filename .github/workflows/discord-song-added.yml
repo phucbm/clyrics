@@ -19,7 +19,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          ADDED=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'songs/*.json')
+          ADDED=$(git -c core.quotepath=false diff --name-only --diff-filter=A HEAD~1 HEAD -- 'songs/*.json')
           if [ -z "$ADDED" ]; then
             echo "No new songs added, skipping."
             exit 0
