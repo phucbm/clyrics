@@ -27,25 +27,16 @@ export function EditSongSheet({ song }: Props) {
   )
   const [resetting, setResetting] = useState(false)
 
-  function stripToChineseOnly(text: string): string {
-    return text
-      .split('\n')
-      .map((line) => line.replace(/[^一-鿿㐀-䶿豈-﫿]/g, ''))
-      .join('\n')
-  }
-
   function parseDraftLines() {
     const byText = new Map(song.lines.map((l) => [l.chinese, l]))
-    return stripToChineseOnly(rawLyrics)
+    return rawLyrics
       .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
       .map((chinese, i) => {
         const existing = byText.get(chinese)
         return {
           id: existing?.id ?? `${Date.now()}-${i}`,
           chinese,
-            pinyin: linePinyin(chinese),
+          pinyin: linePinyin(chinese),
           translations: existing?.translations ?? [],
         }
       })
@@ -170,7 +161,7 @@ export function EditSongSheet({ song }: Props) {
       </div>
 
       <p className="text-xs text-[#AAA] text-center">
-          Only Chinese characters are saved,<br/>all other text is stripped automatically.
+          Lyrics saved as-is. Empty lines become gap spacers in play view.
       </p>
 
       <div className="flex justify-center pt-1 pb-2">

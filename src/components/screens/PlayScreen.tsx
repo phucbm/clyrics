@@ -667,6 +667,9 @@ export function PlayScreen() {
               const secondaryText = secondaryLang
                 ? line.translations.find((t) => t.lang === secondaryLang)?.text
                 : undefined
+              if (!line.chinese) {
+                return <div key={line.id} className="h-6" />
+              }
               return (
                 <div key={line.id}>
                   {playConfig.pinyin && line.pinyin && (
