@@ -13,11 +13,14 @@ function ToolBarButton({ btn, showLabel }: ToolBarButtonProps) {
     <button
       onClick={btn.onClick}
       aria-label={btn.label}
-      className="flex flex-col items-center justify-center gap-1 w-12 h-12 transition-all active:scale-90 text-[#0F0F0F]"
+      className="relative flex flex-col items-center justify-center gap-1 w-12 h-12 transition-all active:scale-90 text-[#0F0F0F]"
     >
       {btn.icon}
       {showLabel && (
         <span className="text-[10px] font-medium leading-none">{btn.label}</span>
+      )}
+      {btn.indicator && (
+        <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-500 ring-2 ring-white" />
       )}
     </button>
   )

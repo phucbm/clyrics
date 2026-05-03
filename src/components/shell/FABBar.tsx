@@ -9,20 +9,24 @@ interface FABProps {
   children: ReactNode
   variant?: 'primary' | 'secondary'
   label?: string
+  indicator?: boolean
 }
 
-function FAB({ onClick, children, variant = 'primary', label }: FABProps) {
+function FAB({ onClick, children, variant = 'primary', label, indicator }: FABProps) {
   return (
     <button
       onClick={onClick}
       aria-label={label}
-      className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-150 active:scale-90 ${
+      className={`relative w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-150 active:scale-90 ${
         variant === 'primary'
           ? 'bg-[#0F0F0F] text-white hover:bg-[#2a2a2a]'
           : 'bg-white text-[#0F0F0F] border border-[#E0E0DC] hover:bg-[#F0F0EC]'
       }`}
     >
       {children}
+      {indicator && (
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-white" />
+      )}
     </button>
   )
 }
@@ -84,7 +88,7 @@ export function FABBar({ buttons, visible = true }: FABBarProps) {
         <div className="absolute bottom-6 left-5 z-20">
           <FABGroup side="left" className="flex flex-col items-center gap-3" visible={visible}>
             {left.map((btn, i) => (
-              <FAB key={i} onClick={btn.onClick} variant={btn.variant} label={btn.label}>
+              <FAB key={i} onClick={btn.onClick} variant={btn.variant} label={btn.label} indicator={btn.indicator}>
                 {btn.icon}
               </FAB>
             ))}
@@ -95,7 +99,7 @@ export function FABBar({ buttons, visible = true }: FABBarProps) {
         <div className="absolute bottom-6 right-5 z-20">
           <FABGroup side="right" className="flex flex-col items-center gap-3" visible={visible}>
             {right.map((btn, i) => (
-              <FAB key={i} onClick={btn.onClick} variant={btn.variant} label={btn.label}>
+              <FAB key={i} onClick={btn.onClick} variant={btn.variant} label={btn.label} indicator={btn.indicator}>
                 {btn.icon}
               </FAB>
             ))}

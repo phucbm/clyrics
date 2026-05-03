@@ -10,6 +10,8 @@ import {
 import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
+import { useRepoSongs } from '../../hooks/useRepoSongs'
+import { songHasChanges } from '../../lib/utils'
 import { FABBar } from '../shell/FABBar'
 import { ToolBar } from '../shell/ToolBar'
 import { USE_TOOLBAR, type ControlButton } from '../shell/controls'
@@ -60,6 +62,9 @@ export function EditScreen() {
   const { updateSong, setActiveSong } = useSongStore()
   const { navigateTo, playConfig, primaryLang, secondaryLang } = useUIStore()
   const { open } = useBottomSheet()
+  const { songs: repoSongs } = useRepoSongs()
+  const repoOriginal = song?.copiedFrom ? repoSongs.find((s) => s.id === song.copiedFrom) : null
+  const hasChanges = repoOriginal ? songHasChanges(song!, repoOriginal) : false
 
   function goBack() {
     setActiveSong(null)
@@ -161,6 +166,21 @@ export function EditScreen() {
           </div>
         )}
 
+        {hasChanges && (
+          <div className="flex items-center gap-3 mt-3 mb-1 px-4 py-3 bg-[#F0F0EC] border border-[#E0E0DC] rounded-xl">
+            <p className="flex-1 text-xs text-[#666] leading-snug">
+              You have changes vs. the community version.
+            </p>
+            <button
+              onClick={() => open(<ContributeSheet song={song} />, 'Contribute')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F0F0F] text-white text-xs font-semibold rounded-lg shrink-0 hover:bg-[#2a2a2a] transition-colors"
+            >
+              <GitPullRequest size={11} weight="fill" />
+              Contribute
+            </button>
+          </div>
+        )}
+
         {song.lines.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-sm text-[#888] mb-3">No lines yet.</p>
@@ -212,7 +232,7 @@ export function EditScreen() {
           { icon: <ArrowLeft size={20} />, label: 'Back', position: 'left', onClick: goBack, variant: 'secondary' },
           { icon: <PencilSimple size={20} weight="fill" />, label: 'Edit', position: 'right', onClick: () => open(<EditSongSheet song={song} />, 'Edit Song'), variant: 'secondary' },
           { icon: <Lightning size={20} weight="fill" />, label: 'Generate', position: 'right', onClick: () => open(<GenerateConfigSheet />, 'Generate'), variant: 'secondary' },
-          ...(song.source === 'local' ? [{ icon: <GitPullRequest size={20} weight="fill" />, label: 'Contribute', position: 'right' as const, onClick: () => open(<ContributeSheet song={song} />, 'Contribute'), variant: 'secondary' as const }] : []),
+          ...(song.source === 'local' ? [{ icon: <GitPullRequest size={20} weight="fill" />, label: 'Contribute', position: 'right' as const, onClick: () => open(<ContributeSheet song={song} />, 'Contribute'), variant: 'secondary' as const, indicator: hasChanges }] : []),
           { icon: <Play size={20} weight="fill" />, label: 'Play', position: 'right', onClick: () => open(<PlayConfigSheet />, 'Play'), variant: 'primary' },
         ]
         return USE_TOOLBAR
