@@ -5,7 +5,6 @@ import {
   Lightning,
   PencilSimple,
   Play,
-  Plus,
   Warning,
 } from '@phosphor-icons/react'
 import { useActiveSong, useSongStore } from '../../store/useSongStore'
@@ -184,19 +183,25 @@ export function EditScreen() {
               />
             ))}
 
-            <button
-              onClick={addLine}
-              className="flex items-center gap-2 mt-4 mb-2 text-sm text-[#888] hover:text-[#0F0F0F] transition-colors"
-            >
-              <Plus size={14} />
-              Add line
-            </button>
-
-            {song.authors.length > 0 && (
-              <p className="text-xs text-[#AAA] mt-2 mb-6">
-                Contributors: {song.authors.join(', ')}
-              </p>
-            )}
+            {(() => {
+              const langs = [...new Set(song.lines.flatMap((l) => l.translations.map((t) => t.lang)))]
+              const updatedAt = song.updatedAt ?? song.createdAt
+              const dateStr = new Date(updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+              return (
+                <div className="mt-6 mb-2 pt-4 border-t border-[#E8E8E4] flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between text-xs text-[#AAA]">
+                    <span>{song.lines.length} {song.lines.length === 1 ? 'line' : 'lines'}</span>
+                    <span>Updated {dateStr}</span>
+                  </div>
+                  {langs.length > 0 && (
+                    <p className="text-xs text-[#AAA]">Languages: {langs.join(', ')}</p>
+                  )}
+                  {song.authors.length > 0 && (
+                    <p className="text-xs text-[#AAA]">Contributors: {song.authors.join(', ')}</p>
+                  )}
+                </div>
+              )
+            })()}
           </div>
         )}
       </div>
