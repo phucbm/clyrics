@@ -4,7 +4,7 @@ import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { Warning } from '@phosphor-icons/react'
 import { makeSongId } from '../../lib/utils'
-import { generateTitlePinyin, getGroqKey } from '../../lib/groq'
+import { linePinyin } from '../../lib/pinyin'
 import type { Song } from '../../types'
 
 export function AddSongSheet() {
@@ -25,19 +25,16 @@ export function AddSongSheet() {
       .join('\n')
   }
 
-  async function handleSave() {
+  function handleSave() {
     if (!rawLyrics.trim()) { setError('Add some lyrics first.'); return }
     const lines = stripToChineseOnly(rawLyrics)
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
-      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: '', translations: [] }))
+      .map((chinese, i) => ({ id: `${Date.now()}-${i}`, chinese, pinyin: linePinyin(chinese), translations: [] }))
 
     const titleStr = title.trim() || 'Untitled'
-    let titlePinyin: string | undefined
-    if (getGroqKey()) {
-      try { titlePinyin = await generateTitlePinyin(titleStr) } catch { /* skip */ }
-    }
+    const titlePinyin = linePinyin(titleStr) || undefined
 
     const song: Song = {
       id: makeSongId(title.trim(), artist.trim()),
@@ -78,11 +75,13 @@ export function AddSongSheet() {
       <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Title</label>
         <input className={inputCls} placeholder="Song title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        {title && <p className="text-xs text-[#AAA] font-mono px-1">{linePinyin(title)}</p>}
       </div>
 
       <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Artist</label>
         <input className={inputCls} placeholder="Artist name" value={artist} onChange={(e) => setArtist(e.target.value)} />
+        {artist && <p className="text-xs text-[#AAA] font-mono px-1">{linePinyin(artist)}</p>}
       </div>
 
       <div className="space-y-1">
@@ -102,7 +101,7 @@ export function AddSongSheet() {
       </div>
 
       <p className="text-xs text-[#AAA] text-center">
-        Only Chinese characters are saved — all other text is stripped automatically.
+        Only Chinese characters are saved,<br/>all other text is stripped automatically.
       </p>
 
       {error && (

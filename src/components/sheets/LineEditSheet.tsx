@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { nanoid } from 'nanoid'
 import { CopySimple } from '@phosphor-icons/react'
 import { useBottomSheet } from '../shell/BottomSheet'
+import { linePinyin } from '../../lib/pinyin'
 import type { LyricLine } from '../../types'
 
 interface Props {
@@ -19,7 +20,6 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
   const { close, setFooter } = useBottomSheet()
 
   const [chinese, setChinese] = useState(line.chinese)
-  const [pinyin, setPinyin] = useState(line.pinyin)
   const [primaryText, setPrimaryText] = useState(
     line.translations.find((t) => t.lang === primaryLang)?.text ?? ''
   )
@@ -32,7 +32,7 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
     return {
       ...line,
       chinese,
-      pinyin,
+      pinyin: linePinyin(chinese),
       translations: [
         ...other,
         ...(primaryText.trim() ? [{ lang: primaryLang, text: primaryText }] : []),
@@ -86,19 +86,6 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium text-[#888]">Pinyin</label>
-        <textarea
-          className={`${cls} font-mono`}
-          style={{ minHeight: '52px' }}
-          placeholder="pīnyīn"
-          value={pinyin}
-          onChange={(e) => setPinyin(e.target.value)}
-          autoCapitalize="none"
-          autoCorrect="off"
-        />
-      </div>
-
-      <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Chinese</label>
         <textarea
           className={cls}
@@ -108,6 +95,9 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
           onChange={(e) => setChinese(e.target.value)}
           autoFocus
         />
+        {chinese && (
+          <p className="text-xs text-[#AAA] font-mono px-1">{linePinyin(chinese)}</p>
+        )}
       </div>
 
       <div className="space-y-1">

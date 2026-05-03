@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from 'react'
-import { nanoid } from 'nanoid'
-import { ArrowCounterClockwise, CopySimple, Sparkle } from '@phosphor-icons/react'
-import { useSongStore } from '../../store/useSongStore'
-import { useUIStore } from '../../store/useUIStore'
-import { useBottomSheet } from '../shell/BottomSheet'
-import { LyricsEditorSheet } from './LyricsEditorSheet'
-import { generateTitlePinyin, getGroqKey } from '../../lib/groq'
-import type { Song } from '../../types'
+import {useEffect, useRef, useState} from 'react'
+import {nanoid} from 'nanoid'
+import {ArrowCounterClockwise, CopySimple} from '@phosphor-icons/react'
+import {useSongStore} from '../../store/useSongStore'
+import {useUIStore} from '../../store/useUIStore'
+import {useBottomSheet} from '../shell/BottomSheet'
+import {LyricsEditorSheet} from './LyricsEditorSheet'
+import {linePinyin} from '../../lib/pinyin'
+import type {Song} from '../../types'
 
 const RAW_BASE = 'https://raw.githubusercontent.com/phucbm/clyrics/main'
 
@@ -20,9 +20,6 @@ export function EditSongSheet({ song }: Props) {
   const { open, closeAll, setFooter } = useBottomSheet()
 
   const [title, setTitle] = useState(song.title)
-  const [titlePinyin, setTitlePinyin] = useState(song.titlePinyin ?? '')
-  const [generatingPinyin, setGeneratingPinyin] = useState(false)
-  const [pinyinError, setPinyinError] = useState<string | null>(null)
   const [artist, setArtist] = useState(song.artist)
   const [youtubeUrl, setYoutubeUrl] = useState(song.youtubeUrl ?? '')
   const [rawLyrics, setRawLyrics] = useState(
@@ -48,7 +45,7 @@ export function EditSongSheet({ song }: Props) {
         return {
           id: existing?.id ?? `${Date.now()}-${i}`,
           chinese,
-          pinyin: existing?.pinyin ?? '',
+            pinyin: linePinyin(chinese),
           translations: existing?.translations ?? [],
         }
       })
@@ -57,27 +54,12 @@ export function EditSongSheet({ song }: Props) {
   function handleSave() {
     updateSong(song.id, {
       title: title.trim() || 'Untitled',
-      titlePinyin: titlePinyin.trim() || undefined,
+        titlePinyin: linePinyin(title.trim()) || undefined,
       artist: artist.trim() || '',
       youtubeUrl: youtubeUrl.trim() || undefined,
       lines: parseDraftLines(),
     })
     closeAll()
-  }
-
-  async function handleRegenPinyin() {
-    const key = getGroqKey()
-    if (!key) return
-    setGeneratingPinyin(true)
-    setPinyinError(null)
-    try {
-      const result = await generateTitlePinyin(title.trim() || song.title)
-      setTitlePinyin(result)
-    } catch (e) {
-      setPinyinError(e instanceof Error ? e.message : 'Failed')
-    } finally {
-      setGeneratingPinyin(false)
-    }
   }
 
   const handleSaveRef = useRef(handleSave)
@@ -161,30 +143,13 @@ export function EditSongSheet({ song }: Props) {
       <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Title</label>
         <input className={inputCls} placeholder="Song title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <div className="flex items-center gap-2">
-          <input
-            className={`${inputCls} flex-1 text-xs`}
-            placeholder="Title pinyin"
-            value={titlePinyin}
-            onChange={(e) => setTitlePinyin(e.target.value)}
-          />
-          {getGroqKey() && (
-            <button
-              onClick={handleRegenPinyin}
-              disabled={generatingPinyin}
-              className="shrink-0 p-2 rounded-xl border border-[#E0E0DC] text-[#888] hover:text-[#0F0F0F] disabled:opacity-40 transition-colors"
-              title="Regenerate pinyin"
-            >
-              <Sparkle size={14} className={generatingPinyin ? 'animate-pulse' : ''} />
-            </button>
-          )}
-        </div>
-        {pinyinError && <p className="text-xs text-red-500">{pinyinError}</p>}
+          {title && <p className="text-xs text-[#AAA] font-mono px-1">{linePinyin(title)}</p>}
       </div>
 
       <div className="space-y-1">
         <label className="text-xs font-medium text-[#888]">Artist</label>
         <input className={inputCls} placeholder="Artist name" value={artist} onChange={(e) => setArtist(e.target.value)} />
+          {artist && <p className="text-xs text-[#AAA] font-mono px-1">{linePinyin(artist)}</p>}
       </div>
 
       <div className="space-y-1">
@@ -205,7 +170,7 @@ export function EditSongSheet({ song }: Props) {
       </div>
 
       <p className="text-xs text-[#AAA] text-center">
-        Only Chinese characters are saved — all other text is stripped automatically.
+          Only Chinese characters are saved,<br/>all other text is stripped automatically.
       </p>
 
       <div className="flex justify-center pt-1 pb-2">
