@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { Song } from '../types'
 
-const SONGS_API = 'https://api.github.com/repos/phucbm/clyrics/contents/songs'
-const CACHE_TTL = 5 * 60 * 1000
-
 let cache: Song[] | null = null
-let cacheTime = 0
 
 export function invalidateRepoSongsCache() {
-  cacheTime = 0
+  cache = null
 }
 
 export function useRepoSongs() {
@@ -17,7 +13,7 @@ export function useRepoSongs() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (cache && Date.now() - cacheTime < CACHE_TTL) {
+    if (cache) {
       setSongs(cache)
       setLoading(false)
       return
@@ -26,34 +22,15 @@ export function useRepoSongs() {
     let cancelled = false
     setLoading(true)
 
-    fetch(SONGS_API)
+    fetch('/songs/index.json')
       .then((r) => {
-        if (!r.ok) throw new Error(`GitHub API ${r.status}`)
-        return r.json()
+        if (!r.ok) throw new Error(`Failed to load songs index: ${r.status}`)
+        return r.json() as Promise<Song[]>
       })
-      .then(async (files: Array<{ download_url: string; name: string }>) => {
-        const jsonFiles = files.filter((f) => f.name.endsWith('.json'))
-        const COMMITS_API = 'https://api.github.com/repos/phucbm/clyrics/commits'
-        const results = await Promise.allSettled(
-          jsonFiles.map(async (f) => {
-            const [data, commitRes] = await Promise.all([
-              fetch(f.download_url).then((r) => r.json() as Promise<Song>),
-              fetch(`${COMMITS_API}?path=songs/${f.name}&per_page=1`).then((r) => r.json()),
-            ])
-            const updatedAt = commitRes?.[0]?.commit?.committer?.date
-              ? new Date(commitRes[0].commit.committer.date).getTime()
-              : undefined
-            return { ...data, updatedAt }
-          })
-        )
-        const fetched: Song[] = results
-          .filter((r) => r.status === 'fulfilled')
-          .map((r) => ({ ...(r as PromiseFulfilledResult<Song>).value, source: 'repo' as const }))
-
+      .then((data) => {
         if (!cancelled) {
-          cache = fetched
-          cacheTime = Date.now()
-          setSongs(fetched)
+          cache = data
+          setSongs(data)
           setLoading(false)
         }
       })

@@ -4,7 +4,9 @@
   "version": "0.0.2",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/build-songs-index.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/build-songs-index.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
