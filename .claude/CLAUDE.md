@@ -14,7 +14,8 @@
 - Groq API key stored in localStorage (`clyrics_groq_key`) or `VITE_GROQ_API_KEY` env — never hardcode or log it
 - Screen transitions use framer-motion `AnimatePresence`; new screens must follow the `SCREENS` map pattern in `App.tsx`
 - Song `id` field IS the filename without `.json` (e.g. `林三七-野草与栀子花`) — CJK chars kept raw, never slugified for filenames
-- `songs/` folder in repo is source of truth for community song IDs; `useRepoSongs` caches them in-memory (5min TTL, module-level `cache` var)
+- `songs/` folder in repo is source of truth for community songs; `scripts/build-songs-index.mjs` generates `public/songs/index.json` at build time (runs via `predev`/`prebuild` hooks) — `public/songs/` is gitignored
+- `useRepoSongs` fetches `/songs/index.json` (relative URL, served by Vite/Cloudflare) — no GitHub API calls; in-memory cache, no TTL needed (index is per-deploy)
 - `Song.copiedFrom` tracks fork origin — set when user forks a community song; used to determine contribute mode (edit vs new)
 - Nickname for contributions stored in localStorage under `clyrics_nickname`
 - Repo song card click → play screen; local song card click → edit screen
