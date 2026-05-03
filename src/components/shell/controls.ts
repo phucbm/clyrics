@@ -6,6 +6,7 @@ export interface ControlButton {
   position: 'left' | 'right'
   onClick: () => void
   variant?: 'primary' | 'secondary'
+  indicator?: boolean
 }
 
 export const USE_TOOLBAR = true

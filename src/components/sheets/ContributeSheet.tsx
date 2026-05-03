@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { contributeNewSong, contributeEditSong, getPRListUrl, prTitle, songBaseName, slugify } from '../../lib/github'
+import { songChangeSummary } from '../../lib/utils'
 import { useRepoSongs } from '../../hooks/useRepoSongs'
 import { ArrowSquareOut, CheckCircle, GitPullRequest, Warning } from '@phosphor-icons/react'
 import type { Song } from '../../types'
@@ -34,6 +35,9 @@ export function ContributeSheet({ song }: Props) {
   const { close, setFooter } = useBottomSheet()
   const { songs: repoSongs } = useRepoSongs()
   const isCopy = !!song.copiedFrom
+  const repoOriginal = song.copiedFrom ? repoSongs.find((s) => s.id === song.copiedFrom) : null
+  const diff = repoOriginal ? songChangeSummary(song, repoOriginal) : null
+  const isIdentical = isCopy && diff !== null && diff.changedLines === 0 && !diff.metaChanged
   const [mode, setMode] = useState<'new' | 'edit'>('new')
   const [nickname, setNickname] = useState(() => {
     try { return localStorage.getItem(NICKNAME_KEY) ?? '' } catch { return '' }
@@ -44,7 +48,7 @@ export function ContributeSheet({ song }: Props) {
 
   const trimmed = nickname.trim()
   const tooShort = trimmed.length > 0 && trimmed.length < MIN_LENGTH
-  const canSubmit = trimmed.length >= MIN_LENGTH && status !== 'loading'
+  const canSubmit = trimmed.length >= MIN_LENGTH && status !== 'loading' && !isIdentical
 
   function handleNicknameChange(v: string) {
     setNickname(v)
@@ -121,12 +125,28 @@ export function ContributeSheet({ song }: Props) {
         Create a Pull Request to add your lyrics. Once reviewed and merged, it appears in Community Songs.
       </p>
 
+      {isCopy && diff !== null && (
+        <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs ${
+          diff.changedLines > 0 || diff.metaChanged
+            ? 'bg-green-50 border border-green-200 text-green-700'
+            : 'bg-[#F0F0EC] border border-[#E0E0DC] text-[#888]'
+        }`}>
+          <span className={`w-2 h-2 rounded-full shrink-0 ${diff.changedLines > 0 || diff.metaChanged ? 'bg-green-500' : 'bg-[#CCC]'}`} />
+          {diff.changedLines === 0 && !diff.metaChanged
+            ? 'Identical to community version — no changes to contribute.'
+            : [
+                diff.metaChanged && 'Title/artist changed.',
+                diff.changedLines > 0 && `${diff.changedLines} ${diff.changedLines === 1 ? 'line' : 'lines'} changed.`,
+              ].filter(Boolean).join(' ')}
+        </div>
+      )}
+
       {/* Mode selector */}
-      <div className="space-y-1.5">
+      <div className={`space-y-1.5 ${isIdentical ? 'pointer-events-none opacity-40' : ''}`}>
         <p className="text-xs font-medium text-[#888]">Contribute as</p>
         <div className="space-y-2">
-          <label className={`flex items-start gap-3 px-3 py-3 rounded-xl border transition-colors cursor-pointer ${
-            mode === 'new' ? 'border-[#0F0F0F] bg-[#F8F7F5]' : 'border-[#E0E0DC] bg-white'
+          <label className={`flex items-start gap-3 px-3 py-3 rounded-xl border transition-colors ${
+            isIdentical ? 'cursor-not-allowed border-[#E0E0DC] bg-white' : `cursor-pointer ${mode === 'new' ? 'border-[#0F0F0F] bg-[#F8F7F5]' : 'border-[#E0E0DC] bg-white'}`
           }`}>
             <input
               type="radio"
@@ -134,6 +154,7 @@ export function ContributeSheet({ song }: Props) {
               value="new"
               checked={mode === 'new'}
               onChange={() => setMode('new')}
+              disabled={isIdentical}
               className="mt-0.5 accent-[#0F0F0F]"
             />
             <div>
@@ -142,29 +163,25 @@ export function ContributeSheet({ song }: Props) {
             </div>
           </label>
 
-          <label className={`flex items-start gap-3 px-3 py-3 rounded-xl border transition-colors ${
-            isCopy
-              ? `cursor-pointer ${mode === 'edit' ? 'border-[#0F0F0F] bg-[#F8F7F5]' : 'border-[#E0E0DC] bg-white'}`
-              : 'cursor-not-allowed opacity-40 border-[#E0E0DC] bg-white'
-          }`}>
-            <input
-              type="radio"
-              name="contribute-mode"
-              value="edit"
-              checked={mode === 'edit'}
-              onChange={() => setMode('edit')}
-              disabled={!isCopy}
-              className="mt-0.5 accent-[#0F0F0F]"
-            />
-            <div>
-              <p className="text-sm font-medium text-[#0F0F0F]">Edits</p>
-              <p className="text-[11px] text-[#888] mt-0.5">
-                {isCopy
-                  ? 'Propose changes to the original community song.'
-                  : 'Only available when song is forked from Community.'}
-              </p>
-            </div>
-          </label>
+          {isCopy && (
+            <label className={`flex items-start gap-3 px-3 py-3 rounded-xl border transition-colors ${
+              isIdentical ? 'cursor-not-allowed border-[#E0E0DC] bg-white' : `cursor-pointer ${mode === 'edit' ? 'border-[#0F0F0F] bg-[#F8F7F5]' : 'border-[#E0E0DC] bg-white'}`
+            }`}>
+              <input
+                type="radio"
+                name="contribute-mode"
+                value="edit"
+                checked={mode === 'edit'}
+                onChange={() => setMode('edit')}
+                disabled={isIdentical}
+                className="mt-0.5 accent-[#0F0F0F]"
+              />
+              <div>
+                <p className="text-sm font-medium text-[#0F0F0F]">Edits</p>
+                <p className="text-[11px] text-[#888] mt-0.5">Propose changes to the original community song.</p>
+              </div>
+            </label>
+          )}
         </div>
       </div>
 
