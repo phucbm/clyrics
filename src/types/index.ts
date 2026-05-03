@@ -41,4 +41,6 @@ export interface GenerateConfig {
   secondLang?: string
   thirdLang?: string
   overridePinyin: boolean
+  temperature: number
+  customPrompt?: string
 }

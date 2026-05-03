@@ -3,7 +3,7 @@ import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { generateLyrics, getGroqKey } from '../../lib/groq'
-import { Lightning, Warning, Key } from '@phosphor-icons/react'
+import { Translate, Warning, Key, CaretDown } from '@phosphor-icons/react'
 import { LoadingNotes, SuccessFall } from './MusicAnimations'
 
 const LANGUAGES = [
@@ -26,6 +26,7 @@ export function GenerateConfigSheet() {
   const [generating, setGenerating] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   function previewAnim() {
     setGenerating(true)
@@ -56,7 +57,9 @@ export function GenerateConfigSheet() {
         generateConfig.secondLang || undefined,
         song.lines,
         true,
-        generateConfig.thirdLang || undefined
+        generateConfig.thirdLang || undefined,
+        generateConfig.temperature,
+        generateConfig.customPrompt || undefined
       )
       updateSong(song.id, { lines })
       setLangs(generateConfig.translateLang, generateConfig.secondLang || undefined)
@@ -84,7 +87,7 @@ export function GenerateConfigSheet() {
         disabled={!song}
         className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
       >
-        <Lightning size={16} weight="fill" />
+        <Translate size={16} weight="bold" />
         Generate
       </button>
     )
@@ -173,7 +176,51 @@ export function GenerateConfigSheet() {
         </div>
       )}
 
-      <div className="border-t border-[#E0E0DC] pt-3">
+      <div className="border-t border-[#E0E0DC] pt-3 space-y-3">
+        <div>
+          <p className="text-sm font-medium text-[#0F0F0F] mb-3">Translation style</p>
+          <div className="flex rounded-xl overflow-hidden border border-[#E4E2DE]">
+            {([
+              { label: 'Precise', value: 0.3 },
+              { label: 'Balanced', value: 0.5 },
+              { label: 'Poetic', value: 0.7 },
+            ] as const).map(({ label, value }) => (
+              <button
+                key={value}
+                onClick={() => setGenerateConfig({ temperature: value })}
+                className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
+                  generateConfig.temperature === value
+                    ? 'bg-[#0F0F0F] text-white'
+                    : 'text-[#555] hover:bg-[#F0F0EC]'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowAdvanced((v) => !v)}
+          className="flex items-center gap-1 text-xs text-[#999] hover:text-[#555] transition-colors"
+        >
+          <CaretDown
+            size={12}
+            className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+          />
+          Custom instructions
+        </button>
+
+        {showAdvanced && (
+          <textarea
+            value={generateConfig.customPrompt ?? ''}
+            onChange={(e) => setGenerateConfig({ customPrompt: e.target.value || undefined })}
+            placeholder={'e.g. 栀子花 → "hoa dành dành". Use southern Vietnamese dialect. Keep rhymes where possible.'}
+            rows={3}
+            className="w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-sm text-[#0F0F0F] placeholder-[#CCC] focus:border-[#0F0F0F] transition-colors resize-none focus:outline-none"
+          />
+        )}
+
         <p className="text-xs text-[#999]">
           Est. input ~{inputTok} tok / Est. output ~{outputTok} tok
         </p>
