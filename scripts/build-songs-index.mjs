@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { readdirSync } from 'fs'
-import { execSync } from 'child_process'
+import { spawnSync } from 'child_process'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -21,10 +21,11 @@ const songs = files.map((filename) => {
 
   let updatedAt
   try {
-    const iso = execSync(`git log -1 --format="%aI" -- "songs/${filename}"`, {
+    const result = spawnSync('git', ['log', '-1', '--format=%aI', '--', `songs/${filename}`], {
       cwd: root,
       encoding: 'utf-8',
-    }).trim()
+    })
+    const iso = result.stdout?.trim()
     if (iso) updatedAt = new Date(iso).getTime()
   } catch {
     // git not available or no commits for file
