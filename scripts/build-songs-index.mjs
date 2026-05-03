@@ -15,11 +15,12 @@ const files = readdirSync(songsDir).filter(
   (f) => f.endsWith('.json') && f !== 'index.json'
 )
 
-const songs = files.map((filename) => {
-  const song = JSON.parse(readFileSync(join(songsDir, filename), 'utf-8'))
-
-  return { ...song, source: 'repo' }
-})
+const songs = files
+  .map((filename) => {
+    const song = JSON.parse(readFileSync(join(songsDir, filename), 'utf-8'))
+    return { ...song, source: 'repo' }
+  })
+  .sort((a, b) => new Date(b.createdAt ?? 0) - new Date(a.createdAt ?? 0))
 
 writeFileSync(outFile, JSON.stringify(songs, null, 2), 'utf-8')
 console.log(`[build-songs-index] wrote ${songs.length} songs → public/songs/index.json`)
