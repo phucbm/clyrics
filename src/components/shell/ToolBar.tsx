@@ -51,7 +51,7 @@ interface ToolBarProps {
   showLabel?: boolean
 }
 
-export function ToolBar({ buttons, visible = true, showLabel = true }: ToolBarProps) {
+export function ToolBar({ buttons, visible = true, showLabel = false }: ToolBarProps) {
   const left = buttons.filter((b) => b.position === 'left')
   const right = buttons.filter((b) => b.position === 'right')
 
