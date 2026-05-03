@@ -1,8 +1,6 @@
 import { useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
-import { FAB } from '../shell/FAB'
-import { FABGroup } from '../shell/FABGroup'
 import { AddSongSheet } from '../sheets/AddSongSheet'
 import { SongCard, SongCardSkeleton } from '../cards/SongCard'
 import { useRepoSongs, invalidateRepoSongsCache } from '../../hooks/useRepoSongs'
@@ -10,6 +8,9 @@ import { Plus } from '@phosphor-icons/react'
 import { AppFooter } from '../shell/AppFooter'
 import { useEffect } from 'react'
 import type { Song } from '../../types'
+import { FABBar } from '../shell/FABBar'
+import { ToolBar } from '../shell/ToolBar'
+import { USE_TOOLBAR, type ControlButton } from '../shell/controls'
 
 export function HomeScreen() {
   const { songs: localSongs, setActiveSong } = useSongStore()
@@ -35,6 +36,10 @@ export function HomeScreen() {
   function openAddSong() {
     open(<AddSongSheet />, 'Add Song')
   }
+
+  const buttons: ControlButton[] = [
+    { icon: <Plus size={22} />, label: 'Add', position: 'right', onClick: openAddSong, variant: 'primary' },
+  ]
 
   return (
     <div className="h-full flex flex-col relative">
@@ -104,12 +109,9 @@ export function HomeScreen() {
 
       </div>
 
-      {/* FABs: right zone — [+] primary */}
-      <FABGroup side="right" className="absolute bottom-6 right-5 z-20">
-        <FAB onClick={openAddSong} label="Add song">
-          <Plus size={22} />
-        </FAB>
-      </FABGroup>
+      {USE_TOOLBAR
+        ? <ToolBar buttons={buttons} />
+        : <FABBar buttons={buttons} />}
     </div>
   )
 }
