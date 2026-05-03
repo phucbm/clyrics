@@ -1,6 +1,7 @@
 {
   "id": "林三七-野草与栀子花",
   "title": "野草与栀子花",
+  "titlePinyin": "yěcǎo yǔ zhīzǐhuā",
   "artist": "林三七",
   "youtubeUrl": "https://www.youtube.com/watch?v=VHXcjpRtZi0",
   "authors": [
@@ -10,7 +11,7 @@
     {
       "id": "1777638932458-0",
       "chinese": "晚风渐渐把我们吹散",
-      "pinyin": "wǎn fēng jiàn jiàn bǎ wǒ men chuī sàn",
+      "pinyin": "wǎnfēng jiànjiàn bǎ wǒmen chuīsàn",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -25,7 +26,7 @@
     {
       "id": "1777638932458-3",
       "chinese": "身边少了你真不习惯",
-      "pinyin": "shēn biān shǎo le nǐ zhēn bù xí guàn",
+      "pinyin": "shēnbiān shǎole nǐ zhēn bùxíguàn",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -40,7 +41,7 @@
     {
       "id": "1777638932458-4",
       "chinese": "以后的我再没有爱上谁的打算",
-      "pinyin": "yǐ hòu de wǒ zài méi yǒu ài shàng shuí de dǎ suàn",
+      "pinyin": "yǐhòu de wǒ zài méiyǒu àishàng shuí de dǎsuàn",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -55,7 +56,7 @@
     {
       "id": "1777638932458-5",
       "chinese": "可一个人难免孤单",
-      "pinyin": "kě yí gè rén nán miǎn gū dān",
+      "pinyin": "kě yígèrén nánmiǎn gūdān",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -68,9 +69,9 @@
       ]
     },
     {
-      "id": "1777638932458-6",
+      "id": "GBNOeQuyXlPRGhLsI38RR",
       "chinese": "枯萎的野草怎配得上栀子花",
-      "pinyin": "kū wěi de yě cǎo zěn pèi de shàng zhī zi huā",
+      "pinyin": "kūwěi de yěcǎo zěnpèi dé shàng zhīzǐhuā",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -85,7 +86,7 @@
     {
       "id": "1777638932458-7",
       "chinese": "在冬夜的我留不住你的初夏",
-      "pinyin": "zài dōng yè de wǒ liú bù zhù nǐ de chū xià",
+      "pinyin": "zài dōngyè de wǒ liú búzhù nǐ de chūxià",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -100,7 +101,7 @@
     {
       "id": "1777638932458-8",
       "chinese": "你转身离开我成了曾经的路人甲",
-      "pinyin": "nǐ zhuǎn shēn lí kāi wǒ chéng le céng jīng de lù rén jiǎ",
+      "pinyin": "nǐ zhuǎnshēn líkāi wǒ chéng le céngjīng de lùrén jiǎ",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -115,7 +116,7 @@
     {
       "id": "1777638932458-9",
       "chinese": "祝你以后过得比我好啊",
-      "pinyin": "zhù nǐ yǐ hòu guò de bǐ wǒ hǎo a",
+      "pinyin": "zhùnǐ yǐhòu guò dé bǐ wǒ hǎoa",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -128,9 +129,9 @@
       ]
     },
     {
-      "id": "1777638932458-10",
+      "id": "3b5SKXD3OGDMP7aw9LfAc",
       "chinese": "枯萎的野草怎配得上栀子花",
-      "pinyin": "kū wěi de yě cǎo zěn pèi de shàng zhī zi huā",
+      "pinyin": "kūwěi de yěcǎo zěnpèi dé shàng zhīzǐhuā",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -145,7 +146,7 @@
     {
       "id": "1777638932458-11",
       "chinese": "不够好的我给不起你要的家",
-      "pinyin": "bù gòu hǎo de wǒ gěi bù qǐ nǐ yào de jiā",
+      "pinyin": "bú gòu hǎode wǒ gěi bùqǐ nǐ yào de jiā",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -160,7 +161,7 @@
     {
       "id": "1777638932458-12",
       "chinese": "流过的眼泪成了回忆里的一道疤",
-      "pinyin": "liú guò de yǎn lèi chéng le huí yì lǐ de yī dào bā",
+      "pinyin": "liúguò de yǎnlèi chéng le huíyì lǐ de yídào bā",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -175,7 +176,7 @@
     {
       "id": "1777638932458-13",
       "chinese": "以后再没有人来帮我擦",
-      "pinyin": "yǐ hòu zài méi yǒu rén lái bāng wǒ cā",
+      "pinyin": "yǐhòu zài méi yǒurén lái bāng wǒ cā",
       "translations": [
         {
           "lang": "Vietnamese",
@@ -188,6 +189,5 @@
       ]
     }
   ],
-  "createdAt": 1777638932459,
-  "source": "local"
+  "createdAt": 1777690490218
 }
