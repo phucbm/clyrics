@@ -3,11 +3,12 @@ import {nanoid} from 'nanoid'
 import {useCallback, useEffect, useRef, useState, type RefObject} from 'react'
 import {useActiveSong, useSongStore} from '../../store/useSongStore'
 import {useUIStore} from '../../store/useUIStore'
-import {FAB} from '../shell/FAB'
 import {useYouTubePlayer} from '../../hooks/useYouTubePlayer'
 import {extractVideoId} from '../../hooks/useYouTube'
 import {ArrowLeft, MusicNote, Pause, Play, PencilSimple} from '@phosphor-icons/react'
-import {FABGroup} from '../shell/FABGroup'
+import {FABBar} from '../shell/FABBar'
+import {ToolBar} from '../shell/ToolBar'
+import {USE_TOOLBAR, type ControlButton} from '../shell/controls'
 import {useBottomSheet} from '../shell/BottomSheet'
 import {PlayConfigSheet} from '../sheets/PlayConfigSheet'
 import {ShareSheet} from '../sheets/ShareSheet'
@@ -639,52 +640,25 @@ export function PlayScreen() {
         </div>
       )}
 
-      {/* Back FAB */}
-      <div className="absolute bottom-6 left-5 z-20">
-        <FABGroup side="left" className="flex flex-col items-center gap-3" visible={fabVisible}>
-          <FAB onClick={() => openSheet(<ShareSheet song={song} />, 'Share')} variant="secondary" label="Share">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-              <polyline points="16 6 12 2 8 6"/>
-              <line x1="12" y1="2" x2="12" y2="15"/>
-            </svg>
-          </FAB>
-          <FAB
-            onClick={song?.source === 'repo' ? confirmForkAndEdit : () => navigateTo('edit')}
-            variant="secondary"
-            label={song?.source === 'repo' ? 'Save to My Songs' : 'Edit'}
-          >
-            <PencilSimple size={20} />
-          </FAB>
-          <FAB onClick={() => navigateTo(prevScreen === 'home' ? 'home' : 'edit')} variant="secondary" label="Back">
-            <ArrowLeft size={20} />
-          </FAB>
-        </FABGroup>
-      </div>
-
-      {/* Play config + Play/Pause FABs */}
-      <div className="absolute bottom-6 right-5 z-20">
-        <FABGroup side="right" className="flex flex-col items-center gap-3" visible={fabVisible}>
-          {/* Sync button — hidden temporarily, keep for future use */}
-          {videoId && (
-            <div className="hidden">
-              <FAB onClick={syncToVideo} variant="secondary" label="Sync to video">
-                <span className="text-xs font-bold">sync</span>
-              </FAB>
-            </div>
-          )}
-          {videoId && (
-            <FAB onClick={() => openSheet(<PlayConfigSheet isPlaying={isPlaying} />, 'Play Config')} variant="secondary" label="Play config">
-              <MusicNote size={20} />
-            </FAB>
-          )}
-          {videoId && !playConfig.hideVideo && (
-            <FAB onClick={togglePlay} label={isPlaying ? 'Pause' : 'Play'}>
-              {isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />}
-            </FAB>
-          )}
-        </FABGroup>
-      </div>
+      {(() => {
+        const shareIcon = (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+        )
+        const buttons: ControlButton[] = [
+          { icon: <ArrowLeft size={20} />, label: 'Back', position: 'left', onClick: () => navigateTo(prevScreen === 'home' ? 'home' : 'edit'), variant: 'secondary' },
+          { icon: shareIcon, label: 'Share', position: 'right', onClick: () => openSheet(<ShareSheet song={song} />, 'Share'), variant: 'secondary' },
+          { icon: <PencilSimple size={20} />, label: song?.source === 'repo' ? 'Save' : 'Edit', position: 'right', onClick: song?.source === 'repo' ? confirmForkAndEdit : () => navigateTo('edit'), variant: 'secondary' },
+          ...(videoId ? [{ icon: <MusicNote size={20} />, label: 'Config', position: 'right' as const, onClick: () => openSheet(<PlayConfigSheet isPlaying={isPlaying} />, 'Play Config'), variant: 'secondary' as const }] : []),
+          ...(videoId && !playConfig.hideVideo ? [{ icon: isPlaying ? <Pause size={22} weight="fill" /> : <Play size={22} weight="fill" />, label: isPlaying ? 'Pause' : 'Play', position: 'right' as const, onClick: togglePlay, variant: 'primary' as const }] : []),
+        ]
+        return USE_TOOLBAR
+          ? <ToolBar buttons={buttons} visible={fabVisible} />
+          : <FABBar buttons={buttons} visible={fabVisible} />
+      })()}
 
       {/* Loop countdown toast */}
       {loopCountdown !== null && videoId && (

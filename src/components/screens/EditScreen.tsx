@@ -10,8 +10,9 @@ import {
 import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
-import { FAB } from '../shell/FAB'
-import { FABGroup } from '../shell/FABGroup'
+import { FABBar } from '../shell/FABBar'
+import { ToolBar } from '../shell/ToolBar'
+import { USE_TOOLBAR, type ControlButton } from '../shell/controls'
 import { GenerateConfigSheet } from '../sheets/GenerateConfigSheet'
 import { PlayConfigSheet } from '../sheets/PlayConfigSheet'
 import { EditSongSheet } from '../sheets/EditSongSheet'
@@ -206,27 +207,18 @@ export function EditScreen() {
         )}
       </div>
 
-      <FABGroup side="left" className="absolute bottom-6 left-5 z-20">
-        <FAB onClick={goBack} variant="secondary" label="Back to Home">
-          <ArrowLeft size={20} />
-        </FAB>
-      </FABGroup>
-      <FABGroup side="right" className="absolute bottom-6 right-5 z-20 flex flex-col-reverse gap-3">
-        <FAB onClick={() => open(<EditSongSheet song={song} />, 'Edit Song')} variant="secondary" label="Edit song">
-          <PencilSimple size={20} weight="fill" />
-        </FAB>
-        <FAB onClick={() => open(<GenerateConfigSheet />, 'Generate')} variant="secondary" label="Generate lyrics">
-          <Lightning size={20} weight="fill" />
-        </FAB>
-        {song.source === 'local' && (
-          <FAB onClick={() => open(<ContributeSheet song={song} />, 'Contribute')} variant="secondary" label="Contribute via PR">
-            <GitPullRequest size={20} weight="fill" />
-          </FAB>
-        )}
-        <FAB onClick={() => open(<PlayConfigSheet />, 'Play')} label="Play">
-          <Play size={20} weight="fill" />
-        </FAB>
-      </FABGroup>
+      {(() => {
+        const buttons: ControlButton[] = [
+          { icon: <ArrowLeft size={20} />, label: 'Back', position: 'left', onClick: goBack, variant: 'secondary' },
+          { icon: <PencilSimple size={20} weight="fill" />, label: 'Edit', position: 'right', onClick: () => open(<EditSongSheet song={song} />, 'Edit Song'), variant: 'secondary' },
+          { icon: <Lightning size={20} weight="fill" />, label: 'Generate', position: 'right', onClick: () => open(<GenerateConfigSheet />, 'Generate'), variant: 'secondary' },
+          ...(song.source === 'local' ? [{ icon: <GitPullRequest size={20} weight="fill" />, label: 'Contribute', position: 'right' as const, onClick: () => open(<ContributeSheet song={song} />, 'Contribute'), variant: 'secondary' as const }] : []),
+          { icon: <Play size={20} weight="fill" />, label: 'Play', position: 'right', onClick: () => open(<PlayConfigSheet />, 'Play'), variant: 'primary' },
+        ]
+        return USE_TOOLBAR
+          ? <ToolBar buttons={buttons} />
+          : <FABBar buttons={buttons} />
+      })()}
     </div>
   )
 }
