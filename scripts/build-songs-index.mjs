@@ -1,6 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { readdirSync } from 'fs'
-import { spawnSync } from 'child_process'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -19,19 +18,7 @@ const files = readdirSync(songsDir).filter(
 const songs = files.map((filename) => {
   const song = JSON.parse(readFileSync(join(songsDir, filename), 'utf-8'))
 
-  let updatedAt
-  try {
-    const result = spawnSync('git', ['log', '-1', '--format=%aI', '--', `songs/${filename}`], {
-      cwd: root,
-      encoding: 'utf-8',
-    })
-    const iso = result.stdout?.trim()
-    if (iso) updatedAt = new Date(iso).getTime()
-  } catch {
-    // git not available or no commits for file
-  }
-
-  return { ...song, source: 'repo', ...(updatedAt ? { updatedAt } : {}) }
+  return { ...song, source: 'repo' }
 })
 
 writeFileSync(outFile, JSON.stringify(songs, null, 2), 'utf-8')

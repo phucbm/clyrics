@@ -115,7 +115,7 @@ async function createPR(
 
   // Strip internal-only fields before publishing
   const { source: _source, copiedFrom: _copiedFrom, ...songData } = song
-  const finalSong = { ...songData, authors: [...new Set([...song.authors, nickname])] }
+  const finalSong = { ...songData, authors: [...new Set([...song.authors, nickname])], updatedAt: Date.now() }
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalSong, null, 2))))
 
   await octokit.rest.git.createRef({ owner: OWNER, repo: REPO, ref: `refs/heads/${branch}`, sha: mainSha })
