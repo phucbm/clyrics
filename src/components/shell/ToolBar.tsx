@@ -5,45 +5,39 @@ import type { ControlButton } from './controls'
 
 interface ToolBarButtonProps {
   btn: ControlButton
-  inPill?: boolean
+  showLabel: boolean
 }
 
-function ToolBarButton({ btn, inPill = false }: ToolBarButtonProps) {
+function ToolBarButton({ btn, showLabel }: ToolBarButtonProps) {
   const isPrimary = btn.variant === 'primary'
   return (
     <button
       onClick={btn.onClick}
       aria-label={btn.label}
-      className={`flex flex-col items-center justify-center gap-1 transition-all active:scale-90 ${
-        inPill ? 'w-12 h-12' : 'w-14 h-14'
-      } ${
-        isPrimary
-          ? 'bg-[#0F0F0F] text-white rounded-full shadow-sm'
-          : 'text-[#0F0F0F]'
+      className={`flex flex-col items-center justify-center gap-1 w-12 h-12 transition-all active:scale-90 ${
+        isPrimary ? 'text-[#0F0F0F]' : 'text-[#888]'
       }`}
     >
       {btn.icon}
-      <span className="text-[10px] font-medium leading-none text-current opacity-60">{btn.label}</span>
+      {showLabel && (
+        <span className="text-[10px] font-medium leading-none text-current">{btn.label}</span>
+      )}
     </button>
   )
 }
 
 // ── ToolBarGroup ──────────────────────────────────────────────────────────────
 
-function ToolBarGroup({ buttons }: { buttons: ControlButton[] }) {
-  const single = buttons.length === 1
-  const isPrimarySingle = single && buttons[0].variant === 'primary'
+interface ToolBarGroupProps {
+  buttons: ControlButton[]
+  showLabel: boolean
+}
 
+function ToolBarGroup({ buttons, showLabel }: ToolBarGroupProps) {
   return (
-    <div
-      className={`flex items-center shadow-md ${
-        single
-          ? `w-14 h-14 justify-center rounded-full ${isPrimarySingle ? 'bg-[#0F0F0F]' : 'bg-white border border-[#E0E0DC]'}`
-          : 'rounded-2xl bg-white border border-[#E0E0DC] px-1 gap-0.5'
-      }`}
-    >
+    <div className="flex items-center rounded-full bg-white border border-[#E0E0DC] shadow-md px-1 gap-0.5">
       {buttons.map((btn, i) => (
-        <ToolBarButton key={i} btn={btn} inPill={!single} />
+        <ToolBarButton key={i} btn={btn} showLabel={showLabel} />
       ))}
     </div>
   )
@@ -54,9 +48,10 @@ function ToolBarGroup({ buttons }: { buttons: ControlButton[] }) {
 interface ToolBarProps {
   buttons: ControlButton[]
   visible?: boolean
+  showLabel?: boolean
 }
 
-export function ToolBar({ buttons, visible = true }: ToolBarProps) {
+export function ToolBar({ buttons, visible = true, showLabel = true }: ToolBarProps) {
   const left = buttons.filter((b) => b.position === 'left')
   const right = buttons.filter((b) => b.position === 'right')
 
@@ -68,8 +63,8 @@ export function ToolBar({ buttons, visible = true }: ToolBarProps) {
       style={{ pointerEvents: visible ? 'auto' : 'none' }}
       className="absolute bottom-0 inset-x-0 flex items-end justify-between px-5 pb-6 z-20"
     >
-      <div>{left.length > 0 ? <ToolBarGroup buttons={left} /> : <div className="w-14" />}</div>
-      <div>{right.length > 0 ? <ToolBarGroup buttons={right} /> : null}</div>
+      <div>{left.length > 0 ? <ToolBarGroup buttons={left} showLabel={showLabel} /> : <div className="w-12" />}</div>
+      <div>{right.length > 0 ? <ToolBarGroup buttons={right} showLabel={showLabel} /> : null}</div>
     </motion.div>
   )
 }
