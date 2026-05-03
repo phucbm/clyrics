@@ -107,8 +107,9 @@ async function createPR(
   filePath: string,
   fileSha?: string,
 ): Promise<string> {
-  const baseName = [song.artist, song.title].filter(Boolean).join('-') || song.id
-  const branch = `song/${baseName}-${nanoid(6)}`
+  const rawBase = [song.artist, song.title].filter(Boolean).join('-') || song.id
+  const safeBase = slugify(rawBase) || song.id.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const branch = `song/${safeBase}-${nanoid(6)}`
 
   const { data: ref } = await octokit.rest.git.getRef({ owner: OWNER, repo: REPO, ref: 'heads/main' })
   const mainSha = ref.object.sha
