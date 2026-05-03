@@ -249,6 +249,9 @@ export function PlayScreen() {
 
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null
   const [loopCountdown, setLoopCountdown] = useState<number | null>(null)
+  const [seekFlash, setSeekFlash] = useState<{ side: 'left' | 'right'; seconds: number; key: number } | null>(null)
+  const seekAccRef = useRef<{ left: number; right: number }>({ left: 0, right: 0 })
+  const seekResetTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const handleEnded = useCallback(() => {
     setLoopCountdown(null)
@@ -258,7 +261,7 @@ export function PlayScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playConfig.loop])
 
-  const { containerRef, isPlaying, isReady, play, togglePlay, seekTo, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop, handleEnded)
+  const { containerRef, isPlaying, isReady, play, togglePlay, seekTo, seekBySeconds, getProgress, getTimeInfo } = useYouTubePlayer(videoId, playConfig.loop, handleEnded)
   const progressBarRef = useRef<HTMLDivElement>(null)
 
   // Refs so wheel/touch handlers always see current values without re-registering
@@ -268,6 +271,8 @@ export function PlayScreen() {
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const touchStartYRef = useRef(0)
   const touchScrollPosRef = useRef(0)
+  const edgeTapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const edgeTapCountRef = useRef<{ side: 'left' | 'right'; count: number }>({ side: 'left', count: 0 })
 
   // Auto-hide controls — 2s after last action
   const scheduleHide = useCallback(() => {
@@ -542,6 +547,34 @@ export function PlayScreen() {
     )
   }
 
+  function handleEdgeTap(side: 'left' | 'right') {
+    const ref = edgeTapCountRef.current
+    if (ref.side !== side) {
+      ref.side = side
+      ref.count = 0
+    }
+    ref.count++
+    clearTimeout(edgeTapTimerRef.current)
+    if (ref.count >= 2) {
+      ref.count = 0
+      const delta = side === 'left' ? -10 : 10
+      seekBySeconds(delta)
+      seekAccRef.current[side] += Math.abs(delta)
+      const acc = seekAccRef.current[side]
+      setSeekFlash({ side, seconds: side === 'left' ? -acc : acc, key: Date.now() })
+      clearTimeout(seekResetTimerRef.current)
+      seekResetTimerRef.current = setTimeout(() => {
+        seekAccRef.current = { left: 0, right: 0 }
+        setSeekFlash(null)
+      }, 1000)
+    } else {
+      edgeTapTimerRef.current = setTimeout(() => {
+        ref.count = 0
+        toggleControls()
+      }, 250)
+    }
+  }
+
   const showArtist = song.artist && song.artist !== 'Unknown' && song.artist !== ''
   const fabVisible = !focusMode || controlsVisible
 
@@ -550,9 +583,52 @@ export function PlayScreen() {
 
       {/* Mobile video — outside scroll container so sticky isn't needed */}
       {videoId && !isDesktop && !playConfig.hideVideo && (
-        <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}} onClick={toggleControls}>
+        <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}}>
           <div ref={containerRef} className="w-full h-full" style={{pointerEvents: 'none'}}/>
           <img src="/icon.png" alt="" className="absolute bottom-3 right-3 w-7 h-7 rounded-md opacity-60 pointer-events-none" />
+
+          {/* Tap zones: single tap=controls, double tap left=−10s / right=+10s */}
+          <div className="absolute inset-0 flex select-none" style={{bottom: '6px', userSelect: 'none', WebkitUserSelect: 'none'}}>
+            <div className="w-[30%] h-full" onClick={() => handleEdgeTap('left')} />
+            <div className="flex-1 h-full" onClick={toggleControls} />
+            <div className="w-[30%] h-full" onClick={() => handleEdgeTap('right')} />
+          </div>
+
+          {/* Seek flash indicator */}
+          <style>{`
+            @keyframes seek-flash {
+              0%   { opacity: 1; }
+              70%  { opacity: 1; }
+              100% { opacity: 0; }
+            }
+            @keyframes seek-text {
+              0%   { transform: scale(1.2); opacity: 1; }
+              30%  { transform: scale(1); opacity: 1; }
+              70%  { opacity: 1; }
+              100% { opacity: 0; }
+            }
+          `}</style>
+          {seekFlash && (
+            <div
+              key={seekFlash.key}
+              className="absolute inset-y-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
+              style={{
+                [seekFlash.side === 'left' ? 'left' : 'right']: 0,
+                width: '30%',
+                background: seekFlash.side === 'left'
+                  ? 'radial-gradient(ellipse at left center, rgba(255,255,255,0.18) 0%, transparent 70%)'
+                  : 'radial-gradient(ellipse at right center, rgba(255,255,255,0.18) 0%, transparent 70%)',
+                animation: 'seek-flash 0.9s ease-out forwards',
+              }}
+            >
+              <span className="text-white font-bold" style={{fontSize: 20, animation: 'seek-text 0.9s ease-out forwards', textShadow: '0 1px 4px rgba(0,0,0,0.6)'}}>
+                {seekFlash.side === 'left' ? '«' : '»'}
+              </span>
+              <span className="text-white font-semibold text-xs tabular-nums" style={{animation: 'seek-text 0.9s ease-out forwards', textShadow: '0 1px 4px rgba(0,0,0,0.6)'}}>
+                {seekFlash.seconds > 0 ? '+' : ''}{seekFlash.seconds}s
+              </span>
+            </div>
+          )}
 
           {/* Progress bar — taller touch target for drag-to-seek */}
           <div
@@ -621,10 +697,9 @@ export function PlayScreen() {
       )}
 
       {/* Bottom touch/hover zone — focus mode only, reveals controls */}
-      {/* Desktop: always show for hover-to-reveal. Mobile: only when no video (youtube tap handles it otherwise) */}
-      {focusMode && (isDesktop || !videoId || playConfig.hideVideo) && (
+      {focusMode && (
         <div
-          className="absolute bottom-0 inset-x-0 h-[100px] z-10"
+          className="absolute bottom-0 inset-x-0 h-[80px] z-10"
           onPointerDown={isDesktop ? undefined : revealControls}
           onMouseEnter={isDesktop ? revealControls : undefined}
         >
@@ -635,11 +710,7 @@ export function PlayScreen() {
             }`}
           >
             <span className="px-4 py-2 bg-black/60 text-white/90 text-xs rounded-full backdrop-blur-sm">
-              {isDesktop
-                ? 'Hover here to show pause button'
-                : videoId && !playConfig.hideVideo
-                  ? 'Tap on youtube to show pause button'
-                  : 'Tap here to show pause button'}
+              {isDesktop ? 'Hover here to show pause button' : 'Tap here to show pause button'}
             </span>
           </div>
         </div>
