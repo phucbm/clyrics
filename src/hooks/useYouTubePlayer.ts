@@ -46,7 +46,7 @@ export function useYouTubePlayer(videoId: string | null, loop = false, onEnded?:
       if (destroyed || !containerEl) return
       playerRef.current = new window.YT.Player(containerEl, {
         videoId,
-        playerVars: { rel: 0, modestbranding: 1 },
+        playerVars: { rel: 0, modestbranding: 1, controls: 0, disablekb: 1 },
         events: {
           onReady: () => { if (!destroyed) setIsReady(true) },
           onStateChange: (e: any) => {
@@ -89,6 +89,16 @@ export function useYouTubePlayer(videoId: string | null, loop = false, onEnded?:
     } catch {}
   }
 
+  function seekBySeconds(delta: number) {
+    const p = playerRef.current
+    if (!p) return
+    try {
+      const duration = p.getDuration()
+      const current = p.getCurrentTime()
+      if (duration) p.seekTo(Math.max(0, Math.min(duration, current + delta)), true)
+    } catch {}
+  }
+
   function getProgress(): number {
     const p = playerRef.current
     if (!p) return 0
@@ -105,5 +115,5 @@ export function useYouTubePlayer(videoId: string | null, loop = false, onEnded?:
     try { return { currentTime: p.getCurrentTime(), duration: p.getDuration() } } catch { return { currentTime: 0, duration: 0 } }
   }
 
-  return { containerRef, isPlaying, isReady, play, pause, togglePlay, seekTo, getProgress, getTimeInfo }
+  return { containerRef, isPlaying, isReady, play, pause, togglePlay, seekTo, seekBySeconds, getProgress, getTimeInfo }
 }
