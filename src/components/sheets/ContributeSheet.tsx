@@ -3,7 +3,8 @@ import { useBottomSheet } from '../shell/BottomSheet'
 import { contributeNewSong, contributeEditSong, getPRListUrl, prTitle, songBaseName, slugify } from '../../lib/github'
 import { songChangeSummary } from '../../lib/utils'
 import { useRepoSongs } from '../../hooks/useRepoSongs'
-import { ArrowSquareOut, CheckCircle, GitPullRequest, Warning } from '@phosphor-icons/react'
+import { ArrowSquareOut, GitPullRequest, Warning } from '@phosphor-icons/react'
+import { LoadingNotes, SuccessConfetti } from './MusicAnimations'
 import type { Song } from '../../types'
 
 function resolveNewFileName(song: Song, repoSongs: Song[], nickname: string): string {
@@ -45,6 +46,11 @@ export function ContributeSheet({ song }: Props) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [prUrl, setPrUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  function previewAnim() {
+    setStatus('loading')
+    setTimeout(() => { setPrUrl('#'); setStatus('success') }, 3000)
+  }
 
   const trimmed = nickname.trim()
   const tooShort = trimmed.length > 0 && trimmed.length < MIN_LENGTH
@@ -93,7 +99,7 @@ export function ContributeSheet({ song }: Props) {
           </button>
         </div>
       )
-    } else {
+    } else if (status !== 'loading') {
       setFooter(
         <button
           onClick={() => submitRef.current()}
@@ -101,20 +107,26 @@ export function ContributeSheet({ song }: Props) {
           className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
         >
           <GitPullRequest size={15} weight="fill" />
-          {status === 'loading' ? 'Creating PR…' : 'Send contribution'}
+          Send contribution
         </button>
       )
+    } else {
+      setFooter(null)
     }
   }, [status, prUrl, canSubmit])
 
   if (status === 'success') {
     return (
-      <div className="px-5 pb-4 space-y-4">
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <CheckCircle size={32} weight="fill" className="text-green-500" />
-          <p className="text-sm font-semibold text-[#0F0F0F]">PR created!</p>
-          <p className="text-xs text-[#888]">Your song is under review. Thank you for contributing.</p>
-        </div>
+      <div className="px-5 pb-4">
+        <SuccessConfetti title="PR created!" subtitle="Your song is under review. Thank you for contributing." />
+      </div>
+    )
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="px-5 pb-4">
+        <LoadingNotes />
       </div>
     )
   }
@@ -236,6 +248,15 @@ export function ContributeSheet({ song }: Props) {
           <Warning size={12} className="shrink-0 mt-0.5" />
           <span className="break-all">{error}</span>
         </div>
+      )}
+
+      {import.meta.env.DEV && (
+        <button
+          onClick={previewAnim}
+          className="w-full py-2 text-[11px] text-[#CCC] hover:text-[#888] transition-colors border border-dashed border-[#E0E0DC] rounded-xl"
+        >
+          preview animation
+        </button>
       )}
     </div>
   )

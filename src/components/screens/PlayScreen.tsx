@@ -12,6 +12,7 @@ import {USE_TOOLBAR, type ControlButton} from '../shell/controls'
 import {useBottomSheet} from '../shell/BottomSheet'
 import {PlayConfigSheet} from '../sheets/PlayConfigSheet'
 import {ShareSheet} from '../sheets/ShareSheet'
+import {FloatingNotes, type FloatingNotesHandle} from '../sheets/MusicAnimations'
 import type {Song} from '../../types'
 
 const AVG_LINE_PX = 80   // estimated px per lyric group
@@ -238,6 +239,7 @@ export function PlayScreen() {
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
+  const floatingNotesRef = useRef<FloatingNotesHandle>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
@@ -422,6 +424,7 @@ export function PlayScreen() {
 
     function onWheel(e: WheelEvent) {
       e.preventDefault()
+      if (e.deltaY < 0) floatingNotesRef.current?.push(Math.abs(e.deltaY) * 0.5)
       const current = pauseAnimation()
       const max = getMaxScroll()
       const next = Math.max(0, Math.min(max, current + e.deltaY))
@@ -448,6 +451,7 @@ export function PlayScreen() {
     function onTouchMove(e: TouchEvent) {
       e.preventDefault()
       const dy = touchStartYRef.current - e.touches[0].clientY
+      if (dy < 0) floatingNotesRef.current?.push(Math.abs(dy) * 0.4)
       const max = getMaxScroll()
       const next = Math.max(0, Math.min(max, touchScrollPosRef.current + dy))
       setScrollImmediate(next)
@@ -569,6 +573,7 @@ export function PlayScreen() {
         <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
         {/* Bottom fade */}
         <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+        <FloatingNotes ref={floatingNotesRef} />
         <div ref={contentRef} style={{willChange: 'transform'}}>
 
           <div style={{height: videoId && !isDesktop && !playConfig.hideVideo ? '20vh' : '42vh'}}/>

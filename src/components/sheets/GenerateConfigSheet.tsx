@@ -4,6 +4,7 @@ import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { generateLyrics, getGroqKey } from '../../lib/groq'
 import { Lightning, Warning, Key } from '@phosphor-icons/react'
+import { LoadingNotes, SuccessFall } from './MusicAnimations'
 
 const LANGUAGES = [
   'Vietnamese', 'English', 'Japanese', 'Korean',
@@ -23,7 +24,14 @@ export function GenerateConfigSheet() {
   const { generateConfig, setGenerateConfig, setPlayConfig, setLangs } = useUIStore()
   const { close, setFooter } = useBottomSheet()
   const [generating, setGenerating] = useState(false)
+  const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function previewAnim() {
+    setGenerating(true)
+    setTimeout(() => { setGenerating(false); setDone(true) }, 2500)
+    setTimeout(() => setDone(false), 5500)
+  }
 
   const hasKey = !!getGroqKey()
   const lineCount = song?.lines.length ?? 0
@@ -53,10 +61,11 @@ export function GenerateConfigSheet() {
       updateSong(song.id, { lines })
       setLangs(generateConfig.translateLang, generateConfig.secondLang || undefined)
       setPlayConfig({ translation: true, secondLang: !!generateConfig.secondLang })
-      close()
+      setGenerating(false)
+      setDone(true)
+      setTimeout(close, 2500)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Generation failed')
-    } finally {
       setGenerating(false)
     }
   }
@@ -65,18 +74,37 @@ export function GenerateConfigSheet() {
   handleGenerateRef.current = handleGenerate
 
   useEffect(() => {
-    if (!hasKey) return
+    if (!hasKey || generating || done) {
+      setFooter(null)
+      return
+    }
     setFooter(
       <button
         onClick={() => handleGenerateRef.current()}
-        disabled={generating || !song}
+        disabled={!song}
         className="w-full py-4 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white disabled:opacity-40 hover:bg-[#2a2a2a] transition-colors flex items-center justify-center gap-2"
       >
         <Lightning size={16} weight="fill" />
-        {generating ? 'Generating…' : 'Generate'}
+        Generate
       </button>
     )
-  }, [generating, hasKey, song])
+  }, [generating, done, hasKey, song])
+
+  if (generating) {
+    return (
+      <div className="px-5 pb-4">
+        <LoadingNotes label="Generating lyrics…" sublabel="Asking Groq to translate your song" />
+      </div>
+    )
+  }
+
+  if (done) {
+    return (
+      <div className="px-5 pb-4">
+        <SuccessFall title="Lyrics generated!" subtitle="Translations are ready. Closing…" />
+      </div>
+    )
+  }
 
   if (!hasKey) {
     return (
@@ -156,6 +184,15 @@ export function GenerateConfigSheet() {
           <Warning size={12} className="shrink-0" />
           <span>{error}</span>
         </div>
+      )}
+
+      {import.meta.env.DEV && (
+        <button
+          onClick={previewAnim}
+          className="w-full py-2 text-[11px] text-[#CCC] hover:text-[#888] transition-colors border border-dashed border-[#E0E0DC] rounded-xl"
+        >
+          preview animation
+        </button>
       )}
     </div>
   )
