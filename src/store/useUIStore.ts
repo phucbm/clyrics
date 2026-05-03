@@ -41,6 +41,8 @@ export const useUIStore = create<UIStore>()(
         translateLang: 'Vietnamese',
         secondLang: undefined,
         overridePinyin: false,
+        temperature: 0.7,
+        customPrompt: undefined,
       },
       navigateTo: (screen) => {
         const cur = SCREEN_ORDER.indexOf(get().screen)

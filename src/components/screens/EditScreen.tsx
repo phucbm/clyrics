@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import {
   ArrowLeft,
   GitPullRequest,
-  Lightning,
+  Translate,
   PencilSimple,
   Play,
   Warning,
@@ -160,7 +160,7 @@ export function EditScreen() {
               onClick={() => open(<GenerateConfigSheet />, 'Generate')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F0F0F] text-white text-xs font-semibold rounded-lg shrink-0 hover:bg-[#2a2a2a] transition-colors"
             >
-              <Lightning size={11} weight="fill" />
+              <Translate size={11} weight="fill" />
               Generate
             </button>
           </div>
@@ -230,9 +230,9 @@ export function EditScreen() {
       {(() => {
         const buttons: ControlButton[] = [
           { icon: <ArrowLeft size={20} />, label: 'Back', position: 'left', onClick: goBack, variant: 'secondary' },
-          { icon: <PencilSimple size={20} weight="fill" />, label: 'Edit', position: 'right', onClick: () => open(<EditSongSheet song={song} />, 'Edit Song'), variant: 'secondary' },
-          { icon: <Lightning size={20} weight="fill" />, label: 'Generate', position: 'right', onClick: () => open(<GenerateConfigSheet />, 'Generate'), variant: 'secondary' },
-          ...(song.source === 'local' ? [{ icon: <GitPullRequest size={20} weight="fill" />, label: 'Contribute', position: 'right' as const, onClick: () => open(<ContributeSheet song={song} />, 'Contribute'), variant: 'secondary' as const, indicator: hasChanges }] : []),
+          { icon: <PencilSimple size={20} />, label: 'Edit', position: 'right', onClick: () => open(<EditSongSheet song={song} />, 'Edit Song'), variant: 'secondary' },
+          { icon: <Translate size={20} />, label: 'Generate', position: 'right', onClick: () => open(<GenerateConfigSheet />, 'Generate'), variant: 'secondary' },
+          ...(song.source === 'local' ? [{ icon: <GitPullRequest size={20} />, label: 'Contribute', position: 'right' as const, onClick: () => open(<ContributeSheet song={song} />, 'Contribute'), variant: 'secondary' as const, indicator: hasChanges }] : []),
           { icon: <Play size={20} weight="fill" />, label: 'Play', position: 'right', onClick: () => open(<PlayConfigSheet />, 'Play'), variant: 'primary' },
         ]
         return USE_TOOLBAR

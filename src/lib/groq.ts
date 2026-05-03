@@ -37,7 +37,9 @@ export async function generateLyrics(
   secondaryLang?: string,
   existingLines?: LyricLine[],
   overridePinyin = false,
-  thirdLang?: string
+  thirdLang?: string,
+  temperature = 0.7,
+  customPrompt?: string
 ): Promise<LyricLine[]> {
   const key = getGroqKey()
   if (!key) throw new Error('NO_KEY')
@@ -47,6 +49,7 @@ export async function generateLyrics(
     thirdLang ? `Also add a third entry in the translations array for "${thirdLang}".` : '',
   ].filter(Boolean).join(' ')
   const secondInstr = extraInstr ? ` ${extraInstr}` : ''
+  const customInstr = customPrompt?.trim() ? `\n\nAdditional instructions: ${customPrompt.trim()}` : ''
 
   const res = await fetch(GROQ_API, {
     method: 'POST',
@@ -60,10 +63,10 @@ export async function generateLyrics(
         { role: 'system', content: SYSTEM_PROMPT_RAW },
         {
           role: 'user',
-          content: `Translate to "${primaryLang}".${secondInstr}\n\nLyrics:\n${chinese}`,
+          content: `Translate to "${primaryLang}".${secondInstr}${customInstr}\n\nLyrics:\n${chinese}`,
         },
       ],
-      temperature: 0.1,
+      temperature,
       max_tokens: 6000,
     }),
   })
@@ -90,7 +93,9 @@ export async function generateLyrics(
 
     const merged = [...baseTranslations]
     for (const t of newTranslations) {
-      if (!merged.some((m) => m.lang === t.lang)) merged.push(t)
+      const idx = merged.findIndex((m) => m.lang === t.lang)
+      if (idx === -1) merged.push(t)
+      else merged[idx] = t
     }
 
     return {
