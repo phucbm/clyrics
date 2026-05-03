@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { forwardRef, useImperativeHandle, useEffect, useRef } from 'react'
+import { motion, motionValue as mv, type MotionValue } from 'framer-motion'
 import { CheckCircle } from '@phosphor-icons/react'
 
 const CHARS = ['♪', '♫', '♬', '字', '中', '福', '越', '汉', '文']
@@ -63,6 +64,92 @@ const CONFETTI_CONFIGS = [
   { char: CHARS[5], angle: 113,  dist: 80,  delay: 0.175, color: COLORS[9]  },
   { char: CHARS[3], angle: 188,  dist: 95,  delay: 0.125, color: COLORS[12] },
 ]
+
+const NOTE_CHARS = ['♪', '♫', '♬']
+
+const AMBIENT_CONFIGS = [
+  { char: NOTE_CHARS[0], x: '7%',  duration: 4.0, color: COLORS[0]  },
+  { char: NOTE_CHARS[2], x: '24%', duration: 3.8, color: COLORS[6]  },
+  { char: NOTE_CHARS[1], x: '41%', duration: 4.2, color: COLORS[1]  },
+  { char: NOTE_CHARS[0], x: '58%', duration: 4.7, color: COLORS[4]  },
+  { char: NOTE_CHARS[2], x: '75%', duration: 4.1, color: COLORS[2]  },
+  { char: NOTE_CHARS[1], x: '91%', duration: 4.4, color: COLORS[10] },
+]
+
+const FLOAT_H = 200   // px notes travel before reset
+const SPAWN_Y = 22    // px below baseline (invisible)
+
+const FADE_OUT = -150 // opacity ramps max→0 as y goes FADE_OUT → -(FLOAT_H-10)
+
+function noteOpacity(y: number): number {
+  if (y > SPAWN_Y) return 0
+  if (y > 0)       return ((SPAWN_Y - y) / SPAWN_Y) * 0.5
+  if (y > FADE_OUT) return 0.5
+  const end = -(FLOAT_H - 10)
+  if (y > end)     return 0.5 * ((y - end) / (FADE_OUT - end))
+  return 0
+}
+
+export interface FloatingNotesHandle { push: (dy: number) => void }
+
+export const FloatingNotes = forwardRef<FloatingNotesHandle>(function FloatingNotes(_, ref) {
+  const ysRef  = useRef<MotionValue<number>[]>([])
+  const opsRef = useRef<MotionValue<number>[]>([])
+
+  if (ysRef.current.length === 0) {
+    const n = AMBIENT_CONFIGS.length
+    ysRef.current  = AMBIENT_CONFIGS.map((_, i) => {
+      const y = SPAWN_Y - (i / (n - 1)) * (FLOAT_H + SPAWN_Y)
+      return mv(y)
+    })
+    opsRef.current = ysRef.current.map(yMV => mv(noteOpacity(yMV.get())))
+  }
+
+  useImperativeHandle(ref, () => ({
+    push(dy: number) {
+      ysRef.current.forEach((yMV, i) => {
+        const next = yMV.get() + dy
+        yMV.set(next)
+        opsRef.current[i].set(noteOpacity(next))
+      })
+    },
+  }))
+
+  useEffect(() => {
+    let rafId: number
+    let last = performance.now()
+
+    function tick(now: number) {
+      const dt = Math.min((now - last) / 1000, 0.05)
+      last = now
+      ysRef.current.forEach((yMV, i) => {
+        const speed = FLOAT_H / AMBIENT_CONFIGS[i].duration
+        let y = yMV.get() - speed * dt
+        if (y < -(FLOAT_H - 5)) y = SPAWN_Y + Math.random() * 12
+        yMV.set(y)
+        opsRef.current[i].set(noteOpacity(y))
+      })
+      rafId = requestAnimationFrame(tick)
+    }
+
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [])
+
+  return (
+    <div className="absolute bottom-0 inset-x-0 pointer-events-none" style={{ height: FLOAT_H + SPAWN_Y }}>
+      {AMBIENT_CONFIGS.map((n, i) => (
+        <motion.span
+          key={i}
+          className="absolute bottom-2 text-sm select-none"
+          style={{ left: n.x, color: n.color, y: ysRef.current[i], opacity: opsRef.current[i] }}
+        >
+          {n.char}
+        </motion.span>
+      ))}
+    </div>
+  )
+})
 
 interface LoadingNotesProps {
   label?: string
