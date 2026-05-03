@@ -9,18 +9,15 @@ interface ToolBarButtonProps {
 }
 
 function ToolBarButton({ btn, showLabel }: ToolBarButtonProps) {
-  const isPrimary = btn.variant === 'primary'
   return (
     <button
       onClick={btn.onClick}
       aria-label={btn.label}
-      className={`flex flex-col items-center justify-center gap-1 w-12 h-12 transition-all active:scale-90 ${
-        isPrimary ? 'text-[#0F0F0F]' : 'text-[#888]'
-      }`}
+      className="flex flex-col items-center justify-center gap-1 w-12 h-12 transition-all active:scale-90 text-[#0F0F0F]"
     >
       {btn.icon}
       {showLabel && (
-        <span className="text-[10px] font-medium leading-none text-current">{btn.label}</span>
+        <span className="text-[10px] font-medium leading-none">{btn.label}</span>
       )}
     </button>
   )
@@ -34,8 +31,13 @@ interface ToolBarGroupProps {
 }
 
 function ToolBarGroup({ buttons, showLabel }: ToolBarGroupProps) {
+  const single = buttons.length === 1
   return (
-    <div className="flex items-center rounded-full bg-white border border-[#E0E0DC] shadow-md px-1 gap-0.5">
+    <div
+      className={`flex items-center rounded-full border border-white/40 shadow-lg backdrop-blur-xl bg-white/50 ${
+        single ? 'w-12 h-12 justify-center' : 'px-1 gap-0.5'
+      }`}
+    >
       {buttons.map((btn, i) => (
         <ToolBarButton key={i} btn={btn} showLabel={showLabel} />
       ))}
