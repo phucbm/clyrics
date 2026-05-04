@@ -2,6 +2,7 @@ import { Octokit } from 'octokit'
 import { SignJWT, importPKCS8 } from 'jose'
 import { nanoid } from 'nanoid'
 import type { Song } from '../types'
+import { linePinyin } from './pinyin'
 
 const OWNER = 'phucbm'
 const REPO = 'clyrics'
@@ -107,9 +108,9 @@ async function createPR(
   filePath: string,
   fileSha?: string,
 ): Promise<string> {
-  const rawBase = [song.artist, song.title].filter(Boolean).join('-') || song.id
-  const safeBase = slugify(rawBase) || song.id.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const branch = `song/${safeBase}-${nanoid(6)}`
+  const pinyinBase = linePinyin([song.title, song.artist].filter(Boolean).join(' '))
+    .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 40) || nanoid(6)
+  const branch = `song/${pinyinBase}-${nanoid(6)}`
 
   const { data: ref } = await octokit.rest.git.getRef({ owner: OWNER, repo: REPO, ref: 'heads/main' })
   const mainSha = ref.object.sha
