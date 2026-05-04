@@ -3,6 +3,8 @@ import { useActiveSong, useSongStore } from '../../store/useSongStore'
 import { useUIStore } from '../../store/useUIStore'
 import { useBottomSheet } from '../shell/BottomSheet'
 import { generateLyrics, getGroqKey } from '../../lib/groq'
+import { linePinyin } from '../../lib/pinyin'
+import { isOwner } from '../../lib/owner'
 import { Translate, Warning, Key, CaretDown } from '@phosphor-icons/react'
 import { LoadingNotes, SuccessFall } from './MusicAnimations'
 
@@ -35,7 +37,14 @@ export function GenerateConfigSheet() {
   }
 
   const hasKey = !!getGroqKey()
+  const owner = isOwner()
   const lineCount = song?.lines.length ?? 0
+
+  function handleRegenPinyin() {
+    if (!song) return
+    const lines = song.lines.map((l) => ({ ...l, pinyin: linePinyin(l.chinese) }))
+    updateSong(song.id, { lines })
+  }
   const inputTok = Math.round(lineCount * 10 + 60)
   const outputTok = Math.round(lineCount * 30)
 
@@ -225,6 +234,16 @@ export function GenerateConfigSheet() {
           Est. input ~{inputTok} tok / Est. output ~{outputTok} tok
         </p>
       </div>
+
+      {owner && (
+        <button
+          onClick={handleRegenPinyin}
+          disabled={!song}
+          className="w-full py-2 text-[11px] text-[#999] hover:text-[#555] transition-colors border border-dashed border-[#E0E0DC] rounded-xl disabled:opacity-40"
+        >
+          Regen pinyin
+        </button>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
