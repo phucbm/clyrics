@@ -86,6 +86,7 @@ export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
         label="Pinyin"
         checked={playConfig.pinyin}
         onChange={(v) => setPlayConfig({ pinyin: v })}
+        hint="pp"
       />
 
       {availableLangs.length === 0 && (
@@ -102,6 +103,7 @@ export function PlayConfigSheet({ isPlaying = false }: PlayConfigSheetProps) {
             checked={active}
             onChange={(v) => toggleLang(lang, v)}
             disabled={disabled}
+            hint={lang === 'Vietnamese' ? 'pv' : undefined}
           />
         )
       })}

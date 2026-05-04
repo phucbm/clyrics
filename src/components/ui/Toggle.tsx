@@ -30,16 +30,24 @@ interface ToggleRowProps {
   checked: boolean
   onChange: (v: boolean) => void
   disabled?: boolean
+  hint?: string
 }
 
-export function ToggleRow({ label, sublabel, checked, onChange, disabled }: ToggleRowProps) {
+export function ToggleRow({ label, sublabel, checked, onChange, disabled, hint }: ToggleRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 py-1">
       <div className="min-w-0">
         <p className="text-sm font-medium text-[#0F0F0F]">{label}</p>
         {sublabel && <p className="text-xs text-[#888] mt-0.5">{sublabel}</p>}
       </div>
-      <Toggle checked={checked} onChange={onChange} disabled={disabled} />
+      <div className="flex items-center gap-2 shrink-0">
+        {hint && (
+          <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-[#AAA] border border-[#E4E2DE] bg-[#F8F8F6] leading-none tracking-wider">
+            {hint}
+          </kbd>
+        )}
+        <Toggle checked={checked} onChange={onChange} disabled={disabled} />
+      </div>
     </div>
   )
 }

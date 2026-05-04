@@ -241,7 +241,7 @@ function ForkConfirmSheet({ existingCopy, onEditCopy, onNewCopy }: ForkConfirmPr
 export function PlayScreen() {
   const song = useActiveSong()
   const {songs, addSong, setActiveSong, updateSong} = useSongStore()
-  const {playConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
+  const {playConfig, setPlayConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
   const {open: openSheet} = useBottomSheet()
 
   function forkSong(): Song {
@@ -594,6 +594,58 @@ export function PlayScreen() {
       if (isPlayingRef.current) startProgressAnimation()
     }, 50)
   }
+
+  // Keyboard shortcuts — desktop only
+  const keySeqRef = useRef<{ key: string; time: number } | null>(null)
+  useEffect(() => {
+    if (!isDesktop) return
+    function onKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement).isContentEditable) return
+
+      // Two-key sequences: pp, pv
+      if (e.key === 'p') {
+        const now = Date.now()
+        const prev = keySeqRef.current
+        if (prev?.key === 'p' && now - prev.time < 500) {
+          keySeqRef.current = null
+          setPlayConfig({ pinyin: !playConfig.pinyin })
+          return
+        }
+        keySeqRef.current = { key: 'p', time: now }
+        return
+      }
+      if (e.key === 'v') {
+        const now = Date.now()
+        const prev = keySeqRef.current
+        if (prev?.key === 'p' && now - prev.time < 500) {
+          keySeqRef.current = null
+          if (primaryLang === 'Vietnamese') {
+            setPlayConfig({ translation: !playConfig.translation })
+          } else if (secondaryLang === 'Vietnamese') {
+            setPlayConfig({ secondLang: !playConfig.secondLang })
+          }
+          return
+        }
+        keySeqRef.current = null
+        return
+      }
+      keySeqRef.current = null
+
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (videoId && !playConfig.hideVideo) togglePlay()
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault()
+        seekBySeconds(-10)
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault()
+        seekBySeconds(10)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [isDesktop, videoId, playConfig, primaryLang, secondaryLang, togglePlay, seekBySeconds, setPlayConfig])
 
   // Drag-to-seek on progress bar (mobile inline + PiP)
   function handleProgressDrag(e: React.PointerEvent<HTMLDivElement>) {
