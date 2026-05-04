@@ -55,9 +55,11 @@ interface PiPProps {
   progressBarRef: RefObject<HTMLDivElement | null>
   onReveal?: () => void
   onProgressDrag: (e: React.PointerEvent<HTMLDivElement>) => void
+  onEdgeTap: (side: 'left' | 'right') => void
+  seekFlash: { side: 'left' | 'right'; seconds: number; key: number } | null
 }
 
-function DraggablePiP({ containerRef, progressBarRef, onReveal, onProgressDrag }: PiPProps) {
+function DraggablePiP({ containerRef, progressBarRef, onReveal, onProgressDrag, onEdgeTap, seekFlash }: PiPProps) {
   const [pip, setPip] = useState(loadPiP)
   const pipRef = useRef(pip)
 
@@ -116,9 +118,38 @@ function DraggablePiP({ containerRef, progressBarRef, onReveal, onProgressDrag }
       className="fixed z-[9999] rounded-2xl overflow-hidden shadow-2xl border border-black/20 select-none cursor-grab active:cursor-grabbing"
       style={{ left: pip.x, top: pip.y, width: pip.w, height: h }}
       onPointerDown={startDrag}
-      onClick={onReveal}
     >
       <div ref={containerRef} className="w-full h-full bg-black" style={{ pointerEvents: 'none' }} />
+
+      {/* Tap zones: left=−10s, center=reveal controls, right=+10s */}
+      <div className="absolute inset-0 flex" style={{ bottom: '6px' }} onPointerDown={e => e.stopPropagation()}>
+        <div className="w-[30%] h-full cursor-pointer" onClick={() => onEdgeTap('left')} />
+        <div className="flex-1 h-full cursor-pointer" onClick={onReveal} />
+        <div className="w-[30%] h-full cursor-pointer" onClick={() => onEdgeTap('right')} />
+      </div>
+
+      {/* Seek flash indicator */}
+      {seekFlash && (
+        <div
+          key={seekFlash.key}
+          className="absolute inset-y-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
+          style={{
+            [seekFlash.side === 'left' ? 'left' : 'right']: 0,
+            width: '30%',
+            background: seekFlash.side === 'left'
+              ? 'radial-gradient(ellipse at left center, rgba(255,255,255,0.18) 0%, transparent 70%)'
+              : 'radial-gradient(ellipse at right center, rgba(255,255,255,0.18) 0%, transparent 70%)',
+            animation: 'seek-flash 0.9s ease-out forwards',
+          }}
+        >
+          <span className="text-white font-bold" style={{ fontSize: 20, animation: 'seek-text 0.9s ease-out forwards', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
+            {seekFlash.side === 'left' ? '«' : '»'}
+          </span>
+          <span className="text-white font-semibold text-xs tabular-nums" style={{ animation: 'seek-text 0.9s ease-out forwards', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
+            {seekFlash.seconds > 0 ? '+' : ''}{seekFlash.seconds}s
+          </span>
+        </div>
+      )}
 
       {/* Progress bar — taller touch target for drag-to-seek */}
       <div
@@ -246,12 +277,12 @@ export function PlayScreen() {
     function onSave(updated: LyricLine) {
       const newLines = song!.lines.map(l => l.id === updated.id ? updated : l)
       updateSong(song!.id, { lines: newLines })
-      if (wasPlayingRef.current) togglePlay()
+      if (wasPlayingRef.current) { skipNextSyncRef.current = true; togglePlay() }
       resumeIfActive()
     }
 
     function onCancel() {
-      if (wasPlayingRef.current) togglePlay()
+      if (wasPlayingRef.current) { skipNextSyncRef.current = true; togglePlay() }
       resumeIfActive()
     }
 
@@ -322,6 +353,7 @@ export function PlayScreen() {
   const edgeTapCountRef = useRef<{ side: 'left' | 'right'; count: number }>({ side: 'left', count: 0 })
   const doubleTapRef = useRef<{ lineId: string; time: number } | null>(null)
   const wasPlayingRef = useRef(false)
+  const skipNextSyncRef = useRef(false)
 
   // Auto-hide controls — 2s after last action
   const scheduleHide = useCallback(() => {
@@ -533,7 +565,13 @@ export function PlayScreen() {
 
     const treatAsNoVideo = !videoId || playConfig.hideVideo
     if (videoId && !playConfig.hideVideo && isPlaying) {
-      syncToVideo()
+      if (skipNextSyncRef.current) {
+        skipNextSyncRef.current = false
+        startScrollAnimation(getScrollPos())
+        startProgressAnimation()
+      } else {
+        syncToVideo()
+      }
     } else if (speedRef.current > 0 && treatAsNoVideo) {
       startScrollAnimation(getScrollPos())
     } else {
@@ -630,6 +668,20 @@ export function PlayScreen() {
   return (
     <div className="h-full flex flex-col relative">
 
+      <style>{`
+        @keyframes seek-flash {
+          0%   { opacity: 1; }
+          70%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes seek-text {
+          0%   { transform: scale(1.2); opacity: 1; }
+          30%  { transform: scale(1); opacity: 1; }
+          70%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+
       {/* Mobile video — outside scroll container so sticky isn't needed */}
       {videoId && !isDesktop && !playConfig.hideVideo && (
         <div className="relative w-full bg-black flex-shrink-0" style={{aspectRatio: '16/9'}}>
@@ -643,20 +695,6 @@ export function PlayScreen() {
             <div className="w-[30%] h-full" onClick={() => handleEdgeTap('right')} />
           </div>
 
-          {/* Seek flash indicator */}
-          <style>{`
-            @keyframes seek-flash {
-              0%   { opacity: 1; }
-              70%  { opacity: 1; }
-              100% { opacity: 0; }
-            }
-            @keyframes seek-text {
-              0%   { transform: scale(1.2); opacity: 1; }
-              30%  { transform: scale(1); opacity: 1; }
-              70%  { opacity: 1; }
-              100% { opacity: 0; }
-            }
-          `}</style>
           {seekFlash && (
             <div
               key={seekFlash.key}
@@ -744,6 +782,8 @@ export function PlayScreen() {
           progressBarRef={progressBarRef}
           onReveal={revealControls}
           onProgressDrag={handleProgressDrag}
+          onEdgeTap={handleEdgeTap}
+          seekFlash={seekFlash}
         />,
         document.body
       )}
