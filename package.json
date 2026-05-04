@@ -1,7 +1,11 @@
 {
   "name": "clyrics",
-  "private": true,
-  "version": "0.0.4",
+  "private": false,
+  "version": "0.0.6",
+  "author": {
+    "name": "phucbm",
+    "url": "https://github.com/phucbm"
+  },
   "type": "module",
   "scripts": {
     "predev": "node scripts/build-songs-index.mjs",
