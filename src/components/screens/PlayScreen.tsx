@@ -6,6 +6,7 @@ import {useUIStore} from '../../store/useUIStore'
 import {useYouTubePlayer} from '../../hooks/useYouTubePlayer'
 import {extractVideoId} from '../../hooks/useYouTube'
 import {ArrowLeft, MusicNote, Pause, Play, PencilSimple} from '@phosphor-icons/react'
+import {LineEditSheet} from '../sheets/LineEditSheet'
 import {FABBar} from '../shell/FABBar'
 import {ToolBar} from '../shell/ToolBar'
 import {USE_TOOLBAR, type ControlButton} from '../shell/controls'
@@ -13,7 +14,7 @@ import {useBottomSheet} from '../shell/BottomSheet'
 import {PlayConfigSheet} from '../sheets/PlayConfigSheet'
 import {ShareSheet} from '../sheets/ShareSheet'
 import {FloatingNotes, type FloatingNotesHandle} from '../sheets/MusicAnimations'
-import type {Song} from '../../types'
+import type {Song, LyricLine} from '../../types'
 
 const AVG_LINE_PX = 80   // estimated px per lyric group
 
@@ -208,7 +209,7 @@ function ForkConfirmSheet({ existingCopy, onEditCopy, onNewCopy }: ForkConfirmPr
 
 export function PlayScreen() {
   const song = useActiveSong()
-  const {songs, addSong, setActiveSong} = useSongStore()
+  const {songs, addSong, setActiveSong, updateSong} = useSongStore()
   const {playConfig, screen, prevScreen, navigateTo, autoplay, setAutoplay, primaryLang, secondaryLang} = useUIStore()
   const {open: openSheet} = useBottomSheet()
 
@@ -236,6 +237,52 @@ export function PlayScreen() {
       'Edit this song'
     )
   }
+  function openLineEdit(line: LyricLine) {
+    if (song?.source === 'repo') return
+    wasPlayingRef.current = isPlaying
+    if (isPlaying) togglePlay()
+    pauseAnimation()
+
+    function onSave(updated: LyricLine) {
+      const newLines = song!.lines.map(l => l.id === updated.id ? updated : l)
+      updateSong(song!.id, { lines: newLines })
+      if (wasPlayingRef.current) togglePlay()
+      resumeIfActive()
+    }
+
+    function onCancel() {
+      if (wasPlayingRef.current) togglePlay()
+      resumeIfActive()
+    }
+
+    openSheet(
+      <LineEditSheet
+        line={line}
+        primaryLang={primaryLang}
+        secondaryLang={secondaryLang}
+        onSave={onSave}
+        onDelete={() => {}}
+        onDuplicate={() => {}}
+        onCancel={onCancel}
+      />,
+      'Edit line',
+      undefined,
+      true,
+    )
+  }
+
+  function handleLineTap(line: LyricLine) {
+    if (song?.source === 'repo') return
+    const now = Date.now()
+    const prev = doubleTapRef.current
+    if (prev && prev.lineId === line.id && now - prev.time < 300) {
+      doubleTapRef.current = null
+      openLineEdit(line)
+    } else {
+      doubleTapRef.current = { lineId: line.id, time: now }
+    }
+  }
+
   const [focusMode, setFocusMode] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [showHint, setShowHint] = useState(false)
@@ -273,6 +320,8 @@ export function PlayScreen() {
   const touchScrollPosRef = useRef(0)
   const edgeTapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const edgeTapCountRef = useRef<{ side: 'left' | 'right'; count: number }>({ side: 'left', count: 0 })
+  const doubleTapRef = useRef<{ lineId: string; time: number } | null>(null)
+  const wasPlayingRef = useRef(false)
 
   // Auto-hide controls — 2s after last action
   const scheduleHide = useCallback(() => {
@@ -671,7 +720,7 @@ export function PlayScreen() {
                 return <div key={line.id} className="h-6" />
               }
               return (
-                <div key={line.id}>
+                <div key={line.id} onClick={() => handleLineTap(line)}>
                   {playConfig.pinyin && line.pinyin && (
                     <p className="text-xs text-[#888] mb-1 leading-relaxed tracking-wide font-mono">{line.pinyin}</p>
                   )}

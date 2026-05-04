@@ -12,11 +12,12 @@ interface Props {
   onSave: (updated: LyricLine) => void
   onDelete: () => void
   onDuplicate: (copy: LyricLine) => void
+  onCancel?: () => void
 }
 
 const cls = 'w-full px-3 py-2.5 border border-[#E0E0DC] rounded-xl bg-white text-[#0F0F0F] placeholder-[#AAA] focus:border-[#0F0F0F] transition-colors outline-none resize-none leading-relaxed'
 
-export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDelete, onDuplicate }: Props) {
+export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDelete, onDuplicate, onCancel }: Props) {
   const { close, setFooter } = useBottomSheet()
 
   const [chinese, setChinese] = useState(line.chinese)
@@ -63,14 +64,33 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
   handleSaveRef.current = handleSave
 
   useEffect(() => {
-    setFooter(
-      <button
-        onClick={() => handleSaveRef.current()}
-        className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
-      >
-        Save
-      </button>
-    )
+    if (onCancel) {
+      setFooter(
+        <div className="flex gap-3">
+          <button
+            onClick={() => { close(); onCancel() }}
+            className="flex-1 py-3.5 rounded-xl border border-[#E0E0DC] text-sm font-medium text-[#555] hover:bg-[#F0F0EC] transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => handleSaveRef.current()}
+            className="flex-1 py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+          >
+            Save
+          </button>
+        </div>
+      )
+    } else {
+      setFooter(
+        <button
+          onClick={() => handleSaveRef.current()}
+          className="w-full py-3.5 bg-[#0F0F0F] rounded-xl text-sm font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+        >
+          Save
+        </button>
+      )
+    }
   }, [])
 
   return (
@@ -93,7 +113,7 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
           placeholder="Chinese text"
           value={chinese}
           onChange={(e) => setChinese(e.target.value)}
-          autoFocus
+          autoFocus={!onCancel}
         />
         {chinese && (
           <p className="text-xs text-[#AAA] font-mono px-1">{linePinyin(chinese)}</p>
@@ -124,14 +144,16 @@ export function LineEditSheet({ line, primaryLang, secondaryLang, onSave, onDele
         </div>
       )}
 
-      <div className="flex justify-center pt-1 pb-2">
-        <button
-          onClick={handleDelete}
-          className="text-xs text-[#BBB] hover:text-red-500 underline underline-offset-2 transition-colors"
-        >
-          Delete this line
-        </button>
-      </div>
+      {!onCancel && (
+        <div className="flex justify-center pt-1 pb-2">
+          <button
+            onClick={handleDelete}
+            className="text-xs text-[#BBB] hover:text-red-500 underline underline-offset-2 transition-colors"
+          >
+            Delete this line
+          </button>
+        </div>
+      )}
     </div>
   )
 }

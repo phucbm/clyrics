@@ -12,10 +12,11 @@ interface SheetEntry {
   content: ReactNode
   title?: string
   footer?: ReactNode
+  locked?: boolean
 }
 
 interface BottomSheetCtx {
-  open: (content: ReactNode, title?: string, footer?: ReactNode) => void
+  open: (content: ReactNode, title?: string, footer?: ReactNode, locked?: boolean) => void
   close: () => void
   closeAll: () => void
   setFooter: (footer: ReactNode) => void
@@ -41,8 +42,8 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
   const isOpen = stack.length > 0
   const current = stack[stack.length - 1]
 
-  const open = useCallback((content: ReactNode, title?: string, footer?: ReactNode) => {
-    setStack(s => [...s, { content, title, footer }])
+  const open = useCallback((content: ReactNode, title?: string, footer?: ReactNode, locked?: boolean) => {
+    setStack(s => [...s, { content, title, footer, locked }])
     setDragY(0)
   }, [])
 
@@ -77,9 +78,11 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
     setDragY(delta)
   }
 
+  const isLocked = current?.locked ?? false
+
   function onPointerUp() {
     setDragging(false)
-    if (dragY > 100) close()
+    if (!isLocked && dragY > 100) close()
     else setDragY(0)
   }
 
@@ -98,7 +101,7 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
         }}
-        onClick={closeAll}
+        onClick={isLocked ? undefined : closeAll}
       />
 
       {/* Sheet panel */}
@@ -108,13 +111,14 @@ export function BottomSheetProvider({ children }: { children: ReactNode }) {
       >
         {/* Drag handle */}
         <div
-          className="pt-3 pb-1 flex justify-center cursor-grab active:cursor-grabbing touch-none select-none shrink-0"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          className="pt-3 pb-1 flex justify-center touch-none select-none shrink-0"
+          style={{ cursor: isLocked ? 'default' : 'grab' }}
+          onPointerDown={isLocked ? undefined : onPointerDown}
+          onPointerMove={isLocked ? undefined : onPointerMove}
+          onPointerUp={isLocked ? undefined : onPointerUp}
+          onPointerCancel={isLocked ? undefined : onPointerUp}
         >
-          <div className="w-10 h-1 bg-[#D0D0CC] rounded-full" />
+          <div className={`w-10 h-1 rounded-full ${isLocked ? 'bg-transparent' : 'bg-[#D0D0CC]'}`} />
         </div>
 
         {/* Title row */}
